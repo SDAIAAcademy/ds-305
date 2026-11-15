@@ -3,132 +3,53 @@
   "version": 1,
   "questions": [
     {
-      "id": "q-example-1",
+      "id": "d1-claim-in-sample",
       "type": "single",
-      "prompt": "REPLACE: a practice question on LO1, as a short scenario",
+      "prompt": "A model card reports AUC 0.86 \"on 4,000 held-out rows\". The metadata shows the shipped model was retrained on all rows, those 4,000 included. On your untouched holdout it scores 0.76. What is the verdict on the card's claim?",
       "options": [
-        "REPLACE: a wrong option that a common misconception makes tempting",
-        "REPLACE: the right answer",
-        "REPLACE: a wrong option that a common misconception makes tempting",
-        "REPLACE: a wrong option that a common misconception makes tempting"
+        "Supported, because the developers did hold the rows out when they measured",
+        "Unsupported, because the number belongs to rows the shipped model has seen",
+        "Untestable, because the 4,000 rows cannot be recovered",
+        "Supported within sampling error of the holdout"
       ],
       "correct": [
         1
       ],
-      "explanation": "REPLACE: why the right answer is right, in one sentence",
+      "explanation": "The claim is about new applicants; the only evidence for it is a holdout the shipped model never saw, and that gives 0.76.",
       "misconceptions": [
-        "REPLACE: the misconception behind this option",
+        "Treats the honest first measurement as evidence for a different, retrained model",
         "",
-        "REPLACE: the misconception behind this option",
-        "REPLACE: the misconception behind this option"
+        "Confuses losing the developers' rows with being unable to test: the validator's holdout tests the claim",
+        "Ignores the size of the gap: 0.86 against 0.76 on 10,000 rows is far beyond sampling error"
       ],
       "lo": [
-        "LO1"
+        "LO5"
       ],
       "day": "day1",
       "session": 1,
-      "level": "apply",
+      "level": "analyze",
       "pool": "practice",
       "weight": 1
     },
     {
-      "id": "q-example-2",
-      "type": "tf",
-      "prompt": "REPLACE: a statement on LO2 that is true",
-      "options": [
-        "True",
-        "False"
-      ],
-      "correct": [
-        0
-      ],
-      "explanation": "REPLACE: why the right answer is right, in one sentence",
-      "misconceptions": [
-        "",
-        "REPLACE: the misconception behind this option"
-      ],
-      "lo": [
-        "LO2"
-      ],
-      "day": "day1",
-      "session": 1,
-      "level": "understand",
-      "pool": "practice",
-      "weight": 1
-    },
-    {
-      "id": "q-example-3",
+      "id": "d1-untestable-to-test",
       "type": "single",
-      "prompt": "REPLACE: a practice question on LO3, as a short scenario",
+      "prompt": "A card says the model \"will remain accurate for three years\". What should the validation report do with this claim?",
       "options": [
-        "REPLACE: a wrong option that a common misconception makes tempting",
-        "REPLACE: the right answer",
-        "REPLACE: a wrong option that a common misconception makes tempting",
-        "REPLACE: a wrong option that a common misconception makes tempting"
+        "Mark it supported if the holdout AUC is high today",
+        "Remove it from the card without comment",
+        "Mark it untestable and rewrite it as a monitoring condition with a metric, threshold and action",
+        "Mark it unsupported and reject the model"
       ],
       "correct": [
-        1
+        2
       ],
-      "explanation": "REPLACE: why the right answer is right, in one sentence",
+      "explanation": "No data from the next three years exists; a validator turns such a promise into a condition that can be checked as data arrives.",
       "misconceptions": [
-        "REPLACE: the misconception behind this option",
+        "Projects a present measurement into a future nobody has observed",
+        "Drops the developers' promise instead of turning it into something checkable",
         "",
-        "REPLACE: the misconception behind this option",
-        "REPLACE: the misconception behind this option"
-      ],
-      "lo": [
-        "LO3"
-      ],
-      "day": "day1",
-      "session": 1,
-      "level": "apply",
-      "pool": "practice",
-      "weight": 1
-    },
-    {
-      "id": "q-example-4",
-      "type": "tf",
-      "prompt": "REPLACE: a statement on LO4 that is true",
-      "options": [
-        "True",
-        "False"
-      ],
-      "correct": [
-        0
-      ],
-      "explanation": "REPLACE: why the right answer is right, in one sentence",
-      "misconceptions": [
-        "",
-        "REPLACE: the misconception behind this option"
-      ],
-      "lo": [
-        "LO4"
-      ],
-      "day": "day1",
-      "session": 1,
-      "level": "understand",
-      "pool": "practice",
-      "weight": 1
-    },
-    {
-      "id": "q-example-5",
-      "type": "single",
-      "prompt": "REPLACE: a practice question on LO5, as a short scenario",
-      "options": [
-        "REPLACE: a wrong option that a common misconception makes tempting",
-        "REPLACE: the right answer",
-        "REPLACE: a wrong option that a common misconception makes tempting",
-        "REPLACE: a wrong option that a common misconception makes tempting"
-      ],
-      "correct": [
-        1
-      ],
-      "explanation": "REPLACE: why the right answer is right, in one sentence",
-      "misconceptions": [
-        "REPLACE: the misconception behind this option",
-        "",
-        "REPLACE: the misconception behind this option",
-        "REPLACE: the misconception behind this option"
+        "Treats an untestable promise as evidence of a fault"
       ],
       "lo": [
         "LO5"
@@ -136,6 +57,209 @@
       "day": "day1",
       "session": 1,
       "level": "apply",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d1-proper-score",
+      "type": "single",
+      "prompt": "Two forecasters say 0.51 and 0.95 for the same applicant, who then defaults. Which score tells them apart and rewards reporting the probability you believe?",
+      "options": [
+        "Accuracy at a threshold of 0.5",
+        "The AUC over the whole holdout",
+        "The share of applicants above 0.5",
+        "The Brier score"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "The Brier score is a proper scoring rule: it scores the distance between the probability and the outcome, so 0.95 scores better than 0.51 here.",
+      "misconceptions": [
+        "Accuracy only asks which side of 0.5 a forecast is on, so both forecasts score the same",
+        "AUC measures ranking across applicants and is unchanged by rescaling probabilities",
+        "Counts decisions, not the quality of probabilities",
+        ""
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": "day1",
+      "session": 2,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d1-base-rate",
+      "type": "single",
+      "prompt": "On a holdout with a 10% default rate, a model has AUC 0.75 and Brier 0.20. Giving everyone 10% scores Brier 0.09. What does this show?",
+      "options": [
+        "The model's probabilities are worse than knowing nothing, though it ranks applicants well",
+        "The base-rate forecast is the better model and should replace it",
+        "The Brier score is unreliable when AUC is high",
+        "The holdout is too small to compare"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A proper score below the base rate means the stated probabilities do harm as probabilities; the AUC shows the ranking is still informative.",
+      "misconceptions": [
+        "",
+        "Confuses the probability scale with usefulness: the model still ranks, and recalibration can repair its scale",
+        "Assumes the two measures must agree; they measure different properties",
+        "Ten thousand rows make a difference of 0.11 in Brier score far larger than sampling noise"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": "day1",
+      "session": 2,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d1-rebalanced",
+      "type": "single",
+      "prompt": "Every bin of a reliability diagram lies well below the diagonal, by roughly the same factor in odds. The metadata says the training set was rebalanced to 50/50. What is the most likely cause?",
+      "options": [
+        "The model overfitted its training rows",
+        "The model learned odds for a population where half default",
+        "The holdout has more defaults than the training data",
+        "Too few bins were used to draw the diagram"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Rebalancing shifts the model's odds to the training prevalence; applied where about 10% default, every probability is inflated.",
+      "misconceptions": [
+        "Overfitting usually makes the extremes too extreme, not every bin too high by a constant factor",
+        "",
+        "The curve shows the opposite: fewer defaults than predicted",
+        "The number of bins changes the resolution of the picture, not where the points lie"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": "day1",
+      "session": 2,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d1-calib-rows",
+      "type": "single",
+      "prompt": "You fit isotonic regression on the holdout and report its calibration error on the same holdout: 0.002. Fitted on calib rows instead, the holdout error is 0.012. Which number goes in the report?",
+      "options": [
+        "0.002, because it uses the larger, cleaner set",
+        "The average of the two",
+        "0.012, because the map has not seen the rows it is judged on",
+        "Neither: isotonic regression cannot be evaluated"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "A map fitted and judged on the same rows follows their noise; only rows it has not seen show what applicants will get.",
+      "misconceptions": [
+        "Fits and judges on the same rows, which flatters a flexible map",
+        "Mixing an honest and a flattered number does not make an honest one",
+        "",
+        "Any recalibration map can be judged on rows it did not see"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": "day1",
+      "session": 3,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d1-platt-auc",
+      "type": "single",
+      "prompt": "After Platt scaling, the Brier score drops from 0.199 to 0.081. What happens to the AUC?",
+      "options": [
+        "It rises, because the probabilities are now right",
+        "It falls, because the scores were compressed",
+        "It must be recomputed on new training rows",
+        "It stays exactly the same"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Platt scaling is a monotone map of the score, so no pair of applicants changes order and the AUC is unchanged.",
+      "misconceptions": [
+        "Confuses calibration with discrimination",
+        "A monotone map keeps the order of every pair of applicants",
+        "Nothing was retrained; the map sits after the model",
+        ""
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": "day1",
+      "session": 3,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d1-group-interval",
+      "type": "single",
+      "prompt": "After recalibration a group of 300 applicants shows 9% predicted and 11% observed, with a 95% interval of 7.9% to 15.0% for the observed rate. What do you write?",
+      "options": [
+        "A finding: the group is under-predicted by 2 points",
+        "No finding: the prediction lies inside the interval, so the data cannot separate the gap from chance",
+        "Recalibrate again on this group only",
+        "A finding, because small groups always hide larger gaps"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "A subgroup gap is reported as a finding when the prediction falls outside the interval of the observed rate.",
+      "misconceptions": [
+        "Treats any gap as a finding without checking whether chance explains it",
+        "",
+        "Fits a repair to 300 rows on the strength of a gap that may be noise",
+        "Assumes the direction of the unknown; small groups give wide intervals, not larger gaps"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": "day1",
+      "session": 4,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d1-excluded-column",
+      "type": "single",
+      "prompt": "A credit model excludes age band on purpose. After recalibration, applicants aged 18 to 24 default 5 points more often than predicted, outside the interval. Why did the recalibration not fix it?",
+      "options": [
+        "The recalibration map sees only the score, and the score does not carry what age adds to risk",
+        "The map was fitted on too few rows",
+        "Age band should have been in the holdout",
+        "Isotonic regression would have fixed it"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A map of the score cannot separate applicants who have the same score but different risk; excluding a column removes it from the input, not from the outcome.",
+      "misconceptions": [
+        "",
+        "With 10,000 calib rows the average is repaired; the gap is within a group, not overall",
+        "It is in the holdout, which is how the gap was found",
+        "Any map of the score alone gives two applicants with the same score the same probability, whatever their age"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": "day1",
+      "session": 4,
+      "level": "understand",
       "pool": "practice",
       "weight": 1
     }

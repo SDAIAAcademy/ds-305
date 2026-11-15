@@ -1,158 +1,521 @@
+<!-- ======================= OPENING ======================= -->
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">REPLACE: welcome; introduce yourself; one question to the room that calibrates the pace; the rhythm of the day</aside>
+  <aside class="notes"><p>Welcome the room. Ask: who has handed a model to someone who then checked it? Who has been the one checking? This is a 300-level course: participants already train and cross-validate boosted models (DS-204) and fit logistic models (DS-301), and they did the pre-work on classification metrics and the bootstrap. Today nobody trains a model: they judge one.</p></aside>
+</section>
+
+<section class="slide" data-label="The week" id="four-days-one-validation">
+  <div class="kicker">The course at a glance</div>
+  <h2>Four days of evidence, then a decision you defend</h2>
+  <div class="cols cols-4 gap-s">
+    <div class="card c-teal"><h4>Day 1 · Probabilities</h4><p class="small mb0">Read the claims, score the probabilities, repair them, check every group.</p></div>
+    <div class="card c-cyan"><h4>Day 2 · Intervals</h4><p class="small mb0">Conformal intervals and prediction sets, by group and under shift.</p></div>
+    <div class="card c-coral"><h4>Day 3 · Explanations</h4><p class="small mb0">Importance, effect plots, Shapley values, and where they mislead.</p></div>
+    <div class="card c-purple"><h4>Day 4 · Decide</h4><p class="small mb0">Subgroup findings, a decline diagnosed, a checklist, a decision.</p></div>
+  </div>
+  <div class="callout tip mt"><b>Day 5 · Capstone.</b> An independent validation of another package, in a public repository, defended before a panel for eight minutes plus questions.</div>
+  <aside class="notes"><p>One sentence per day. The capstone rubric has five parts: calibration and coverage 25, explanations 20, subgroup and shift findings 25, decision 20, reproducibility 10. Each day builds one or two of them. In the defence the panel picks one finding, the participant reruns it and explains what would change its rating. Say that now.</p></aside>
+</section>
+
+<section class="slide" data-label="How we work" id="evidence-not-opinion">
+  <div class="kicker">How this course works</div>
+  <h2>A validator's job is evidence, and every number is rerun</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-navy"><h4>Rows nobody trained on</h4><p class="small mb0">Every claim is checked on rows the developers never saw: the calib and holdout splits.</p></div>
+    <div class="card c-teal"><h4>Guarantees with assumptions</h4><p class="small mb0">Calibration, coverage and explanations each hold under conditions. The report names them.</p></div>
+    <div class="card c-coral"><h4>A decision at the end</h4><p class="small mb0">Fit, fit with conditions, or not fit. Evidence without a decision is not a validation.</p></div>
+  </div>
+  <div class="callout warn small mt"><b>AI policy.</b> AI off for the entry and exit checks and for your first reading of a diagram or a coverage table. In labs an AI tutor may explain, not write code or findings. In the capstone anything goes, defended live.</div>
+  <aside class="notes"><p>Explain why the first reading is AI-off: the skill being assessed is reading a reliability diagram or a coverage table yourself. An assistant that reads it for you leaves you unable to defend the finding when the panel asks. The policy is the course's, not the trainer's choice.</p></aside>
+</section>
+
+<section class="slide" data-label="Case study" id="mizan-and-amana">
+  <div class="kicker">One case study all week</div>
+  <h2>Mizan Community Lending hands you Amana to validate</h2>
+  <p class="lead">A fictional microfinance lender. Its credit analytics team built <b>Amana</b> (<span class="ar">أمانة</span>); you are the independent model risk team.</p>
+  <div class="cols cols-3 gap-s mt-s">
+    <div class="card c-teal flat"><h4>Three models</h4><p class="small mb0">Probability of default, a grade (on time, late, default) and the loss in riyals if a loan defaults.</p></div>
+    <div class="card c-cyan flat"><h4>Your data</h4><p class="small mb0">50,000 applications from 2023 and 2024: 30,000 the developers trained on, 10,000 calib and 10,000 holdout rows that are yours.</p></div>
+    <div class="card c-coral flat"><h4>A later batch</h4><p class="small mb0">10,000 applications from early 2025, with their outcomes. Something in it changed.</p></div>
+  </div>
+  <aside class="notes"><p>Name the people. Dr. Sameera Al-Fadda, head of model risk, chairs the model approval committee: she receives the decision. Talib Al-Harbash, chief credit officer, owns the lending decisions. Rasil Al-Nafisah leads the credit analytics team that built Amana. Fuad Al-Rubayan leads the branch credit officers who review declined applicants. Sadeem Al-Oraini is the data protection officer. Aseel Al-Rumaithi is the validator: the participants' role. Everything is synthetic, generated with a fixed seed by labs/prepare_data.py; problems are planted in it. Do not reveal them.</p></aside>
+</section>
+
+<section class="slide" data-label="Setup" id="setup-and-reference-state">
+  <div class="kicker">Lab environment</div>
+  <h2>Open the notebooks in Colab, or run them locally with uv</h2>
+  <div class="cols cols-2">
+    <ol class="bullets">
+      <li><b>Colab:</b> open a notebook from the course page. Its first cell clones the repository and installs one package.</li>
+      <li><b>Locally:</b> the commands on the right, then <code>00_setup_check.ipynb</code> once.</li>
+      <li>Every lab starts from a <b>supplied reference state</b>: the package, the data and the course functions in <code>mizan.py</code>. No lab needs your earlier run.</li>
+    </ol>
+    <pre class="code s" data-file="terminal (local option)"><code class="language-bash">git clone https://github.com/SDAIAAcademy/ds-305
+cd ds-305/labs
+uv sync
+uv run jupyter lab</code></pre>
+  </div>
+  <aside class="notes"><p>No key and no account: no lab calls a language model, and every lab runs on a laptop processor in a minute or two. Common failures: an old Python (uv installs the right one); on Windows a very deep folder (set UV_PROJECT_ENVIRONMENT to a short folder, see labs/README.md). Every exercise has a safety net: a participant who skips one still gets the reference result in the next cell.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
 
-<!-- Session 1 -->
-
+<!-- ======================= SESSION 1 ======================= -->
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" id="s1-idea" data-lo="LO5">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
-  <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+<section class="slide" data-label="Three questions" id="three-kinds-of-evidence" data-lo="LO5">
+  <div class="kicker">What validation must show</div>
+  <h2>A validation answers three questions, not one</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-teal"><h4>Conceptual soundness</h4><p class="small mb0">Is the design fit for the purpose: the target, the data, the features, the training choices?</p></div>
+    <div class="card c-cyan"><h4>Outcome analysis</h4><p class="small mb0">Does it perform on rows it never saw: discrimination, calibration, intervals, every group?</p></div>
+    <div class="card c-coral"><h4>Monitoring</h4><p class="small mb0">Will anyone notice when it stops working: which metric, which threshold, who acts?</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <div class="callout tip mt"><b>This week.</b> Day 1 and 2 are outcome analysis; Day 3 tests soundness of the explanations; Day 4 adds monitoring and the decision.</div>
+  <aside class="notes"><p>The three-part frame comes from model risk practice in banking supervision (SR 11-7 of the US Federal Reserve calls them conceptual soundness, ongoing monitoring and outcomes analysis). It is not Saudi regulation; it is a widely used vocabulary, and the capstone report is organised on it. Ask the room which of the three their own organisation does least. Usually monitoring.</p><p>Sources: Board of Governors of the Federal Reserve System, SR 11-7 (2011).</p></aside>
 </section>
 
-<section class="slide" id="s1-steps" data-lo="LO5">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" data-label="Independence" id="independent-means-other-rows" data-lo="LO5">
+  <div class="kicker">Who validates</div>
+  <h2>Independent means other people, other rows and other questions</h2>
+  <table class="t small">
+    <tr><th></th><th>The developers</th><th>The validator</th></tr>
+    <tr><td>Question</td><td>Does my model work?</td><td>Where does it stop working, and for whom?</td></tr>
+    <tr><td>Rows</td><td>Their training and test split</td><td>Rows they never touched: calib and holdout</td></tr>
+    <tr><td>Output</td><td>A model and a card</td><td>Rated findings, conditions of use, a decision</td></tr>
+    <tr class="hl"><td>At Mizan</td><td>Rasil's credit analytics team</td><td>Your model risk team, reporting to Dr. Sameera</td></tr>
+  </table>
+  <div class="callout warn small mt-s"><b>What goes wrong.</b> A validator who retrains the model has become a second developer. Repairs are recommended, and the developers own them.</div>
+  <aside class="notes"><p>Stress the rows. The 50,000 applications are split once: 30,000 train for the developers, 10,000 calib (where the validator fits any repair, such as a recalibration map or a conformal threshold) and 10,000 holdout (where the validator judges). Nothing is ever fitted on the holdout.</p></aside>
+</section>
+
+<section class="slide" data-label="Claims" id="claims-evidence-verdicts" data-lo="LO5">
+  <div class="kicker">Reading a model card</div>
+  <h2>Every claim gets one of three verdicts</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-green"><h4>Supported</h4><p class="small mb0">The package's evidence, or your recomputation, backs the claim as written.</p></div>
+    <div class="card c-coral"><h4>Unsupported</h4><p class="small mb0">The evidence is missing, or it contradicts the claim. Missing counts.</p></div>
+    <div class="card c-purple"><h4>Untestable</h4><p class="small mb0">No data you have, or could have today, can test it as written. Rewrite it as a test.</p></div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <div class="callout tip mt"><b>The habit.</b> "Supported" needs evidence. Silence is not support.</div>
+  <aside class="notes"><p>Walk through the vocabulary before the lab. An untestable claim is not necessarily false; it is a promise. The validator's move is to turn it into a monitoring condition with a metric, a threshold, data and an action. That is step 5 of Lab 1.1.</p></aside>
+</section>
+
+<section class="slide" data-label="Amana's card" id="amana-six-claims" data-lo="LO5">
+  <div class="kicker">The package you received</div>
+  <h2>Amana's card makes six claims</h2>
+  <ol class="bullets small">
+    <li>It discriminates well: <b>AUC 0.864</b> on a held-out sample of 4,000 applications.</li>
+    <li>Its probabilities are well calibrated and can be read as default rates.</li>
+    <li>It uses no gender, age or location information.</li>
+    <li>Performance is consistent across all customer groups.</li>
+    <li>It will remain accurate for the next three years.</li>
+    <li>The reasons shown to officers are the causes of an applicant's risk.</li>
+  </ol>
+  <div class="callout note small mt-s"><b>Also in the package.</b> <code>metadata.json</code> (what they did) and <code>evidence.json</code> (what they measured). Read all three before computing anything.</div>
+  <aside class="notes"><p>Read the six claims aloud and take a show of hands on claim 2: who believes it? Do not resolve any claim now; the lab does. The answer key is in the lab notebook's check cell and in labs/solutions/answer_key.md: unsupported 1, 2, 4; supported 3; untestable 5, 6.</p></aside>
+</section>
+
+<section class="slide" data-label="The headline" id="headline-auc-rows" data-lo="LO5">
+  <div class="kicker">One recomputation</div>
+  <h2>The claimed AUC came from rows the shipped model had seen</h2>
+  <div class="cols cols-2">
+    <div class="bars">
+      <div class="row"><span>Claimed in the card</span><div class="bar c-coral" style="--w:86%"></div><span class="val">0.864</span></div>
+      <div class="row"><span>On the training rows</span><div class="bar c-amber" style="--w:86%"></div><span class="val">0.858</span></div>
+      <div class="row"><span>On the holdout</span><div class="bar c-teal" style="--w:76%"></div><span class="val">0.755</span></div>
+    </div>
+    <ul class="bullets small">
+      <li>The developers held out 4,000 rows, measured, then <b>retrained on all rows</b> and shipped that model.</li>
+      <li>The shipped model has seen the 4,000 rows: its 0.864 is an in-sample number.</li>
+      <li>On 10,000 rows it never saw: 0.755.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>Numbers from Lab 1.1 (solution run): claimed 0.864, AUC on the training rows 0.858, holdout 0.755. This is the most common way a headline number goes wrong: the evaluation was honest, then the model changed. The fix is not to forbid retraining on all rows; it is to state that the reported number belongs to a different model, and to validate the one that ships.</p></aside>
+</section>
+
+<section class="slide" data-label="Assumptions" id="guarantees-assumptions" data-lo="LO5">
+  <div class="kicker">Guarantees and assumptions</div>
+  <h2>Every guarantee this week holds under a condition you must state</h2>
+  <table class="t small">
+    <tr><th>Evidence</th><th>It guarantees</th><th>If this holds</th></tr>
+    <tr><td>A holdout score</td><td>Performance on similar new applicants</td><td>New applicants look like the holdout</td></tr>
+    <tr><td>Recalibration</td><td>Average calibration</td><td>The calib rows look like the applicants</td></tr>
+    <tr><td>Conformal intervals</td><td>90% coverage on average</td><td>Rows are exchangeable</td></tr>
+    <tr><td>An explanation</td><td>What the model does</td><td>Not what causes default</td></tr>
+  </table>
+  <div class="callout warn small mt-s"><b>What goes wrong.</b> A report that quotes the guarantee and drops the condition. The condition is where the next failure comes from.</div>
+  <aside class="notes"><p>This table is the spine of the week: each day tests one row, and Day 4 shows a batch where the first three conditions break at once. Ask: which of these conditions can be monitored? All of them, partly: that is the monitoring section of the report.</p></aside>
+</section>
+
+<section class="slide" data-label="Personal data" id="credit-data-personal" data-lo="LO5">
+  <div class="kicker">Responsible use</div>
+  <h2>Validation data is applicants' personal data, even in a model risk team</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>Income, loans and missed payments of named people fall under the <b>Personal Data Protection Law</b>.</li>
+      <li>A validator needs outcomes and predictions, not names: ask for the minimum, and ask the data protection officer.</li>
+      <li>Subgroup columns (age band, gender, region) are needed to audit the model and must not leak into it.</li>
+    </ul>
+    <div class="card c-teal flat"><h4>In this course</h4><p class="small mb0">Every applicant is synthetic. The capstone uses the course packages or a peer's synthetic package; no real borrower data enters a repository.</p></div>
+  </div>
+  <aside class="notes"><p>Keep it practical: the habit is to ask Sadeem, the data protection officer, what the validation extract may contain and how long it is kept. The course does not teach the law. Its official address is on the course page.</p><p>Sources: Personal Data Protection Law (SDAIA), cited by name and address.</p></aside>
+</section>
+
+<section class="slide" id="check-supported-claim" data-lo="LO5">
+  <div class="kicker">Checkpoint</div>
+  <h2>Which verdict does claim 4 get?</h2>
+  <div class="quiz" data-type="single" data-lo="LO5">
+    <p class="lead">Amana's card says "performance is consistent across all customer groups". The evidence file has an overall AUC and no subgroup results. You have not yet computed anything by group. What is the verdict today?</p>
+    <div class="opts">
+      <div class="opt" data-why="Treats the absence of contrary evidence as support: nothing was measured, so nothing supports it">Supported, since no gap has been found</div>
+      <div class="opt" data-ok>Unsupported, since the package has no evidence for it</div>
+      <div class="opt" data-why="Confuses not yet tested with impossible to test: the holdout has the group columns, so it can be tested">Untestable, since groups were not measured</div>
+      <div class="opt" data-why="Assumes a validator may wait: the verdict is recorded on what the package holds, then the test is run">No verdict until the subgroup tables exist</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> A claim is supported by evidence. The package has none for groups, and the holdout could test it, so it is unsupported now and testable later.</div>
+  </div>
+  <aside class="notes"><p>Answer: B, unsupported. If many choose untestable, contrast with claim 5: three future years cannot be observed today, while subgroup columns are in the holdout. Lab 1.4 and Lab 4.1 run the test.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-1-1" data-auto="lab" data-lab="1.1">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Watch for: participants marking claim 3 "unsupported" because they suspect proxies. As written it is supported (no such column is a feature); keep the suspicion for Day 3. Expected: holdout AUC 0.755 against the claimed 0.864; mean prediction 0.403 against a default rate of 0.099. The stretch shows the training-row AUC, 0.858. Fallback: none needed, the lab starts from the package.</p></aside>
 </section>
 
-<!-- Session 2 -->
-
+<!-- ======================= SESSION 2 ======================= -->
 <section class="slide section" id="s2" data-auto="section" data-session="2"></section>
 
-<section class="slide" id="s2-idea" data-lo="LO1">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="Ranking is not risk" id="ranking-not-probability" data-lo="LO1">
+  <div class="kicker">Two different properties</div>
+  <h2>A model can rank applicants well and still state the wrong risk</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
+    <div class="stack">
+      <div class="stat"><div class="big">0.755</div><div class="lbl">AUC on the holdout: who is riskier than whom</div></div>
+      <div class="stat"><div class="big">0.40</div><div class="lbl">mean predicted default probability, against 0.10 observed</div></div>
+    </div>
+    <ul class="bullets small">
+      <li><b>Discrimination</b>: do defaulters get higher scores? AUC answers it, and ignores the scale.</li>
+      <li><b>Calibration</b>: when the model says 20%, do 20% default? AUC is blind to it.</li>
+      <li>Officers read the score as a probability, so both matter.</li>
     </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Numbers from Lab 1.1. Multiply every score by four and the AUC does not change at all. Ask: who at Mizan uses the probability itself, not the rank? Pricing (a risk premium), provisions for expected loss, and the officer who reads "40%" and declines. All three are harmed by a fourfold overstatement.</p></aside>
 </section>
 
-<section class="slide" id="s2-steps" data-lo="LO1">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" data-label="Proper scores" id="proper-scores" data-lo="LO1">
+  <div class="kicker">Scoring a probability</div>
+  <h2>A proper score rewards the forecaster for saying what they believe</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 1.2 · step 1"><code class="language-python">def brier(y, p):
+    return np.mean((p - y) ** 2)
+
+def log_loss(y, p):
+    p = np.clip(p, 1e-12, 1 - 1e-12)
+    return -np.mean(y * np.log(p)
+                    + (1 - y) * np.log(1 - p))</code></pre>
+    <ul class="bullets small">
+      <li>Both are <b>proper</b>: the expected score is best when the forecast equals the true probability.</li>
+      <li>Accuracy at 0.5 is not: 0.51 and 0.99 score the same.</li>
+      <li>Log loss punishes a confident miss hard; Brier is bounded and easier to explain.</li>
+    </ul>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>Do the toy case on the board: outcomes 0, 1, 1 with forecasts 0.2, 0.7, 0.9 give Brier 0.0467 and log loss 0.228 (the lab's first check). Then ask what happens to the log loss if the first forecast were 0.999: it explodes. That is why the lab clips.</p><p>Sources: Gneiting and Raftery, Strictly Proper Scoring Rules (2007).</p></aside>
+</section>
+
+<section class="slide" data-label="Against the base rate" id="beaten-by-base-rate" data-lo="LO1">
+  <div class="kicker">A forecast that knows nothing</div>
+  <h2>As a probability, Amana loses to the base rate</h2>
+  <table class="t">
+    <tr><th>Forecast on the holdout</th><th class="num">Brier</th><th class="num">Log loss</th><th class="num">AUC</th></tr>
+    <tr><td>Amana, as shipped</td><td class="num">0.199</td><td class="num">0.586</td><td class="num">0.755</td></tr>
+    <tr class="hl"><td>Everyone gets the calib default rate</td><td class="num">0.090</td><td class="num">0.324</td><td class="num">0.500</td></tr>
+  </table>
+  <div class="callout warn mt-s"><b>What goes wrong.</b> Reporting AUC alone. The model that ranks better is the worse probability by both proper scores.</div>
+  <aside class="notes"><p>Lab 1.2, step 2. The base-rate forecast is the floor every probability model must beat on a proper score. Ask the room to predict the result before you show the table. Most expect Amana to win because of its AUC.</p></aside>
+</section>
+
+<section class="slide" data-label="Reliability" id="reliability-diagram-bins" data-lo="LO1">
+  <div class="kicker">Seeing calibration</div>
+  <h2>A reliability diagram puts predicted against observed, bin by bin</h2>
+  <div class="cols cols-2">
+    <table class="t small">
+      <tr><th>Bin (1,000 each)</th><th class="num">Predicted</th><th class="num">Observed</th></tr>
+      <tr><td>Lowest</td><td class="num">0.076</td><td class="num">0.020</td></tr>
+      <tr><td>Fourth</td><td class="num">0.262</td><td class="num">0.042</td></tr>
+      <tr><td>Seventh</td><td class="num">0.484</td><td class="num">0.108</td></tr>
+      <tr><td>Highest</td><td class="num">0.854</td><td class="num">0.314</td></tr>
+    </table>
+    <ul class="bullets small">
+      <li>Sort by prediction, cut into <b>equal-count</b> bins, compare the means.</li>
+      <li>Perfect calibration lies on the diagonal.</li>
+      <li>Every Amana bin lies far below it. Expected calibration error: <b>0.30</b>.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>Lab 1.2 steps 3 and 4. Why equal-count bins: the predictions crowd into a range, and equal-width bins leave some nearly empty. The ECE is the count-weighted mean distance from the diagonal; it is a summary of the diagram, not a proper score, so it is never the only number reported. First reading is AI-off: participants write one sentence about the diagram before asking anyone.</p></aside>
+</section>
+
+<section class="slide" data-label="The cause" id="rebalancing-inflates" data-lo="LO1">
+  <div class="kicker">Why the curve is so low</div>
+  <h2>Trained on a 50/50 sample, applied where one in ten defaults</h2>
+  <div class="flow">
+    <div class="step c-teal"><b>1 · Rebalance</b>Non-defaults dropped until half the rows default</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>2 · Train</b>The model learns odds for a world with 50% defaults</div>
+    <div class="arrow">→</div>
+    <div class="step c-coral"><b>3 · Apply</b>About 10% default: every probability is inflated</div>
+  </div>
+  <div class="callout tip mt"><b>A quick check.</b> Rescaling the odds back to the true base rate brings the Brier score from 0.199 to 0.082. The proper repair is fitted on held-out rows: Session 3.</div>
+  <aside class="notes"><p>The metadata says it in one line: "non-defaults dropped at random to a 50/50 sample". Rebalancing can help a model learn the rare class, but its probabilities then belong to the training prevalence. Lab 1.2 step 5 finds the line; the prior correction is shown for intuition only.</p><p>Sources: Niculescu-Mizil and Caruana (2005); scikit-learn user guide on probability calibration.</p></aside>
+</section>
+
+<section class="slide" data-label="Decomposition" id="brier-decomposition" data-lo="LO1">
+  <div class="kicker">What the Brier score is made of</div>
+  <h2>Brier = reliability minus resolution plus uncertainty</h2>
+  <div class="bars">
+    <div class="row"><span>Reliability (miscalibration)</span><div class="bar c-coral" style="--w:100%"></div><span class="val">0.117</span></div>
+    <div class="row"><span>Uncertainty (the base rate)</span><div class="bar c-navy" style="--w:76%"></div><span class="val">0.089</span></div>
+    <div class="row"><span>Resolution (separation)</span><div class="bar c-teal" style="--w:7%"></div><span class="val">0.008</span></div>
+  </div>
+  <div class="callout tip mt-s"><b>Read it.</b> Amana loses more to miscalibration than it gains from separating applicants. Recalibration removes most of the first term and leaves the other two.</div>
+  <aside class="notes"><p>The stretch of Lab 1.2, on the ten bins (approximate, because predictions vary within a bin). Uncertainty depends only on the base rate; no model changes it. Resolution is what the ranking buys; reliability is the price of wrong probabilities.</p></aside>
+</section>
+
+<section class="slide" id="check-proper-score" data-lo="LO1">
+  <div class="kicker">Checkpoint</div>
+  <h2>Which number shows that the probabilities are too high?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1">
+    <p class="lead">A second team's model has AUC 0.78 on your holdout and accuracy 90% at a threshold of 0.5. Its mean predicted default probability is 0.31; the default rate is 0.09. Which result tells the committee the probabilities cannot be read as rates?</p>
+    <div class="opts">
+      <div class="opt" data-why="Treats ranking as calibration: AUC is unchanged when every score is multiplied by a constant">The AUC of 0.78</div>
+      <div class="opt" data-why="Uses a score that is not proper: accuracy at 0.5 ignores how far the probabilities are from the truth">The accuracy of 90%</div>
+      <div class="opt" data-why="Reads fit on rows the model has seen as calibration on new applicants">The model's training loss</div>
+      <div class="opt" data-ok>A reliability diagram and a Brier score against the base rate</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Calibration is shown by comparing predicted with observed rates; a proper score against the base-rate forecast puts a number on the cost.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. The mean of 0.31 against 0.09 already hints at it; the diagram and the Brier comparison are the evidence a report shows. If the room picks accuracy, compute it for the base-rate forecast: also about 91%, with no skill at all.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-1-2" data-auto="lab" data-lab="1.2">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: Brier 0.199 for Amana against 0.090 for the base rate; log loss 0.586 against 0.324; ECE 0.30; highest bin 0.854 predicted against 0.314 observed. Common problem: forgetting to clip in the log loss gives infinity. Remind the room that the first reading of the diagram is theirs, AI-off.</p></aside>
 </section>
 
-<!-- Session 3 -->
-
+<!-- ======================= SESSION 3 ======================= -->
 <section class="slide section" id="s3" data-auto="section" data-session="3"></section>
 
-<section class="slide" id="s3-idea" data-lo="LO1">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="Recap" id="recap-ds204-calibration" data-lo="LO1">
+  <div class="kicker">From DS-204</div>
+  <h2>You calibrated your own model before; now you repair someone else's</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="card c-navy flat"><h4>DS-204, Day 4</h4><p class="small mb0">Calibration measured by decile on your own model, repaired on unseen rows, lost again under drift.</p></div>
+    <div class="card c-teal flat"><h4>Here</h4><p class="small mb0">Two maps compared with proper scores, the rows each may touch, what no map can repair, and the check by group.</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>One slide of recap, no more. Participants who did not take DS-204 have the decile table from the pre-work. Move on quickly.</p></aside>
 </section>
 
-<section class="slide" id="s3-steps" data-lo="LO1">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
+<section class="slide" data-label="A map after the model" id="repair-without-retraining" data-lo="LO1">
+  <div class="kicker">Recalibration</div>
+  <h2>A recalibration map sits after the model and changes only the meaning of the score</h2>
   <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+    <div class="step c-navy"><b>Amana</b>score, unchanged</div>
+    <div class="arrow">→</div>
+    <div class="step c-teal"><b>Map</b>fitted on the calib rows</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>Probability</b>judged on the holdout</div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <ul class="bullets small mt">
+    <li>The map is monotone, so the ranking and the AUC do not move.</li>
+    <li>The developers can adopt it without retraining: it is a recommendation with evidence.</li>
+  </ul>
+  <aside class="notes"><p>Emphasise the three sets of rows: training rows (never used for the map, because the model is overconfident there), calib rows (fit the map), holdout (judge it). The same three-way split returns on Day 2 for conformal thresholds.</p></aside>
+</section>
+
+<section class="slide" data-label="Two maps" id="platt-and-isotonic" data-lo="LO1">
+  <div class="kicker">Two methods</div>
+  <h2>Platt scaling bends nothing; isotonic regression can bend anywhere</h2>
+  <div class="cols cols-2">
+    <div class="card c-teal"><h4>Platt scaling</h4><p class="small mb0">A logistic regression of the outcome on the logit of the score: two parameters, a smooth S-shaped map. Steady with few rows.</p></div>
+    <div class="card c-purple"><h4>Isotonic regression</h4><p class="small mb0">Any non-decreasing step function of the score. Flexible, needs many rows, can overfit a small calib set.</p></div>
+  </div>
+  <pre class="code s mt-s" data-file="Lab 1.3 · step 1"><code class="language-python">lr = LogisticRegression(C=1e6).fit(logit(p_cal).reshape(-1, 1), y_cal)
+platt = lambda q: lr.predict_proba(logit(q).reshape(-1, 1))[:, 1]</code></pre>
+  <aside class="notes"><p>Platt is the logistic model from DS-301 with one feature. Ask why it uses the logit of the score rather than the score: on the logit scale a constant shift is exactly what rebalancing did to the odds, so Platt can undo it.</p><p>Sources: scikit-learn user guide, probability calibration.</p></aside>
+</section>
+
+<section class="slide" data-label="Results" id="recalibration-results" data-lo="LO1">
+  <div class="kicker">Lab 1.3 on the holdout</div>
+  <h2>Both maps cut the Brier score by more than half, and the AUC stays at 0.755</h2>
+  <table class="t">
+    <tr><th>Holdout</th><th class="num">Brier</th><th class="num">Log loss</th><th class="num">ECE</th><th class="num">AUC</th></tr>
+    <tr><td>Raw Amana</td><td class="num">0.199</td><td class="num">0.586</td><td class="num">0.304</td><td class="num">0.755</td></tr>
+    <tr class="hl"><td>Platt</td><td class="num">0.081</td><td class="num">0.284</td><td class="num">0.011</td><td class="num">0.755</td></tr>
+    <tr><td>Isotonic</td><td class="num">0.081</td><td class="num">0.287</td><td class="num">0.012</td><td class="num">0.754</td></tr>
+  </table>
+  <p class="small mt-s">Both now beat the base rate (Brier 0.090, log loss 0.324).</p>
+  <aside class="notes"><p>Numbers from the Lab 1.3 solution run. Isotonic's AUC moves slightly because its steps tie some scores; Platt's is identical. On 10,000 calib rows the two are nearly the same; the stretch repeats the fit with 500 rows, where Platt's log loss is 0.286 and isotonic's 0.306.</p></aside>
+</section>
+
+<section class="slide" data-label="Wrong rows" id="map-on-wrong-rows" data-lo="LO1">
+  <div class="kicker">What goes wrong</div>
+  <h2>A map judged on the rows that fitted it looks perfect</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">0.002</div><div class="lbl">ECE of isotonic fitted and scored on the holdout</div></div>
+      <div class="stat"><div class="big">0.012</div><div class="lbl">ECE of isotonic fitted on calib, scored on the holdout</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>Isotonic regression can follow the noise of the rows it was fitted on.</li>
+      <li>The honest error is six times larger.</li>
+      <li>Same mistake as the claimed AUC of Lab 1.1, one step later.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>From Lab 1.3. This is why the course has three splits. Ask: if the developers had recalibrated themselves, on which rows would you want them to have done it? On rows that neither the model nor the map's evaluation used.</p></aside>
+</section>
+
+<section class="slide" data-label="Limits" id="what-no-map-repairs" data-lo="LO1">
+  <div class="kicker">The limit of the repair</div>
+  <h2>A map of the score cannot see what the score cannot see</h2>
+  <ul class="bullets">
+    <li>It fixes the <b>average</b> relation between score and outcome.</li>
+    <li>It cannot fix a group whose risk differs at the <b>same score</b>: a column the model never had.</li>
+    <li>It cannot improve the ranking.</li>
+    <li>It holds while new applicants resemble the calib rows; a shift breaks it again.</li>
+  </ul>
+  <div class="callout tip mt-s"><b>Next session.</b> Amana excludes region and age band on purpose. Is it calibrated within them?</div>
+  <aside class="notes"><p>This sets up Session 4. Ask the room to guess which group will be worst. Collect two guesses on the board and return to them after the lab.</p></aside>
+</section>
+
+<section class="slide" id="check-recalibration-rows" data-lo="LO1">
+  <div class="kicker">Checkpoint</div>
+  <h2>Where should the recalibration map be fitted?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1">
+    <p class="lead">You recommend Platt scaling for Amana. You have the 30,000 training rows, 10,000 calib rows and 10,000 holdout rows. Where do you fit the map, and where do you report its effect?</p>
+    <div class="opts">
+      <div class="opt" data-ok>Fit on the calib rows, report on the holdout</div>
+      <div class="opt" data-why="Assumes more rows always help: the model is overconfident on rows it trained on, so the map learns the wrong correction">Fit on the training rows, report on the holdout</div>
+      <div class="opt" data-why="Fits and judges on the same rows, which flatters the map as the isotonic example showed">Fit and report on the holdout</div>
+      <div class="opt" data-why="Thinks the calib rows are enough on their own: the effect must be shown on rows the map did not see">Fit and report on the calib rows</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The map must learn from rows the model did not train on, and its effect must be judged on rows the map did not see.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. Tie it to the slide on the wrong rows: 0.002 against 0.012.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-1-3" data-auto="lab" data-lab="1.3">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: Platt Brier 0.0809, log loss 0.2840, ECE 0.0105; isotonic Brier 0.0809, log loss 0.2866; AUC unchanged for Platt. Common problem: passing the raw score instead of its logit to the logistic regression (it still works, less well). The reference repair for every later lab is U.recalibrated: Platt on the calib rows.</p></aside>
 </section>
 
-<!-- Session 4 -->
-
+<!-- ======================= SESSION 4 ======================= -->
 <section class="slide section" id="s4" data-auto="section" data-session="4"></section>
 
-<section class="slide" id="s4-idea" data-lo="LO1">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="Average is not every group" id="calibrated-on-average" data-lo="LO1">
+  <div class="kicker">Calibration by subgroup</div>
+  <h2>Calibrated on average can hide a group the model under-predicts</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
+    <ul class="bullets small">
+      <li>After Platt, mean predicted 0.090 against 0.099 observed on the holdout.</li>
+      <li>Region and age band are <b>not features</b> of Amana, by design.</li>
+      <li>If risk differs between them at the same score, the average hides it.</li>
     </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="card c-coral flat"><h4>Why it matters at Mizan</h4><p class="small mb0">An under-predicted group gets loans priced below its risk; an over-predicted one is declined more than it should be. Both are harms to people.</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Excluding a column is a choice about inputs. It does not make the outcome independent of that column. Ask: does the exclusion protect the young applicant or hide a problem with how the model treats them? This is the start of the fairness thread that Day 4 tags and DS-309 takes further.</p></aside>
 </section>
 
-<section class="slide" id="s4-steps" data-lo="LO1">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" data-label="Small groups" id="intervals-for-small-groups" data-lo="LO1">
+  <div class="kicker">Noise in small groups</div>
+  <h2>A gap in a group of 500 needs an interval before it is a finding</h2>
+  <div class="cols cols-2">
+    <pre class="code s" data-file="mizan.py"><code class="language-python">def wilson(k, n, z=1.96):
+    ph = k / n
+    c = (ph + z*z/(2*n)) / (1 + z*z/n)
+    h = z * np.sqrt(ph*(1-ph)/n + z*z/(4*n*n)) / (1 + z*z/n)
+    return c - h, c + h</code></pre>
+    <ul class="bullets small">
+      <li>The Northern region has 508 holdout applicants; 78 defaulted.</li>
+      <li>The 95% Wilson interval for its rate: <b>12.5% to 18.8%</b>.</li>
+      <li>A finding is a prediction <b>outside</b> the interval, not any gap.</li>
+    </ul>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>The Wilson interval behaves better than the plus-or-minus formula for small groups and rates near zero. A group with 50 rows would have an interval of about plus or minus ten points: almost nothing could be called a finding. Say so in the report rather than drawing conclusions.</p></aside>
+</section>
+
+<section class="slide" data-label="Region" id="calibration-by-region" data-lo="LO1">
+  <div class="kicker">Lab 1.4 · by region</div>
+  <h2>The Northern region defaults 6.7 points more often than predicted</h2>
+  <table class="t small">
+    <tr><th>Region</th><th class="num">n</th><th class="num">Predicted</th><th class="num">Observed</th><th class="num">95% interval</th></tr>
+    <tr><td>Central</td><td class="num">3,448</td><td class="num">8.9%</td><td class="num">9.8%</td><td class="num">8.9 to 10.9</td></tr>
+    <tr><td>Western</td><td class="num">2,707</td><td class="num">8.9%</td><td class="num">9.8%</td><td class="num">8.8 to 11.0</td></tr>
+    <tr><td>Eastern</td><td class="num">1,951</td><td class="num">9.2%</td><td class="num">9.0%</td><td class="num">7.8 to 10.4</td></tr>
+    <tr><td>Southern</td><td class="num">1,386</td><td class="num">9.2%</td><td class="num">9.7%</td><td class="num">8.2 to 11.3</td></tr>
+    <tr class="hl"><td>Northern</td><td class="num">508</td><td class="num">8.7%</td><td class="num">15.4%</td><td class="num">12.5 to 18.8</td></tr>
+  </table>
+  <aside class="notes"><p>From the Lab 1.4 solution run, after Platt scaling. Only the Northern row has its prediction outside the interval. Mizan's Northern branches are newer and smaller: 5% of applications. Ask what the model would need to know to predict the North correctly. The answer is the subject of Day 4: a condition of use, not a quick fix.</p></aside>
+</section>
+
+<section class="slide" data-label="Age band" id="calibration-by-age" data-lo="LO1">
+  <div class="kicker">Lab 1.4 · by age band</div>
+  <h2>Applicants aged 18 to 24 are under-predicted by about 5 points</h2>
+  <div class="bars">
+    <div class="row"><span>18-24 · predicted</span><div class="bar c-navy" style="--w:64%"></div><span class="val">12.7%</span></div>
+    <div class="row"><span>18-24 · observed</span><div class="bar c-coral" style="--w:87%"></div><span class="val">17.5%</span></div>
+    <div class="row"><span>35-44 · predicted</span><div class="bar c-navy" style="--w:41%"></div><span class="val">8.2%</span></div>
+    <div class="row"><span>35-44 · observed</span><div class="bar c-teal" style="--w:42%"></div><span class="val">8.4%</span></div>
+  </div>
+  <p class="small mt-s">18-24: 1,201 applicants, observed interval 15.4% to 19.7%, prediction outside. The other bands sit inside their intervals.</p>
+  <aside class="notes"><p>The model does give younger applicants higher scores (12.7% against 8.2%), through years in business and prior loans, but not high enough. A recalibration of the score cannot fix it, because the map sees only the score. The stretch adds gender and channel: men are under-predicted by 1.6 points, just outside the interval; the branch channel by 1.0 point. Both are smaller and need judgment on Day 4.</p></aside>
+</section>
+
+<section class="slide" data-label="Reporting it" id="report-gap-not-fix" data-lo="LO1 LO5">
+  <div class="kicker">What the validator writes</div>
+  <h2>Report the gap, its interval and its likely cause; leave the fix to the owners</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-teal"><h4>The finding</h4><p class="small mb0">Northern applicants: 15.4% observed against 8.7% predicted, interval 12.5 to 18.8.</p></div>
+    <div class="card c-cyan"><h4>The likely cause</h4><p class="small mb0">Region is excluded and the North is 5% of the data: the model never learned it.</p></div>
+    <div class="card c-coral"><h4>The options</h4><p class="small mb0">A condition of use, a group-aware calibration, more data: a policy choice for Talib and Dr. Sameera.</p></div>
+  </div>
+  <aside class="notes"><p>Using location in credit decisions has its own risks, so the validator does not simply recommend adding region as a feature. Day 4 gives the vocabulary (bias types from the SDAIA AI Bias Reference Guide) and the decision format.</p></aside>
+</section>
+
+<section class="slide" id="check-group-gap" data-lo="LO1">
+  <div class="kicker">Checkpoint</div>
+  <h2>Which gap is a finding?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1">
+    <p class="lead">After recalibration, the Southern region shows 9.2% predicted and 9.7% observed (interval 8.2 to 11.3). The Northern region shows 8.7% predicted and 15.4% observed (interval 12.5 to 18.8). What do you report?</p>
+    <div class="opts">
+      <div class="opt" data-why="Assumes recalibration repairs every group: the map only sees the score, not the region">Neither: the model was recalibrated</div>
+      <div class="opt" data-why="Treats any difference as a finding: the Southern prediction lies inside its interval, so chance explains it">Both, as under-predicted regions</div>
+      <div class="opt" data-ok>The Northern gap, with its interval</div>
+      <div class="opt" data-why="Assumes a small group cannot carry a finding: 508 rows are enough when the prediction falls well outside the interval">Neither: the Northern group is too small</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The Northern prediction lies outside its 95% interval; the Southern one lies inside, so its gap cannot be told from noise.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. If the room says "too small", show the interval width: about six points, and the gap is 6.7.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-1-4" data-auto="lab" data-lab="1.4">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: Northern 8.7% predicted against 15.4% observed (interval 12.5 to 18.8); 18-24 12.7% against 17.5% (15.4 to 19.7). Common problem: computing the interval on the predictions rather than on the outcomes. Fallback: U.recalibrated supplies the Platt repair, so the lab does not need Lab 1.3.</p></aside>
 </section>
 
-<section class="slide" id="wrap-up">
-  <div class="kicker">Day 1 · wrap-up</div>
-  <h2>Three things to keep</h2>
-  <div class="cols cols-3">
-    <div class="card c-teal"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-coral"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-purple"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
+<!-- ======================= CLOSE ======================= -->
+<section class="slide" data-label="Wrap-up" id="wrap-up">
+  <div class="kicker">Day 1 · three things to keep</div>
+  <h2>What today showed about Amana's probabilities</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-teal"><h4>Claims need rows</h4><p class="small mb0">The 0.864 was in-sample. On the holdout, 0.755.</p></div>
+    <div class="card c-cyan"><h4>Ranking is not risk</h4><p class="small mb0">Probabilities four times too high, repaired by Platt on calib rows: Brier 0.199 to 0.081.</p></div>
+    <div class="card c-coral"><h4>Average is not every group</h4><p class="small mb0">The North and the 18 to 24 band stay under-predicted after the repair.</p></div>
   </div>
+  <aside class="notes"><p>Ask each participant to write the three findings in one line each, in the form of the report: finding, evidence, interval. They are the first page of the capstone report's structure.</p></aside>
 </section>
 
-<section class="slide dark" id="next" data-label="Next">
-  <div class="kicker">Next</div>
-  <h2>Day 2: Intervals with guarantees</h2>
-  <p class="lead">REPLACE: what participants prepare before then; unfinished labs can be finished at home</p>
-  <aside class="notes">REPLACE: accounts, installs or reading participants need before the next unit</aside>
+<section class="slide dark" data-label="Next" id="next">
+  <div class="kicker">Tomorrow</div>
+  <h2>Day 2: intervals with guarantees</h2>
+  <ul class="bullets">
+    <li>A point prediction of a loss amount says nothing about how wrong it can be.</li>
+    <li>Tomorrow: conformal intervals and prediction sets, and the condition their 90% rests on.</li>
+    <li>Prepare: reread the bootstrap pre-work; bring one question about today's diagram.</li>
+  </ul>
+  <aside class="notes"><p>Close on the assumption table from Session 1: tomorrow tests the third row, exchangeability.</p></aside>
 </section>

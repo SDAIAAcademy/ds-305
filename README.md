@@ -38,7 +38,9 @@ Participants produce the evidence an independent validator needs about a trained
 
 ## Case study
 
-**REPLACE: the name of the fictional organisation every lab works on.** REPLACE: two sentences on the case study and its synthetic data
+**Mizan Community Lending** (ميزان للإقراض المجتمعي) is a fictional microfinance lender. Its credit analytics team has built **Amana**, a package of three models (the probability of default, a grade of on time, late or default, and the loss in riyals if a loan defaults), and hands it to the model risk team for independent validation. Participants are that team.
+
+The data are synthetic and generated with a fixed seed by `labs/prepare_data.py`: 50,000 applications from 2023 and 2024 (30,000 the developers trained on, 10,000 calibration rows and 10,000 holdout rows for the validator), a later batch of 10,000 applications from the first half of 2025, the package with its model card, metadata and evidence, and two further packages for the capstone. Problems are planted in all of them for the labs to find.
 
 <!-- academy:labs -->
 ## Labs
@@ -69,7 +71,9 @@ Every lab is a notebook in `labs/`. Open it in Google Colab from the course page
 
 An independent validation of another participant's or a course model package, in a public repository whose README reports calibration, coverage, explanation stability, subgroup findings and a fit-for-use decision; eight-minute panel defence plus questions
 
-**Submission:** REPLACE: what participants submit and how: a public repository link, or a shared folder for a course without code
+**Submission:** a link to a public GitHub repository holding the validation notebooks, the run logs, and a README that reports calibration, coverage, explanation stability, subgroup findings and the fit-for-use decision. The defence is eight minutes, then four minutes of questions, in which the panel picks one finding for the participant to rerun and explain what would change its rating.
+
+Packages to validate: Amana-R, the renewal top-up model (`labs/capstone/renewal/`), Amana-F, the seasonal farm-loan model (`labs/capstone/farm/`), or another participant's package with their agreement. Rubric: calibration and coverage 25, explanations 20, subgroup and shift findings 25, decision 20, reproducibility 10.
 
 ## Prerequisites
 
@@ -139,7 +143,7 @@ Each line is a capability; the examples are interchangeable.
 
 ### National references
 
-- SDAIA AI Ethics Principles: REPLACE: the address of the official text
-- SDAIA AI Bias Reference Guide: REPLACE: the address of the official text
-- National AI Risk Management Framework: REPLACE: the address of the official text
-- Personal Data Protection Law and its implementing regulations: REPLACE: the address of the official text
+- SDAIA AI Ethics Principles: https://sdaia.gov.sa/en/SDAIA/about/Documents/ai-principles.pdf
+- SDAIA AI Bias Reference Guide, first edition (May 2026): https://sdaia.gov.sa/en/MediaCenter/KnowledgeCenter/ResearchLibrary/EN-AI-BIAS.pdf
+- National AI Risk Management Framework (April 2026), English executive summary: https://sdaia.gov.sa/en/MediaCenter/KnowledgeCenter/ResearchLibrary/ExecutiveSummaryEn.pdf
+- Personal Data Protection Law: https://sdaia.gov.sa/en/SDAIA/about/Documents/PersonalDataProtectionLaw.pdf, and its Implementing Regulation: https://sdaia.gov.sa/en/SDAIA/about/Documents/ImplementingRegulationPersonalDataProtectionLaw.pdf
