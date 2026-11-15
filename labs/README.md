@@ -1,9 +1,33 @@
 # Uncertainty, Interpretability and Model Validation: labs
 
+Every lab works on **Amana**, the credit model package that Mizan Community Lending (a fictional
+microfinance lender) has sent to its model risk team for validation. All data are synthetic, written by
+`prepare_data.py` with seed 305, and every lab runs on a laptop CPU or in Colab. No lab calls a language
+model, downloads a model or needs a key.
+
 ## Quick start
 
-- Google Colab: open a notebook from the course page; its first cell clones this repository.
-- Locally: clone the repository, then open the notebooks in `labs/` with Jupyter.
+- **Google Colab:** open a notebook from the table below; its first cell clones this repository and
+  installs `requirements-colab.txt` (only MAPIE is missing from Colab's image).
+- **Locally, with [uv](https://docs.astral.sh/uv/):** from `labs/`, run `uv sync`, then
+  `uv run jupyter lab`. Python 3.12 and the exact versions are pinned in `pyproject.toml` and `uv.lock`.
+  On Windows, if a path is too long for the environment, set `UV_PROJECT_ENVIRONMENT` to a short folder
+  outside the repository (for example `C:\uv305`) before `uv sync`.
+- **Check the setup first:** `00_setup_check.ipynb` loads the data and the package in under a minute.
+
+**Quick mode.** Set the environment variable `MIZAN_QUICK=1` to run the slower labs (refits, repeats)
+with fewer rounds; the order of results is the same and the answer key notes the numbers that change.
+
+**Each lab starts from a reference state** that it rebuilds itself from `data/` and `package/`, so a
+participant who missed a lab can start the next one. Solutions are in `solutions/`; the trainer's
+numbers and the capstone packages' planted problems are in `solutions/answer_key.md`.
+
+| Folder | Contents |
+|---|---|
+| `data/` | applications (train, calib, holdout), the 2025 later batch, the checklist, the bias guide's types, the week's findings |
+| `package/` | Amana: three LightGBM models (default, grade, loss), model card, metadata, evidence |
+| `capstone/` | two more packages for the capstone: `renewal` (Amana-R) and `farm` (Amana-F) |
+| `mizan.py` | the course functions the labs import as `U` |
 
 | Unit | Session | Notebook |
 |---|---|---|

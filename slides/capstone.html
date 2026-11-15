@@ -1,20 +1,52 @@
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">Today is theirs: keep your own talking to the opening and the closing. Confirm the running order and the demo setup (screen sharing, accounts, a recorded backup) first.</aside>
+  <aside class="notes"><p>Today is theirs: keep your own talking to the opening and the closing. Each participant defends an independent validation of Amana-R, Amana-F or a peer's package before a panel playing Dr. Sameera Al-Fadda's approval committee. Confirm the running order, screen sharing and that every repository is public before the first defence.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-label="Agenda">
   <div class="kicker">Capstone</div>
-  <h2>How the presentations run</h2>
+  <h2>How the day runs</h2>
   <div class="agenda">
-    <div class="item now"><div><b>Expectations and final prep</b><small>the rubric, a last rehearsal, then the first presentations</small></div></div>
-    <div class="item"><div><b>Presentations</b><small>each one timed, with questions after it</small></div></div>
-    <div class="item"><div><b>Review and closing</b><small>peer feedback, the trainer's review, what next</small></div></div>
+    <div class="item now"><div><b>The brief and the rubric</b><small>what the committee expects, then a clean-clone check</small></div></div>
+    <div class="item"><div><b>Validation work</b><small>the morning: finish the report on your package</small></div></div>
+    <div class="item"><div><b>Defences</b><small>eight minutes each, four minutes of questions</small></div></div>
+    <div class="item"><div><b>Review and closing</b><small>what the room found, what comes next</small></div></div>
   </div>
+  <aside class="notes"><p>Six hours in all. Plan the morning for finishing the validation and the afternoon for defences; with more than eight participants, run two panels in parallel.</p></aside>
 </section>
 
-<section class="slide" id="rubric" data-label="The rubric">
-  <div class="kicker">How presentations are scored</div>
-  <h2>The rubric</h2>
+<section class="slide" data-label="The brief" id="the-brief" data-lo="LO5">
+  <div class="kicker">The brief</div>
+  <h2>Validate one package independently and defend a fit-for-use decision</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li><b>Package.</b> Amana-R (top-up loans) or Amana-F (farm loans) from <code>labs/capstone/</code>, or a peer's model with its card, data and a later batch.</li>
+      <li><b>The week, repeated.</b> Recompute the claims, calibration, intervals and sets, explanation stability, the subgroup table, the later batch, the checklist.</li>
+      <li><b>The decision.</b> Fit, fit with conditions or not fit, with owned conditions and named human review.</li>
+    </ul>
+    <div class="card c-teal flat"><h4>Submission</h4><p class="small mb0">A link to a public GitHub repository holding the validation notebooks, the run logs, and a README that reports calibration, coverage, explanation stability, subgroup findings and the decision.</p></div>
+  </div>
+  <aside class="notes"><p>The course functions in labs/mizan.py work on both packages: pass the package folder to U.model and read its CSV files directly, as Lab 4.4 does. A peer's package needs the same parts; agree it with the trainer by the end of Day 4. The data are synthetic, so public repositories are fine.</p></aside>
+</section>
+
+<section class="slide" data-label="Report" id="report-sections" data-lo="LO1 LO2 LO3 LO4 LO5">
+  <div class="kicker">The README</div>
+  <h2>Seven sections, each with the number that supports it</h2>
+  <table class="t small">
+    <tr><th>Section</th><th>Evidence</th><th>From</th></tr>
+    <tr><td>1 · Claims</td><td>Each claim of the card: supported, unsupported or untestable</td><td>Lab 1.1</td></tr>
+    <tr><td>2 · Calibration</td><td>Brier and log loss before and after, reliability diagram</td><td>Labs 1.2 to 1.4</td></tr>
+    <tr><td>3 · Coverage</td><td>Target against achieved, by group and under shift, widths and set sizes</td><td>Day 2</td></tr>
+    <tr><td>4 · Explanations</td><td>Grouped importance, ALE, stability panel, one misleading result</td><td>Day 3</td></tr>
+    <tr><td>5 · Subgroups</td><td>The flagged, tagged and rated table</td><td>Lab 4.1</td></tr>
+    <tr><td>6 · Later batch</td><td>The memo: cause, evidence, action</td><td>Lab 4.2</td></tr>
+    <tr><td>7 · Checklist and decision</td><td>Twelve items scored; decision with owned conditions</td><td>Labs 4.3, 4.4</td></tr>
+  </table>
+  <aside class="notes"><p>The order follows SR 11-7's three elements: soundness (1, 7), outcomes (2 to 5), monitoring (6, 7). A participant short of time should cut depth, not sections: a section with one honest number beats a missing one.</p></aside>
+</section>
+
+<section class="slide" id="rubric" data-label="The rubric" data-lo="LO1 LO2 LO3 LO4 LO5">
+  <div class="kicker">How the validation is scored</div>
+  <h2>Five criteria, 100 points</h2>
   <div class="bars">
     <div class="row"><span>Calibration and coverage</span><div class="bar c-teal" style="--w:100%"></div><span class="val">25%</span></div>
     <div class="row"><span>Explanations</span><div class="bar c-cyan" style="--w:80%"></div><span class="val">20%</span></div>
@@ -22,77 +54,82 @@
     <div class="row"><span>Decision</span><div class="bar c-purple" style="--w:80%"></div><span class="val">20%</span></div>
     <div class="row"><span>Reproducibility</span><div class="bar c-amber" style="--w:40%"></div><span class="val">10%</span></div>
   </div>
-  <div class="callout tip mt"><b>Show results from at least two measured runs.</b> A claim without a number is a plan, not a result.</div>
-  <aside class="notes">Walk through each criterion with one example of what full marks look like.</aside>
+  <div class="callout tip small mt"><b>Full marks.</b> Every finding has a number, an interval where one applies, and the file that produced it.</div>
+  <aside class="notes"><p>What full marks look like. Calibration and coverage: before-and-after scores, coverage by group with defaults counted. Explanations: grouped importance and a stability panel over refits. Subgroup and shift: the cause of the later batch's change found and argued, gaps tagged with the guide. Decision: every high finding answered by an owned condition. Reproducibility: a clean clone runs and reproduces the README's numbers.</p></aside>
 </section>
 
-<section class="slide" id="format" data-label="Format">
-  <div class="kicker">Format</div>
-  <h2>8 minutes for each presentation</h2>
+<section class="slide" id="format" data-label="Defence">
+  <div class="kicker">The defence</div>
+  <h2>Eight minutes before the committee, then four minutes of questions</h2>
   <div class="cols cols-3">
-    <div class="card c-teal"><h4>1 · The problem</h4><p class="small mb0">Who, what, why now. One slide.</p></div>
-    <div class="card c-cyan"><h4>2 · What you built</h4><p class="small mb0">Design, decisions, trade-offs. Then the live demo.</p></div>
-    <div class="card c-coral"><h4>3 · What you measured</h4><p class="small mb0">Baseline, improvement, failures found, what comes next.</p></div>
+    <div class="card c-teal"><h4>2 min · the package</h4><p class="small mb0">What it claims, and which claims failed on your numbers.</p></div>
+    <div class="card c-cyan"><h4>4 min · the findings</h4><p class="small mb0">The high findings, each with its evidence; the later batch's cause.</p></div>
+    <div class="card c-coral"><h4>2 min · the decision</h4><p class="small mb0">The decision, the conditions and their owners.</p></div>
   </div>
-  <div class="callout note mt"><b>Peer feedback.</b> After each talk, everyone writes one strength, one question and one suggestion.</div>
+  <div class="callout note small mt"><b>The panel plays the committee.</b> Expect "why not approve it as it is?" and "who will review these applicants?"</div>
+  <aside class="notes"><p>Panel questions that separate strong from weak: Which of your findings would you drop if challenged, and why? What would change your decision? Show me the cell that produced this number. If the later batch's cause was not found, a clear account of what was ruled out still scores.</p></aside>
 </section>
 
 <section class="slide order" id="running-order" data-label="Running order">
   <div class="kicker">Running order</div>
-  <h2>Who presents when</h2>
+  <h2>Who defends when</h2>
   <table class="t small">
-    <tr><th>#</th><th>Presenter</th><th>Project</th></tr>
-    <tr><td>1</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>2</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>3</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>4</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>5</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>6</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>7</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
-    <tr><td>8</td><td><input placeholder="name"></td><td><input placeholder="Project"></td></tr>
+    <tr><th>#</th><th>Participant</th><th>Package and repository</th></tr>
+    <tr><td>1</td><td><input placeholder="Name"></td><td><input placeholder="Package · repository"></td></tr>
+    <tr><td>2</td><td><input placeholder="Name"></td><td><input placeholder="Package · repository"></td></tr>
+    <tr><td>3</td><td><input placeholder="Name"></td><td><input placeholder="Package · repository"></td></tr>
+    <tr><td>4</td><td><input placeholder="Name"></td><td><input placeholder="Package · repository"></td></tr>
+    <tr><td>5</td><td><input placeholder="Name"></td><td><input placeholder="Package · repository"></td></tr>
+    <tr><td>6</td><td><input placeholder="Name"></td><td><input placeholder="Package · repository"></td></tr>
+    <tr><td>7</td><td><input placeholder="Name"></td><td><input placeholder="Package · repository"></td></tr>
+    <tr><td>8</td><td><input placeholder="Name"></td><td><input placeholder="Package · repository"></td></tr>
   </table>
-  <aside class="notes">Type the names in at the start; the fields can be edited live and are not saved, so keep the list in your notes too.</aside>
+  <aside class="notes"><p>Type the names in at the start; the fields can be edited live and are not saved, so keep the list in your notes too. Fourteen minutes per slot leaves two for changeover.</p></aside>
 </section>
 
-<section class="slide dark" id="final-prep" data-label="Before the first presentation">
-  <div class="kicker">Before the first presentation</div>
-  <h1>Final prep · 20 minutes</h1>
-  <div class="timer" data-minutes="20"></div>
-  <p class="lead">Rehearse once, record a backup, try the demo on this screen.</p>
-  <aside class="notes">Press T to start the timer. Breaks are not slides: press B when the room needs one.</aside>
+<section class="slide dark" id="final-prep" data-label="Before the first defence">
+  <div class="kicker">Before the first defence</div>
+  <h1>Ten minutes: clone it clean, run one notebook</h1>
+  <div class="timer" data-minutes="10"></div>
+  <p class="lead">Clone your public repository into a new folder and run one notebook from its README. If that fails, the panel's will too.</p>
+  <aside class="notes"><p>Press T to start the timer. The clean-clone test catches most reproducibility losses: a data file not committed, a path that exists only on the participant's laptop. Breaks are not slides: press B when the room needs one.</p></aside>
 </section>
 
-<section class="slide dark presenting" id="now-presenting" data-label="Now presenting">
-  <div class="kicker center">Now presenting</div>
-  <div class="center"><input placeholder="Presenter · project"></div>
+<section class="slide dark presenting" id="now-presenting" data-label="Now defending">
+  <div class="kicker center">Now defending</div>
+  <div class="center"><input placeholder="Name · package"></div>
   <div class="timers mt">
-    <div><h3>Talk and demo</h3><div class="timer" data-minutes="8"></div></div>
+    <div><h3>Defence</h3><div class="timer" data-minutes="8"></div></div>
+    <div><h3>Questions</h3><div class="timer" data-minutes="4"></div></div>
   </div>
-  <aside class="notes">Type the presenter's name and press T to start the timer. Reuse this slide for every presenter.</aside>
+  <aside class="notes"><p>Type the participant's name and press T to start the defence timer, then the questions timer. Reuse this slide for every participant.</p></aside>
 </section>
 
 <section class="slide" id="review" data-label="Trainer review">
-  <div class="kicker">Trainer review</div>
-  <h2>What the presentations showed</h2>
+  <div class="kicker">After the defences</div>
+  <h2>What the validations showed</h2>
   <div class="cols cols-3">
-    <div class="card c-teal"><h4>Strongest patterns</h4><p class="small mb0">What several projects got right.</p></div>
-    <div class="card c-coral"><h4>Common gaps</h4><p class="small mb0">What most projects would fix next.</p></div>
-    <div class="card c-purple"><h4>One surprise</h4><p class="small mb0">Something nobody expected.</p></div>
+    <div class="card c-teal"><h4>Found by most</h4><p class="small mb0">Which planted problem did nearly everyone find, and with what evidence?</p></div>
+    <div class="card c-coral"><h4>Missed by most</h4><p class="small mb0">Which one was quieter, and which check would have caught it?</p></div>
+    <div class="card c-purple"><h4>Best condition</h4><p class="small mb0">Whose condition would you send to a real committee unchanged?</p></div>
   </div>
-  <aside class="notes">Fill these in from your scoring notes during the last break. Name projects for strengths; keep gaps anonymous.</aside>
+  <aside class="notes"><p>Fill these in from your scoring notes during the last break. The answer key in labs/solutions/answer_key.md lists each package's planted problems: reveal them now. Name participants for strengths; keep gaps anonymous.</p></aside>
 </section>
 
 <section class="slide" id="what-next" data-label="After the course">
   <div class="kicker">After the course</div>
   <h2>Keep going</h2>
   <ul class="bullets">
-    <li><b>Your project stays yours:</b> keep it reproducible and add the next improvement you named today</li>
-    <li><b>Next Academy course:</b> REPLACE: the course that follows this one</li>
+    <li><b>Follow-up task.</b> Within four weeks, apply one check from this week (calibration by group, coverage, a stability panel or an input range check) to a model at work, and report what it found.</li>
+    <li><b>Keep the repository.</b> It is the evidence the DS Associate badge looks at.</li>
+    <li><b>Next Academy course:</b> DS-309, fairness mitigation and documentation, takes this week's findings to their remedies.</li>
   </ul>
+  <aside class="notes"><p>The catalog names a tracked follow-up task for this format; confirm its exact wording and deadline with the programme office before the cohort, then replace the first bullet if it differs.</p></aside>
 </section>
 
 <section class="slide dark" id="thanks" data-label="Thank you">
   <div class="kicker">SDAIA Academy</div>
   <h1>Thank you</h1>
   <p class="lead">Uncertainty, Interpretability and Model Validation</p>
+  <aside class="notes"><p>Thank the panel. Remind participants to submit the repository link by the end of the day.</p></aside>
 </section>
