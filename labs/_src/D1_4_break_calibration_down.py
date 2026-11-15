@@ -166,5 +166,5 @@ for col in ("gender", "channel"):
 #
 # ## Carry forward
 #
-# The gap table is saved as `data/reference/d1_4_gaps.json`; Lab 4.1 builds the full audit table from the
+# The gap table is the first subgroup evidence of the report; Lab 4.1 builds the full audit table from the
 # course functions, so it does not need this run.

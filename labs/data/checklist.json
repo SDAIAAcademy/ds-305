@@ -1,0 +1,14 @@
+[
+  {"id": "S1", "part": "soundness", "item": "The intended use and users are stated, and so are the uses the model must not serve"},
+  {"id": "S2", "part": "soundness", "item": "The target is defined, with its time window and how outcomes were observed"},
+  {"id": "S3", "part": "soundness", "item": "The training data are described: period, rows, any sampling or rebalancing"},
+  {"id": "S4", "part": "soundness", "item": "Every feature is listed with when it is known; excluded attributes are listed with the reason"},
+  {"id": "S5", "part": "soundness", "item": "The training settings are enough to refit the model: recipe, seeds and library versions"},
+  {"id": "O1", "part": "outcomes", "item": "Discrimination is measured on rows the shipped model never saw"},
+  {"id": "O2", "part": "outcomes", "item": "Calibration is measured with a proper score and a reliability diagram"},
+  {"id": "O3", "part": "outcomes", "item": "The uncertainty of predictions is stated (intervals or sets) with the coverage achieved"},
+  {"id": "O4", "part": "outcomes", "item": "Results are given by subgroup, with intervals"},
+  {"id": "O5", "part": "outcomes", "item": "The explanation method is stated and its stability across refits is checked"},
+  {"id": "M1", "part": "monitoring", "item": "The inputs and outcomes to monitor are named, with thresholds and an owner"},
+  {"id": "M2", "part": "monitoring", "item": "Conditions of use, known limits and the human review of decisions are stated"}
+]

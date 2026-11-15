@@ -1,0 +1,18 @@
+{
+  "source": "SDAIA AI Bias Reference Guide, first edition (May 2026). Names and pages as in the guide; the one-line summaries are the course's own words. Read the guide's entry before tagging.",
+  "types": [
+    {"name": "Age Bias", "page": 11, "summary": "Outcomes are less accurate or fair for an age group: the guide stresses older people under-represented in the data, and designs that ignore age-related differences"},
+    {"name": "Aggregation Bias", "page": 12, "summary": "Groups that differ are pooled into one model, which then fits the largest groups best"},
+    {"name": "Automation Bias", "page": 19, "summary": "People defer to a system's output even where their own judgement or other evidence should prevail"},
+    {"name": "Concept Drift", "page": 28, "summary": "The relation between inputs and the target changes over time, so learnt patterns stop holding"},
+    {"name": "Coverage Bias", "page": 33, "summary": "The data do not represent the full population the system is used on"},
+    {"name": "Evaluation Bias", "page": 42, "summary": "The data or metrics used to judge a system do not reflect the cases it will meet, so its performance is overstated"},
+    {"name": "Gender Bias", "page": 48, "summary": "A system's outcomes unfairly favour one gender, often through unrepresentative data or embedded stereotypes"},
+    {"name": "Historical Bias", "page": 52, "summary": "The data carry past conditions or decisions that no longer hold"},
+    {"name": "Measurement Bias", "page": 63, "summary": "Values are systematically recorded too high or too low"},
+    {"name": "Model Drift", "page": 66, "summary": "Performance deteriorates over time as the data or the environment changes"},
+    {"name": "Overconfidence Bias", "page": 73, "summary": "A system or its developers overstate how accurate it is"},
+    {"name": "Sample Size Bias", "page": 89, "summary": "A sample too small (or badly sized) for reliable learning or validation"},
+    {"name": "Socioeconomic Bias", "page": 96, "summary": "Outcomes differ by economic status because some groups are under-represented or their traits disfavoured"}
+  ]
+}

@@ -729,6 +729,354 @@
       "level": "analyze",
       "pool": "practice",
       "weight": 1
+    },
+    {
+      "id": "d4-flag-rule",
+      "type": "single",
+      "prompt": "A region of 508 applicants is predicted to default at 8.7% and defaults at 15.4%, with a 95% interval of 12.5% to 18.8%. A second region of 1,951 is predicted 9.2% and defaults at 9.0% (7.8% to 10.4%). Which gaps does the report flag?",
+      "options": [
+        "The first only: its prediction lies outside the observed interval",
+        "Both: every difference between predicted and observed is a gap",
+        "Neither: 508 applicants are too few for any finding",
+        "The second only: it is the larger group"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A calibration gap is flagged when the mean prediction falls outside the interval of the observed rate; the interval reflects the group size.",
+      "misconceptions": [
+        "",
+        "Ignores sampling noise: the second prediction lies inside its interval",
+        "Forgets that the interval already accounts for the group size, and it excludes the prediction",
+        "Confuses group size with the size of the gap"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": "day4",
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-crossed-cells",
+      "type": "single",
+      "prompt": "Within one region, applicants aged 18 to 24 default at 39% on 18 defaults, interval 26% to 54%, against 12.7% predicted. Other age bands in the region rest on 6 to 30 defaults. How should the report treat the crossed table?",
+      "options": [
+        "Rate every cell outside its interval as a high finding",
+        "Drop it: crossed groups are never reported",
+        "Average the cells to get one regional gap",
+        "Give counts and intervals, and name the young cell as one to monitor rather than a finding"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Crossing groups divides the evidence; small cells support a watch list, stated with their counts and intervals, not ratings.",
+      "misconceptions": [
+        "Treats cells of a handful of defaults as firm evidence and multiplies chance findings",
+        "Hides a signal that deserves monitoring",
+        "Throws away the crossed view without saying what the counts allow",
+        ""
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": "day4",
+      "session": 1,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-slice-first",
+      "type": "single",
+      "prompt": "A model's AUC falls from 0.755 to 0.677 on a later batch. By month and channel, one channel is unharmed throughout; the other predicts 46% against 10% observed from one month onwards. What does the pattern point to?",
+      "options": [
+        "A change in a process feeding that channel from that month",
+        "A gradual change in borrowers' behaviour across the market",
+        "Overfitting that has finally shown itself",
+        "Too few defaults to tell"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A failure confined to one channel and starting in one month is the signature of a pipeline or process change, not of drift in the world.",
+      "misconceptions": [
+        "",
+        "A market change would not stop at one channel or start on one date",
+        "Overfitting was present from the start and would affect both channels",
+        "Thousands of applications per channel make the gap far larger than noise"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": "day4",
+      "session": 2,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-psi",
+      "type": "single",
+      "prompt": "In the failing slice, the population stability index of bank inflow is 8.3 and of every other feature below 0.04. The median bank inflow is 8,240 SAR in February and 8.14 in March. What is the most likely cause?",
+      "options": [
+        "Applicants' bank inflows fell sharply in March",
+        "The model needs more trees to handle the new values",
+        "Declared incomes rose, which moved the model",
+        "The feed began reporting bank inflow in thousands of riyals"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "A factor of a thousand in one input, from one date, in one channel is a unit change in the data feed: Measurement Bias in the guide.",
+      "misconceptions": [
+        "A thousandfold fall overnight in one channel is not a change in people",
+        "Treats a broken input as a modelling weakness",
+        "Declared income barely moved (PSI 0.037)",
+        ""
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": "day4",
+      "session": 2,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-reasons-alarm",
+      "type": "single",
+      "prompt": "Outcomes take twelve months to mature. Which measure, computed on the day of scoring, would have warned of a broken input in its first week?",
+      "options": [
+        "The share of applicants whose top reason is each feature, against the reference period",
+        "Monthly AUC of scored applications",
+        "Calibration by region on matured loans",
+        "The default rate of the portfolio"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Reasons and inputs exist at scoring time. A sudden jump, here bank inflow from 22% to 98% of top reasons, is an early alarm.",
+      "misconceptions": [
+        "",
+        "Needs outcomes that do not exist yet",
+        "Also needs outcomes; it confirms faults months later",
+        "Moves only when loans mature, and mixes every cause together"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": "day4",
+      "session": 2,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-not-retrain",
+      "type": "single",
+      "prompt": "The cause of a decline is a unit change in one channel's bank inflow feed. A manager proposes retraining on the last six months. What is wrong with the proposal?",
+      "options": [
+        "Six months is too little data to retrain",
+        "Retraining needs the developers, not the validator",
+        "Nothing: retraining fixes any decline",
+        "The model would learn the broken unit and hide the fault; fix the feed and rescore instead"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Retraining on corrupted inputs adapts the model to the corruption. The remedy is the feed, the rescoring of affected applications and an input check.",
+      "misconceptions": [
+        "Misses the real problem; any amount of the broken data teaches the wrong unit",
+        "True of roles, but not the reason the action is wrong",
+        "Treats every decline as model drift",
+        ""
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": "day4",
+      "session": 2,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-checklist-partial",
+      "type": "single",
+      "prompt": "A package's evidence file reports AUC 0.864, measured on rows the shipped model was trained on. How is the checklist item \"discrimination is measured on rows the shipped model never saw\" scored?",
+      "options": [
+        "Partial: a measurement exists but answers a different question",
+        "Present: the evidence file has an AUC",
+        "Missing: the number is wrong",
+        "Not applicable to a credit model"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Partial means the package answers part of the item, or answers it in a way shown to be wrong.",
+      "misconceptions": [
+        "",
+        "Scores the presence of a number, not whether it answers the item",
+        "Ignores that the package does report discrimination, on the wrong rows",
+        "The item applies to any model claimed to work on new applicants"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": "day4",
+      "session": 3,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-checklist-validator-filled",
+      "type": "single",
+      "prompt": "You computed calibration and subgroup tables yourself during validation. The package contains neither. How do they appear in the report?",
+      "options": [
+        "As present, since the evidence now exists",
+        "They are left out, since the developers did not supply them",
+        "As the developers' results, to keep the report short",
+        "As missing from the package, with the validator's results given and labelled as such"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "The checklist scores the package; the report gives the validator's evidence, says who supplied it, and asks the developers to own it.",
+      "misconceptions": [
+        "Scores the validation instead of the package and lets the gap recur in the next version",
+        "Discards evidence the committee needs",
+        "Misattributes the work and hides the package's gap",
+        ""
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": "day4",
+      "session": 3,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-blocking-gap",
+      "type": "single",
+      "prompt": "A package scores: soundness 2 present and 3 partial; outcomes 2 partial and 3 missing; monitoring 2 missing. Which gap prevents a \"fit with conditions\" decision from being enforced?",
+      "options": [
+        "No named owner, inputs, outcomes or thresholds to monitor",
+        "The missing library versions",
+        "The missing subgroup results",
+        "The partial statement of intended use"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Conditions are enforced by monitoring with an owner and thresholds; without it, no condition can be checked.",
+      "misconceptions": [
+        "",
+        "Hinders exact refits, but does not stop conditions being enforced",
+        "The validator can supply them; they do not make conditions enforceable",
+        "A gap to fix, but conditions can still be written around it"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": "day4",
+      "session": 3,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-condition-quality",
+      "type": "single",
+      "prompt": "Which draft condition could an auditor check a year later?",
+      "options": [
+        "High-risk applications are reviewed carefully",
+        "The model is monitored for bias",
+        "The model is retrained annually",
+        "Model risk checks calibration by region and age band each month; two breaches in a row return the model to validation"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "An enforceable condition names a measure, a frequency, a threshold, an action and an owner.",
+      "misconceptions": [
+        "Names no group, measure, threshold or owner",
+        "An intention without a measure or an owner",
+        "An action without a trigger or a test that it worked",
+        ""
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": "day4",
+      "session": 4,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-human-review",
+      "type": "single",
+      "prompt": "Which human-review rule guards best against officers simply accepting the score?",
+      "options": [
+        "Officers review named groups and applications whose grade set holds all three grades, see stable reasons, may decide differently, and their overrides are monitored",
+        "Officers review borderline scores",
+        "Officers sign every decision the model makes",
+        "Officers review a random 5% of applications"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Automation Bias, in the guide, is deference to a system's output; review works when it targets known failures and gives officers evidence and authority.",
+      "misconceptions": [
+        "",
+        "Does not say which applicants, and gives officers nothing beyond the score",
+        "A signature on every score invites automation bias rather than review",
+        "Random review misses the groups where the model is known to fail"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": "day4",
+      "session": 4,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d4-not-fit",
+      "type": "single",
+      "prompt": "A model ranks well and its probabilities can be repaired, but it has two high calibration gaps by group and a broken input feed. No team agrees to own monitoring. What should the validator recommend?",
+      "options": [
+        "Fit, because the model ranks well",
+        "Fit with conditions, leaving the owner to be decided later",
+        "Fit with conditions, owned by the validator",
+        "Not fit, stating that owned monitoring and the feed fix would change the decision"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Conditions only make a model fit when someone owns them; without an owner the honest decision is not fit, with what would change it.",
+      "misconceptions": [
+        "Ignores high findings that harm applicants now",
+        "A condition without an owner is a wish, not a control",
+        "The validator must stay independent of operating the model",
+        ""
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": "day4",
+      "session": 4,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
     }
   ]
 }

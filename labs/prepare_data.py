@@ -51,6 +51,7 @@ CATEGORICAL = ["business_type", "channel"]
 
 def applicants(rng: np.random.Generator, n: int, months: list[str], *, base: float = -2.55,
                income_scale: float = 1.0, inflow_feed_fault_from: str | None = None,
+               missed_feed_fault_from: str | None = None,
                farm: bool = False, renewal: bool = False) -> pd.DataFrame:
     """Draw n applications and their outcomes. All risk effects are on the log-odds scale."""
     region = rng.choice(REGIONS, n, p=REGION_P)
@@ -109,6 +110,10 @@ def applicants(rng: np.random.Generator, n: int, months: list[str], *, base: flo
         # the seeded cause: a new feed reports the app channel's bank inflow in thousands of riyals
         hit = (df.month >= inflow_feed_fault_from) & (df.channel == "app")
         df.loc[hit, "bank_inflow"] = np.round(df.loc[hit, "bank_inflow"] / 1000, 2)
+    if missed_feed_fault_from:
+        # a feed fault: the app channel's missed-payment history stops loading and arrives as zero
+        hit = (df.month >= missed_feed_fault_from) & (df.channel == "app")
+        df.loc[hit, "prior_missed"] = 0
     return df
 
 
@@ -145,16 +150,17 @@ def write_package(folder: Path, train: pd.DataFrame, holdout: pd.DataFrame, card
                   evidence: dict, grade_and_loss: bool = True) -> None:
     folder.mkdir(parents=True, exist_ok=True)
     m = train_default(train)
-    m.save_model(folder / "amana_default.txt" if folder.name == "package" else folder / "model_default.txt")
+    prefix = "amana_" if folder.name == "package" else "model_"
+    m.save_model(folder / f"{prefix}default.txt")
     if grade_and_loss:
         gcode = train.grade.map({"A": 0, "B": 1, "C": 2})
         g = lgb.train({**PARAMS, "objective": "multiclass", "num_class": 3},
                       lgb.Dataset(X(train), gcode, categorical_feature=CATEGORICAL), num_boost_round=250)
-        g.save_model(folder / "amana_grade.txt")
+        g.save_model(folder / f"{prefix}grade.txt")
         d = train[train["default"] == 1]
         loss = lgb.train({**PARAMS, "objective": "regression", "min_data_in_leaf": 30},
                          lgb.Dataset(X(d), d.loss_sar, categorical_feature=CATEGORICAL), num_boost_round=250)
-        loss.save_model(folder / "amana_loss.txt")
+        loss.save_model(folder / f"{prefix}loss.txt")
     # the developers' own headline numbers, measured on their holdout sample
     p = m.predict(X(holdout))
     evidence = {**evidence, "auc_holdout": round(auc(holdout["default"].to_numpy(), p), 3),
@@ -259,6 +265,8 @@ def main() -> None:
         later_kw = dict(kw)
         if name == "farm":
             later_kw["base"] = kw["base"] + 0.45                # a dry season: risk rises for every farm loan
+        if name == "renewal":
+            later_kw["missed_feed_fault_from"] = "2025-04"     # missed-payment history lost for the app channel
         lb = applicants(rng, n // 4, later_months, income_scale=1.05, **later_kw)
         lb.insert(0, "app_id", [f"{name[0].upper()}L{i:05d}" for i in range(1, len(lb) + 1)])
         d.to_csv(folder / "applications.csv", index=False, lineterminator="\n")
@@ -267,8 +275,10 @@ def main() -> None:
         title = {"renewal": "Amana-R top-up model, version 1.0", "farm": "Amana-F seasonal farm model, version 1.0"}[name]
         card = AMANA_CARD.replace("Amana default model, version 2.1", title)
         m2 = dict(meta, package=title.split(",")[0], version="1.0",
-                  outputs={"model_default.txt": "probability of default"})
-        write_package(folder, tr, tr.sample(n=2000, random_state=SEED), card, m2, evidence, grade_and_loss=False)
+                  outputs={"model_default.txt": "probability of default", "model_grade.txt": "probabilities of grades A, B, C",
+                           "model_loss.txt": "loss in riyals if the loan defaults"})
+        ev2 = dict(evidence, evaluated_on="a random 2,000 of the training rows, held out before training")
+        write_package(folder, tr, tr.sample(n=2000, random_state=SEED), card, m2, ev2)
     print("applications:", len(apps), "default rate", round(apps["default"].mean(), 4),
           "| later batch:", len(later), "default rate", round(later["default"].mean(), 4))
 

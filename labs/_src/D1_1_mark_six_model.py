@@ -211,4 +211,4 @@ U.check(auc_train > auc_hold + 0.05, "the claimed AUC is close to the in-sample 
 # ## Carry forward
 #
 # The six verdicts are the first section of your validation report. Lab 4.4 collects them from
-# `data/reference/findings.json`, so it does not depend on this run.
+# `data/findings.json`, so it does not depend on this run.

@@ -88,3 +88,49 @@ range of one income value for one applicant 3.35 log-odds, of the two incomes' s
 25.1, 30.7, 46.5% (18-24 to 55+); mean value for 55+ +0.073 log-odds. Correlation with age band -0.44;
 median wallet months 43, 37, 28, 19, 12. Age-band calibration gap after Platt, without and with: 18-24
 4.9 and 4.7 points, 55+ 1.2 and 0.8.
+
+## Day 4
+
+**Lab 4.1.** Recalibrated mean 0.090 against 0.099; loss threshold 8,134 SAR. Flagged gaps: Northern
+calibration +6.7 points (15.4% observed, 8.7% predicted, interval 12.5 to 18.8; 508 applicants);
+18-24 calibration +4.8 points (17.5% against 12.7%, interval 15.4 to 19.7); 55+ loss coverage 83.1% on 83
+defaults; men +1.6 points; branch channel +1.0 point; large loans loss coverage 76.7% on 382 defaults.
+Ratings: Northern and 18-24 high; the rest medium. Defensible tags: Northern (Aggregation, Coverage or
+Sample Size Bias), 18-24 (Age or Aggregation Bias), large loans (Evaluation or Overconfidence Bias).
+Stretch: Northern by age band, 45 to 183 applicants and 6 to 30 defaults per cell, intervals 9 to 27
+points wide; no finding per cell. Quick mode gives the same numbers.
+
+**Lab 4.2.** Holdout AUC 0.755; later batch AUC 0.677, mean predicted 0.176 against 0.092 observed. App
+channel from March 2025: predicted 46% against 9 to 11% observed, AUC 0.53 to 0.68; branch unharmed
+(AUC 0.747 for 2025). PSI in the failing slice: bank inflow 8.28, declared income 0.037, the rest below
+0.02. Median app bank inflow 8,065 and 8,240 SAR in January and February, about 8 from March. Bank
+inflow is the top reason for 98.4% of the failing slice against 21.6% of holdout app applicants. Loss
+coverage 92.4% (holdout app), 94.8% (failing slice). Decoy: declared incomes rose 9% in both channels.
+Stretch: the input check alerts on bank inflow (and loan amount) in the first 40 March app rows, nothing
+in February. Cause: unit change in the app channel's bank inflow feed. Bias type: Measurement Bias.
+
+**Lab 4.3.** Key: S1 partial, S2 present, S3 present, S4 partial, S5 partial, O1 partial, O2 missing, O3
+missing, O4 missing, O5 partial, M1 missing, M2 missing. By part: soundness 2 present, 3 partial;
+outcomes 2 partial, 3 missing; monitoring 2 missing. Blocking gap: M1 (M2 accepted with a reason).
+
+**Lab 4.4.** High findings: F2, F3, F4, F8, F10, F11. Reference decision: fit with conditions, five
+conditions with owners. Capstone first look: renewal claimed AUC 0.902, holdout 0.711, mean raw
+prediction 0.412 against 0.089, later batch AUC 0.713 with 0.081 predicted against 0.080 observed; farm
+claimed 0.892, holdout 0.700, mean raw 0.425 against 0.128, later batch AUC 0.686 with 0.140 predicted
+against 0.173 observed.
+
+## Capstone packages (trainer only)
+
+Both packages share Amana's planted problems: the claimed AUC was measured on training rows, the
+probabilities come from a 50/50 rebalanced sample, and no calibration, subgroup or stability evidence is
+supplied. In addition:
+
+- **Amana-R (renewal).** From April 2025 the app channel's prior-missed-payments feed stops arriving
+  (recorded as zero), so repeat borrowers who missed payments look clean. It is quieter than Amana's
+  fault: the overall later batch is calibrated (0.081 against 0.080), but the app channel's AUC falls
+  from about 0.70 to 0.64 by June while its mean prior missed payments drop from about 0.25 to 0.00
+  (PSI 1.6). The slice-by-month table and the PSI of prior missed payments find it.
+- **Amana-F (farm).** The later batch comes from a dry season: default rises for everyone (17.3% observed
+  against 14.0% predicted) with no change in the inputs, a shift in the base rate rather than a broken
+  feed. The Northern region is under-predicted (24.0% observed against 15.1%). A good report says that
+  recalibration on recent matured loans, not a feed fix, is the remedy, and that the North needs review.

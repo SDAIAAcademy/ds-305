@@ -51,7 +51,9 @@
   "force_col_wise": true
  },
  "outputs": {
-  "model_default.txt": "probability of default"
+  "model_default.txt": "probability of default",
+  "model_grade.txt": "probabilities of grades A, B, C",
+  "model_loss.txt": "loss in riyals if the loan defaults"
  },
  "reasons_shown_to_officers": "the three features with the largest positive Shapley values",
  "monitoring": "none defined"

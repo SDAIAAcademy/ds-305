@@ -1,158 +1,453 @@
+<!-- ======================= OPENING ======================= -->
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">REPLACE: welcome; introduce yourself; one question to the room that calibrates the pace; the rhythm of the day</aside>
+  <aside class="notes"><p>Recap in one sentence: probabilities repaired, intervals that fail for large loans, explanations that are unstable for correlated features and a proxy for age. Today the validator puts it together: one subgroup table, one diagnosed decline, one scored package and one decision for Dr. Sameera Al-Fadda's approval committee. The day ends with the choice of the capstone package.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
 
-<!-- Session 1 -->
-
-<section class="slide section" id="s1" data-auto="section" data-session="1"></section>
-
-<section class="slide" id="s1-idea" data-lo="LO4">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
-  <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+<section class="slide" data-label="Review" id="review-day3" data-lo="LO3">
+  <div class="kicker">Review of Day 3</div>
+  <h2>Which explanation statement can go in the report?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3">
+    <p class="lead">Over five refits, 8 of 10 applicants keep their top reason and 1 of 10 keeps all three. Bank inflow and declared income correlate at 0.84. Which sentence is supported?</p>
+    <div class="opts">
+      <div class="opt" data-ok>Show officers one grouped income reason, and only reasons that survive refits</div>
+      <div class="opt" data-why="Reads exact additivity as stability across equally valid models">The three reasons are exact, so they can be shown as they are</div>
+      <div class="opt" data-why="Ranks members of a correlated pair, which no method here can separate">Bank inflow is a stronger reason than declared income</div>
+      <div class="opt" data-why="Takes instability of the second and third reasons as proof the model is wrong">The model must be retrained until the reasons are stable</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The top reason is fairly stable and the rest are not; the two incomes trade credit between refits, so they are one reason told two ways.</div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Answer: A. Two minutes. This rule becomes condition C4 in the decision this afternoon.</p></aside>
 </section>
 
-<section class="slide" id="s1-steps" data-lo="LO4">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<!-- ======================= SESSION 1 ======================= -->
+<section class="slide section" id="s1" data-auto="section" data-session="1"></section>
+
+<section class="slide" data-label="One table" id="one-audit-table" data-lo="LO4">
+  <div class="kicker">Subgroup validation</div>
+  <h2>One table, every group the lender answers for, every measure with its uncertainty</h2>
+  <table class="t small">
+    <tr><th>Column</th><th>Measures per group</th></tr>
+    <tr><td>region, age band, gender, channel</td><td>n, mean predicted, observed rate with a 95% interval, Brier, AUC</td></tr>
+    <tr><td>the same groups, defaulters only</td><td>loss interval coverage and the number of defaults behind it</td></tr>
+    <tr><td>loan size band</td><td>loss coverage, because Talib provisions by loan size</td></tr>
+  </table>
+  <div class="callout note small mt-s"><b>The validator's model.</b> Amana with the Platt repair from Day 1 and one conformal threshold of 8,134 SAR from Day 2.</div>
+  <aside class="notes"><p>Gender, age band and region are not features of Amana; they are kept in the validator's data to audit it. That is the point of excluding a column and still auditing by it. Ask: who decides which groups go in the table? The owners and the committee; the validator proposes and says why.</p></aside>
+</section>
+
+<section class="slide" data-label="Region" id="region-table" data-lo="LO4">
+  <div class="kicker">Lab 4.1 · region</div>
+  <h2>The Northern region defaults at 15.4% against 8.7% predicted</h2>
+  <table class="t small">
+    <tr><th>Region</th><th class="num">n</th><th class="num">Predicted</th><th class="num">Observed (95% interval)</th><th class="num">AUC</th><th class="num">Loss coverage</th></tr>
+    <tr><td>Central</td><td class="num">3,448</td><td class="num">8.9%</td><td class="num">9.8% (8.9 to 10.9)</td><td class="num">0.775</td><td class="num">90.0%</td></tr>
+    <tr><td>Eastern</td><td class="num">1,951</td><td class="num">9.2%</td><td class="num">9.0% (7.8 to 10.4)</td><td class="num">0.766</td><td class="num">93.2%</td></tr>
+    <tr class="hl"><td>Northern</td><td class="num">508</td><td class="num">8.7%</td><td class="num">15.4% (12.5 to 18.8)</td><td class="num">0.720</td><td class="num">87.2%</td></tr>
+    <tr><td>Southern</td><td class="num">1,386</td><td class="num">9.2%</td><td class="num">9.7% (8.2 to 11.3)</td><td class="num">0.751</td><td class="num">93.3%</td></tr>
+    <tr><td>Western</td><td class="num">2,707</td><td class="num">8.9%</td><td class="num">9.8% (8.8 to 11.0)</td><td class="num">0.740</td><td class="num">91.0%</td></tr>
+  </table>
+  <aside class="notes"><p>From the Lab 4.1 run on the 10,000 holdout rows. The North's interval is wide (508 applicants) and still sits far above the prediction: the gap is supported. Its coverage of 87.2% rests on 78 defaults, so it is not flagged. Wilson intervals, as on Day 1.</p></aside>
+</section>
+
+<section class="slide" data-label="Flags" id="flag-rules" data-lo="LO4">
+  <div class="kicker">From numbers to flags</div>
+  <h2>Flag a gap only when an interval supports it</h2>
+  <div class="cols cols-2">
+    <div class="card c-teal"><h4>Calibration</h4><p class="small mb0">Flag when the mean prediction lies outside the observed rate's 95% interval.</p></div>
+    <div class="card c-cyan"><h4>Coverage</h4><p class="small mb0">Flag when loss coverage is below 85% on at least 50 defaults.</p></div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <table class="t small mt-s">
+    <tr><th>Flagged</th><th class="num">Value</th></tr>
+    <tr class="hl"><td>Northern, calibration</td><td class="num">+6.7 points</td></tr>
+    <tr class="hl"><td>Age 18 to 24, calibration</td><td class="num">+4.8 points</td></tr>
+    <tr><td>Age 55+, coverage</td><td class="num">83.1% on 83 defaults</td></tr>
+    <tr><td>Men; branch channel, calibration</td><td class="num">+1.6; +1.0 points</td></tr>
+    <tr><td>Loans above 25,000 SAR, coverage</td><td class="num">76.7% on 382 defaults</td></tr>
+  </table>
+  <aside class="notes"><p>The rules are the course's, stated before looking, which is the protection against hunting for gaps. With five regions, five age bands, two genders and two channels, some group will look odd by chance; the interval rule keeps the flags to what the data support. Ask: is the 50-default floor arbitrary? Yes, and the report says so.</p></aside>
+</section>
+
+<section class="slide" data-label="Tag" id="bias-guide-tags" data-lo="LO4">
+  <div class="kicker">SDAIA AI Bias Reference Guide</div>
+  <h2>A tag names how the gap arose, which points to the remedy</h2>
+  <table class="t small">
+    <tr><th>Gap</th><th>Tag</th><th>Guide</th><th>Mechanism in Amana</th></tr>
+    <tr><td>Northern</td><td>Aggregation Bias</td><td class="num">p. 12</td><td>5% of rows, pooled with larger regions, fitted worst</td></tr>
+    <tr><td>Age 18 to 24</td><td>Age Bias</td><td class="num">p. 11</td><td>age excluded, its differences not accounted for</td></tr>
+    <tr><td>Large loans</td><td>Evaluation Bias</td><td class="num">p. 42</td><td>91% marginal coverage overstates how well they are covered</td></tr>
+  </table>
+  <div class="callout warn small mt-s"><b>A tag is not a verdict.</b> It names a mechanism from the guide. Whether a gap is unfair is the committee's judgement, made with the evidence.</div>
+  <aside class="notes"><p>More than one tag is defensible: the North can also be Sample Size or Coverage Bias. Lab 4.1 accepts any of a short list and asks for the one-line reason. Page numbers are those of the Guide's English edition (September 2026). Remedies are the owners' choice; fairness mitigation is DS-309's subject.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
+</section>
+
+<section class="slide" data-label="Rate" id="rating-rule" data-lo="LO4">
+  <div class="kicker">Rating</div>
+  <h2>Rate by what the gap does to people and how firmly it is supported</h2>
+  <div class="flow">
+    <div class="step c-coral"><b>High</b>Affects approval or price, interval supports it, 2 points or more</div>
+    <div class="arrow">→</div>
+    <div class="step c-amber"><b>Medium</b>Affects provisioning, or supported but small</div>
+    <div class="arrow">→</div>
+    <div class="step c-navy"><b>Low</b>Neither</div>
+  </div>
+  <p class="small mt">Two high findings from this table: the Northern region and applicants aged 18 to 24.</p>
+  <aside class="notes"><p>The rule is the course's, written so that two validators reach the same rating. Coverage gaps affect provisioning, so they are medium under it; a lender who prices on the loss interval would rate them higher, and the report should say which use applies.</p></aside>
+</section>
+
+<section class="slide" data-label="Small cells" id="small-cells" data-lo="LO4">
+  <div class="kicker">Lab 4.1 · stretch</div>
+  <h2>Crossing groups multiplies the cells and divides the evidence</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">6 to 30</div><div class="lbl">defaults per age band within the Northern region</div></div>
+      <div class="stat"><div class="big">9 to 27</div><div class="lbl">points: width of the observed rate's interval per cell</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>Young Northern applicants default at 39% in the sample, on 18 defaults.</li>
+      <li>The interval runs from 26% to 54%: a reason to watch, not a finding.</li>
+      <li>Report crossed cells with their counts and intervals, or not at all.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>Intersectional audits are right in principle and hard in data. The honest move is to say what the counts allow, and to name the cell as one to monitor once more outcomes mature.</p></aside>
+</section>
+
+<section class="slide" id="check-subgroup" data-lo="LO4">
+  <div class="kicker">Checkpoint</div>
+  <h2>How do you report the gap for men?</h2>
+  <div class="quiz" data-type="single" data-lo="LO4">
+    <p class="lead">After recalibration, men default at 10.5% against 8.9% predicted, interval 9.6 to 11.4; women at 9.5% against 9.1%. Under the course rules, what goes in the report?</p>
+    <div class="opts">
+      <div class="opt" data-why="Ignores that the prediction lies outside the interval: the gap is supported">Nothing: the gap is within noise</div>
+      <div class="opt" data-why="Rates a small gap high only because the group is protected; the rule asks for size too">A high finding of gender bias</div>
+      <div class="opt" data-why="Turns a tag into a verdict the validator cannot give">Evidence that the model discriminates against men</div>
+      <div class="opt" data-ok>A medium finding: supported, 1.6 points, monitored by gender</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The interval supports the gap, and the rule rates supported gaps under 2 points as medium; the report states it and asks for monitoring.</div>
+  </div>
+  <aside class="notes"><p>Answer: D.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-4-1" data-auto="lab" data-lab="4.1">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: Northern +6.7 points and 18-24 +4.8 points rated high; 55+ coverage 83.1%, men +1.6, branch +1.0 and large loans 76.7% medium. Quick mode gives the same numbers. Common problems: computing coverage over all rows instead of defaulters only (non-defaulters have no loss); tagging with a type that is not in the guide. Anyone who missed Day 1 or 2 starts from the package: the lab rebuilds the Platt map and the threshold.</p></aside>
 </section>
 
-<!-- Session 2 -->
-
+<!-- ======================= SESSION 2 ======================= -->
 <section class="slide section" id="s2" data-auto="section" data-session="2"></section>
 
-<section class="slide" id="s2-idea" data-lo="LO4">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="Complaint" id="model-got-worse" data-lo="LO4">
+  <div class="kicker">Six months in production</div>
+  <h2>Talib reports that Amana "got worse" in 2025</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="stack">
+      <div class="stat"><div class="big">0.755 → 0.677</div><div class="lbl">AUC, holdout 2023-24 to the 2025 batch</div></div>
+      <div class="stat"><div class="big">17.6% vs 9.2%</div><div class="lbl">mean predicted against observed default, 2025</div></div>
+    </div>
+    <div class="card c-coral flat"><h4>The tempting memo</h4><p class="small mb0">"The model has degraded and must be retrained on recent data."</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>10,000 applications from January to June 2025, outcomes now known. Ask the room for the first thing they would compute. Steer to "where and since when" before "why".</p></aside>
 </section>
 
-<section class="slide" id="s2-steps" data-lo="LO4">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" data-label="Where" id="where-and-since-when" data-lo="LO4">
+  <div class="kicker">Lab 4.2 · step 1</div>
+  <h2>Slice by month and channel: the failure is the app channel from March</h2>
+  <table class="t small">
+    <tr><th>Month</th><th class="num">App predicted</th><th class="num">App observed</th><th class="num">App AUC</th><th class="num">Branch AUC</th></tr>
+    <tr><td>2025-01</td><td class="num">9.9%</td><td class="num">10.1%</td><td class="num">0.728</td><td class="num">0.740</td></tr>
+    <tr><td>2025-02</td><td class="num">9.8%</td><td class="num">9.9%</td><td class="num">0.723</td><td class="num">0.770</td></tr>
+    <tr class="hl"><td>2025-03</td><td class="num">46.6%</td><td class="num">11.0%</td><td class="num">0.680</td><td class="num">0.766</td></tr>
+    <tr class="hl"><td>2025-04 to 06</td><td class="num">46%</td><td class="num">9 to 11%</td><td class="num">0.53 to 0.68</td><td class="num">0.69 to 0.77</td></tr>
+  </table>
+  <aside class="notes"><p>From the Lab 4.2 run. The overall decline is an average of an unharmed branch channel and a broken slice. A drop that starts in one month in one channel points to a change in a process, not in the world.</p></aside>
+</section>
+
+<section class="slide" data-label="Inputs" id="psi-inputs" data-lo="LO4">
+  <div class="kicker">Lab 4.2 · step 2</div>
+  <h2>One input has moved: bank inflow, by a factor of a thousand</h2>
+  <div class="cols cols-2">
+    <div class="bars">
+      <div class="row"><span>bank_inflow</span><div class="bar c-coral" style="--w:100%"></div><span class="val">8.28</span></div>
+      <div class="row"><span>declared_income</span><div class="bar c-teal" style="--w:2%"></div><span class="val">0.037</span></div>
+      <div class="row"><span>loan_amount</span><div class="bar c-teal" style="--w:1%"></div><span class="val">0.016</span></div>
+      <div class="row"><span>five others</span><div class="bar c-teal" style="--w:1%"></div><span class="val">below 0.011</span></div>
+    </div>
+    <ul class="bullets small">
+      <li>Population stability index against the holdout's app applicants: below 0.1 little change, above 0.25 large.</li>
+      <li>Median app bank inflow: 8,065 SAR in January, <b>8.14</b> in March.</li>
+    </ul>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>PSI is a binned divergence between two distributions, standard in credit monitoring. A PSI of 8 is not a shift in the population; it is a different unit. Ask: what in a lender's data pipeline changes on the first of a month? A new feed, a vendor, a form.</p></aside>
+</section>
+
+<section class="slide" data-label="Clues" id="coverage-and-reasons" data-lo="LO4">
+  <div class="kicker">Lab 4.2 · step 3</div>
+  <h2>The explanations changed before anyone read the outcomes</h2>
+  <table class="t small">
+    <tr><th>Slice</th><th class="num">Bank inflow is the top reason</th><th class="num">Loss coverage</th></tr>
+    <tr><td>Holdout, app</td><td class="num">21.6%</td><td class="num">92.4%</td></tr>
+    <tr class="hl"><td>2025, app from March</td><td class="num">98.4%</td><td class="num">94.8%</td></tr>
+    <tr><td>2025, branch</td><td class="num">15.9%</td><td class="num">88.1%</td></tr>
+  </table>
+  <div class="callout tip small mt-s"><b>Use it.</b> Reasons are available on the day of scoring; outcomes take twelve months. A sudden change in the reasons officers see is an early alarm.</div>
+  <aside class="notes"><p>The loss intervals barely move: the loss model relies on bank inflow less, so this measure alone would have missed the fault. Different monitors see different failures.</p></aside>
+</section>
+
+<section class="slide" data-label="Decoy" id="rule-out-decoy" data-lo="LO4">
+  <div class="kicker">Lab 4.2 · step 4</div>
+  <h2>Incomes also rose, in both channels; the branch channel is unharmed</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>Median declared income +9.3% (app) and +8.7% (branch).</li>
+      <li>Branch channel 2025 AUC 0.747, as before.</li>
+      <li>A cause must explain why the failure is in one channel and starts in one month.</li>
+    </ul>
+    <div class="card c-amber flat"><h4>Model drift or a broken input?</h4><p class="small mb0">The guide's Model Drift (p. 66) and Concept Drift (p. 28) describe a changing world. This is Measurement Bias (p. 63): values recorded too low.</p></div>
+  </div>
+  <aside class="notes"><p>Every real investigation has a decoy: something else that changed at about the same time. The test is whether it explains the pattern. Retraining here would teach the model the broken unit and hide the fault.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
+</section>
+
+<section class="slide" data-label="Memo" id="cause-memo" data-lo="LO4">
+  <div class="kicker">Lab 4.2 · step 5</div>
+  <h2>The memo: one cause, three numbers, one action, one thing not to do</h2>
+  <table class="t small">
+    <tr><td><b>Cause</b></td><td>From March 2025 the app channel's bank inflow arrives about a thousand times too small: a unit change in the data feed.</td></tr>
+    <tr><td><b>Evidence</b></td><td>App from March: 46% predicted against 10% observed; PSI of bank inflow 8.3; bank inflow the top reason for 98% of the slice.</td></tr>
+    <tr><td><b>Action</b></td><td>Fix the feed to riyals, rescore March to June, add an input range check before scoring.</td></tr>
+    <tr><td><b>Not</b></td><td>Do not retrain on the 2025 batch.</td></tr>
+  </table>
+  <aside class="notes"><p>The stretch writes the range check: bounds at the reference period's 0.1th and 99.9th percentiles; it alerts on the first 40 March app applications and stays quiet in February. That check is part of condition C2 this afternoon.</p></aside>
+</section>
+
+<section class="slide" id="check-degradation" data-lo="LO4">
+  <div class="kicker">Checkpoint</div>
+  <h2>What would have caught the fault in its first week?</h2>
+  <div class="quiz" data-type="single" data-lo="LO4">
+    <p class="lead">The feed broke on 1 March 2025. Outcomes of March applications mature in March 2026. Which monitor raises the alarm in March 2025?</p>
+    <div class="opts">
+      <div class="opt" data-ok>An input range check and the share of each top reason, computed on the day of scoring</div>
+      <div class="opt" data-why="Needs outcomes that do not exist until a year later">Monthly AUC on scored applications</div>
+      <div class="opt" data-why="The loss intervals barely moved; this monitor misses this fault">Loss interval coverage on defaulted loans</div>
+      <div class="opt" data-why="Retraining on schedule would learn the broken unit rather than detect it">Retraining every quarter on recent applications</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Inputs and reasons exist on the day of scoring; outcome-based measures confirm a fault only once loans mature.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. Monitoring needs both kinds: input and reason monitors for speed, outcome monitors for truth.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-4-2" data-auto="lab" data-lab="4.2">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: app channel from March predicted about 46% against 9 to 11% observed; PSI of bank inflow 8.28; bank inflow the top reason for 98.4% of the slice against 21.6%; branch 2025 AUC 0.747. Common problem: computing PSI on the whole batch rather than the failing slice, which dilutes it (still large). Quick mode gives the same numbers. The lab takes about two minutes to run because of the Shapley values.</p></aside>
 </section>
 
-<!-- Session 3 -->
-
+<!-- ======================= SESSION 3 ======================= -->
 <section class="slide section" id="s3" data-auto="section" data-session="3"></section>
 
-<section class="slide" id="s3-idea" data-lo="LO5">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="Why a list" id="why-a-checklist" data-lo="LO5">
+  <div class="kicker">Checklists</div>
+  <h2>A checklist turns "is it documented?" into twelve answerable items</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
+    <ul class="bullets small">
+      <li>Each item is <b>present</b>, <b>partial</b> or <b>missing</b>, with the file and field that decide it.</li>
+      <li>Two validators reach the same score; the developers know what to send.</li>
+      <li>The course list adapts REFORMS (reporting standards for science that uses machine learning) and model cards to a credit model.</li>
     </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="card c-teal flat"><h4>Three parts</h4><p class="small mb0">Conceptual soundness (S1 to S5), outcomes (O1 to O5), monitoring (M1, M2): the three elements of validation in SR 11-7.</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>SR 11-7 (US Federal Reserve and OCC supervisory guidance on model risk management) names conceptual soundness, ongoing monitoring and outcomes analysis as the elements of validation; it is a widely used frame, not a Saudi requirement. REFORMS is Kapoor and others, Science Advances 2024. Model cards are Mitchell and others, 2019.</p><p>Sources: SR 11-7; REFORMS; Model Cards for Model Reporting.</p></aside>
 </section>
 
-<section class="slide" id="s3-steps" data-lo="LO5">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" data-label="Items" id="checklist-items" data-lo="LO5">
+  <div class="kicker">The course checklist</div>
+  <h2>Twelve items, each with the evidence that would satisfy it</h2>
+  <table class="t small">
+    <tr><th>Soundness</th><th>Outcomes</th><th>Monitoring</th></tr>
+    <tr><td>S1 intended and excluded uses</td><td>O1 AUC on unseen rows</td><td>M1 what is watched, thresholds, owner</td></tr>
+    <tr><td>S2 target and its window</td><td>O2 calibration, proper score</td><td>M2 conditions of use, human review</td></tr>
+    <tr><td>S3 training data, sampling</td><td>O3 intervals or sets, coverage</td><td></td></tr>
+    <tr><td>S4 features, when known, exclusions</td><td>O4 results by subgroup</td><td></td></tr>
+    <tr><td>S5 recipe, seeds, versions</td><td>O5 explanation and its stability</td><td></td></tr>
+  </table>
+  <aside class="notes"><p>Each outcome item maps to a day of the course: O1 and O2 Day 1, O3 Day 2, O5 Day 3, O4 this morning. The checklist is in labs/data/checklist.json.</p></aside>
+</section>
+
+<section class="slide" data-label="Score" id="amana-scored" data-lo="LO5">
+  <div class="kicker">Lab 4.3</div>
+  <h2>Amana: four items present or near it, nothing about monitoring</h2>
+  <table class="t">
+    <tr><th>Part</th><th class="num">Present</th><th class="num">Partial</th><th class="num">Missing</th></tr>
+    <tr><td>Soundness</td><td class="num">2</td><td class="num">3</td><td class="num">0</td></tr>
+    <tr><td>Outcomes</td><td class="num">0</td><td class="num">2</td><td class="num">3</td></tr>
+    <tr class="hl"><td>Monitoring</td><td class="num">0</td><td class="num">0</td><td class="num">2</td></tr>
+  </table>
+  <p class="small mt-s">Partial means the package answers part of the item, or answers it in a way you showed to be wrong.</p>
+  <aside class="notes"><p>The trainer's key: S2 and S3 present; S1, S4, S5, O1 and O5 partial; O2, O3, O4, M1 and M2 missing. Lab 4.3 accepts up to two differences, to be argued. O1 is the usual argument: there is a number, but on the wrong rows.</p></aside>
+</section>
+
+<section class="slide" data-label="Partial" id="partial-is-wrong" data-lo="LO5">
+  <div class="kicker">The hard calls</div>
+  <h2>A number in the evidence file is not evidence if it answers a different question</h2>
+  <div class="cols cols-2">
+    <div class="card c-amber"><h4>O1 · partial</h4><p class="small mb0">AUC 0.864 is in evidence.json, measured on rows the shipped model trained on (Lab 1.1).</p></div>
+    <div class="card c-coral"><h4>O2 · missing</h4><p class="small mb0">You computed calibration yourself. The package still lacks it; the report says who supplied the evidence.</p></div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>The checklist scores the package, not the validation. Filling a gap yourself is useful and must be labelled, otherwise the developers never take ownership of it and the next version arrives with the same gap.</p></aside>
+</section>
+
+<section class="slide" data-label="Request" id="request-to-developers" data-lo="LO5">
+  <div class="kicker">Lab 4.3 · step 4</div>
+  <h2>The request names each item and what would satisfy it</h2>
+  <table class="t small">
+    <tr><td>S4</td><td>The reason for each exclusion and when each feature is known</td></tr>
+    <tr><td>S5</td><td>Library versions, so the model can be refitted exactly</td></tr>
+    <tr><td>O1</td><td>The shipped model's AUC on rows it never saw</td></tr>
+    <tr class="hl"><td>M1</td><td>Inputs and outcomes to monitor, thresholds and a named owner</td></tr>
+    <tr class="hl"><td>M2</td><td>Conditions of use and how officers review declined applicants</td></tr>
+  </table>
+  <aside class="notes"><p>Send it to Rasil Al-Nafisah's team with the checklist attached. Ask the room: which item blocks a decision? M1: a decision with conditions cannot be enforced without someone watching. M2 is accepted with a reason.</p></aside>
+</section>
+
+<section class="slide" data-label="Personal data" id="personal-data-in-package" data-lo="LO5">
+  <div class="kicker">Before you send it</div>
+  <h2>Validation evidence about people is personal data too</h2>
+  <ul class="bullets small">
+    <li>Subgroup tables use gender, age band and region of real applicants: Sadeem Al-Oraini, the data protection officer, signs off the report's annexes.</li>
+    <li>Report groups and rates, not rows; the stability panel uses application identifiers, never names.</li>
+    <li>The Personal Data Protection Law and its implementing regulation apply to the validator's copy as to the developers'.</li>
+  </ul>
+  <aside class="notes"><p>The course data are synthetic, so nothing here is personal; the habit is what the session teaches. Keep the reference to the law at this level: what the validator does, not legal advice. Questions about specific obligations go to the data protection officer.</p><p>Sources: Personal Data Protection Law and its Implementing Regulation (SDAIA).</p></aside>
+</section>
+
+<section class="slide" id="check-checklist" data-lo="LO5">
+  <div class="kicker">Checkpoint</div>
+  <h2>How do you score O5 for Amana?</h2>
+  <div class="quiz" data-type="single" data-lo="LO5">
+    <p class="lead">metadata.json says officers see the three largest Shapley values. evidence.json says stability_checked: false. You tested stability yourself on Day 3. What is O5?</p>
+    <div class="opts">
+      <div class="opt" data-why="Scores the validator's work instead of the package">Present, because the stability panel exists</div>
+      <div class="opt" data-why="Ignores that the method is stated, which is half of the item">Missing, because nothing about explanations is there</div>
+      <div class="opt" data-ok>Partial: the method is stated, its stability is not checked by the developers</div>
+      <div class="opt" data-why="Treats an unstable result as grounds to drop the item rather than score it">Not applicable, because the reasons were unstable</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The checklist scores what the package supplies; the method is there and the stability evidence is not.</div>
+  </div>
+  <aside class="notes"><p>Answer: C.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-4-3" data-auto="lab" data-lab="4.3">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: the trainer's key with at most two differences; by part, soundness 2 present and 3 partial, outcomes 2 partial and 3 missing, monitoring 2 missing; blocking gap M1. Common problem: scoring S4 present because features are listed; the item also asks when each is known and why each exclusion was made. The stretch reads the renewal package's evidence file: the same three gaps.</p></aside>
 </section>
 
-<!-- Session 4 -->
-
+<!-- ======================= SESSION 4 ======================= -->
 <section class="slide section" id="s4" data-auto="section" data-session="4"></section>
 
-<section class="slide" id="s4-idea" data-lo="LO5">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
-  <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+<section class="slide" data-label="Three answers" id="three-decisions" data-lo="LO5">
+  <div class="kicker">The fit-for-use decision</div>
+  <h2>The committee needs one of three answers, and the conditions that go with it</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-green"><h4>Fit</h4><p class="small mb0">Use as documented. Rare for a first submission.</p></div>
+    <div class="card c-amber"><h4>Fit with conditions</h4><p class="small mb0">Use only while named conditions hold, each with an owner.</p></div>
+    <div class="card c-coral"><h4>Not fit</h4><p class="small mb0">Do not use. Say what would change the answer.</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>The decision is Dr. Sameera Al-Fadda's committee's; the validator drafts it with the evidence. The NIST AI Risk Management Framework's Manage function and the SDAIA AI Ethics Principles both ask that risks be owned and monitored after deployment; conditions with owners are how a validation report does that.</p><p>Sources: NIST AI RMF 1.0; SDAIA AI Ethics Principles.</p></aside>
 </section>
 
-<section class="slide" id="s4-steps" data-lo="LO5">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" data-label="Findings" id="week-findings" data-lo="LO5">
+  <div class="kicker">Lab 4.4 · step 1</div>
+  <h2>Eleven findings from the week; six are high</h2>
+  <table class="t small">
+    <tr><th>High</th><th>Finding</th></tr>
+    <tr><td>F2</td><td>Probabilities about four times too high; Platt on calib rows repairs them</td></tr>
+    <tr><td>F3, F4</td><td>Northern region and ages 18 to 24 under-predicted after repair</td></tr>
+    <tr><td>F8</td><td>Reasons shown to officers unstable over refits</td></tr>
+    <tr><td>F10</td><td>App channel bank inflow in the wrong unit from March 2025</td></tr>
+    <tr><td>F11</td><td>No monitoring, owner, conditions of use or human review</td></tr>
+  </table>
+  <aside class="notes"><p>The findings are in labs/data/findings.json, so the lab does not depend on earlier runs. The rule: high when the impact is high and the evidence supports it. F7 (the simulated income shift) has high stakes but is simulated, so it is rated low: a stress test is a reason to monitor, not a finding.</p></aside>
+</section>
+
+<section class="slide" data-label="Conditions" id="conditions-with-owners" data-lo="LO5">
+  <div class="kicker">Lab 4.4 · step 2</div>
+  <h2>Every condition says what must hold, who owns it and which findings it answers</h2>
+  <table class="t small">
+    <tr><th>Condition</th><th>Owner</th><th>Answers</th></tr>
+    <tr><td>C1 Use probabilities only after the Platt map</td><td>Credit analytics</td><td>F2</td></tr>
+    <tr><td>C2 No app scoring until the feed is fixed; rescore; range check</td><td>Data engineering</td><td>F10</td></tr>
+    <tr><td>C3 Northern and 18 to 24 go to an officer</td><td>Branch officers</td><td>F3, F4</td></tr>
+    <tr><td>C4 One grouped income reason; only stable reasons</td><td>Credit analytics</td><td>F8, F9</td></tr>
+    <tr><td>C5 Monthly monitoring; two breaches return it to validation</td><td>Model risk</td><td>F11, F5, F7</td></tr>
+  </table>
+  <aside class="notes"><p>The lab checks mechanically that every high finding is answered and every condition has an owner. Ask: who is Fuad Al-Rubayan in this table? The branch officers' lead: C3 lands on his team, so he must agree to it before the committee meets.</p></aside>
+</section>
+
+<section class="slide" data-label="Review" id="human-review-real" data-lo="LO5">
+  <div class="kicker">Human review</div>
+  <h2>Name which applicants an officer must see, and give the officer the evidence</h2>
+  <div class="cols cols-2">
+    <div class="card c-coral"><h4>A slogan</h4><p class="small mb0">"Borderline cases are reviewed by a human."</p></div>
+    <div class="card c-teal"><h4>A rule</h4><p class="small mb0">Every application from the Northern region, aged 18 to 24, or with all three grades in its 90% set.</p></div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <div class="callout warn small mt-s"><b>Automation Bias</b> (guide p. 19): officers who see only a score defer to it. They need the grade set, stable reasons, authority to decide differently, and their overrides monitored.</div>
+  <aside class="notes"><p>The grade set from Day 2 earns its place here: an application whose 90% set holds all three grades is one the model cannot place. Ask the room how many applications the rule sends to officers: the North is 5% of holdout applicants and 18 to 24 is 12%, so at least a sixth before the full sets are added; Fuad's team must be able to absorb it, and the report should state the share.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
+</section>
+
+<section class="slide" data-label="Not fit?" id="when-not-fit" data-lo="LO5">
+  <div class="kicker">Judgement</div>
+  <h2>"Fit with conditions" is only as good as its owners and its monitoring</h2>
+  <ul class="bullets">
+    <li>The model ranks well (AUC 0.755) and its probabilities are repaired: the harms found have conditions that remove them while causes are fixed.</li>
+    <li>If no one will own C2 or C5, the honest decision is <b>not fit</b>.</li>
+    <li>A condition without an owner is a wish; a review rule without a list of applicants is a slogan.</li>
+  </ul>
+  <aside class="notes"><p>Lab 4.4's stretch writes the two sentences for a committee that asks to approve without conditions. Reference: Northern and young applicants would keep being priced on risks 5 to 7 points lower than they are, and every app application since March is scored on a broken input.</p></aside>
+</section>
+
+<section class="slide" data-label="Capstone" id="capstone-packages" data-lo="LO5">
+  <div class="kicker">Lab 4.4 · steps 4 and 5</div>
+  <h2>Two packages wait for the capstone; both claim more than they deliver</h2>
+  <table class="t small">
+    <tr><th></th><th class="num">Claimed AUC</th><th class="num">Holdout AUC</th><th class="num">Mean raw prediction</th><th class="num">Default rate</th></tr>
+    <tr><td>Amana-R · top-up loans for repeat borrowers</td><td class="num">0.902</td><td class="num">0.711</td><td class="num">0.412</td><td class="num">0.089</td></tr>
+    <tr><td>Amana-F · seasonal farm loans</td><td class="num">0.892</td><td class="num">0.700</td><td class="num">0.425</td><td class="num">0.128</td></tr>
+  </table>
+  <p class="small mt-s">Each has applications, a later batch, three models, a card, metadata and evidence. Choose one, or a package agreed with your peer, and plan its first three checks.</p>
+  <aside class="notes"><p>Do not reveal the planted problems; the answer key has them. Hint only that each later batch tells a different story: one quiet, one loud. Pairs may validate the same package independently and compare.</p></aside>
+</section>
+
+<section class="slide" id="check-decision" data-lo="LO5">
+  <div class="kicker">Checkpoint</div>
+  <h2>Which condition is written well enough to enforce?</h2>
+  <div class="quiz" data-type="single" data-lo="LO5">
+    <p class="lead">Four drafts for the approval committee. Which one could an auditor check next year?</p>
+    <div class="opts">
+      <div class="opt" data-why="Names no group, no owner and no test: a slogan">Borderline applications receive human review</div>
+      <div class="opt" data-ok>Model risk checks calibration by region and age band monthly; two breaches return the model to validation</div>
+      <div class="opt" data-why="An intention with no measure, threshold or owner">The model will be monitored for fairness</div>
+      <div class="opt" data-why="Retraining is an action without a trigger or a check that it worked">The developers retrain the model every year</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> An enforceable condition names a measure, a frequency, a threshold, an action and an owner.</div>
+  </div>
+  <aside class="notes"><p>Answer: B.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-4-4" data-auto="lab" data-lab="4.4">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: six high findings (F2, F3, F4, F8, F10, F11); the reference decision is fit with conditions with five owned conditions; first look: renewal claimed 0.902 against 0.711, farm 0.892 against 0.700; renewal's later batch is calibrated overall (0.081 against 0.080), farm's is under-predicted (0.140 against 0.173). "Not fit" is accepted when argued from the owners. Collect each participant's package choice before they leave.</p></aside>
 </section>
 
-<section class="slide" id="wrap-up">
-  <div class="kicker">Day 4 · wrap-up</div>
-  <h2>Three things to keep</h2>
-  <div class="cols cols-3">
-    <div class="card c-teal"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-coral"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-purple"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
+<!-- ======================= CLOSE ======================= -->
+<section class="slide" data-label="Wrap-up" id="wrap-up">
+  <div class="kicker">Day 4 · three things to keep</div>
+  <h2>What a validation report gives the committee</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-teal"><h4>Supported gaps</h4><p class="small mb0">By group, with intervals, tagged with the guide and rated by a rule stated before looking.</p></div>
+    <div class="card c-coral"><h4>Causes, not symptoms</h4><p class="small mb0">Slice, then inputs, then reasons: a broken feed is not a degraded model.</p></div>
+    <div class="card c-purple"><h4>Owned conditions</h4><p class="small mb0">A decision the committee can enforce, with monitoring and real human review.</p></div>
   </div>
+  <aside class="notes"><p>Each participant now has the four days' sections of a validation report on Amana. The capstone repeats the week, alone or in pairs, on Amana-R or Amana-F.</p></aside>
 </section>
 
 <section class="slide dark" id="next" data-label="Next">
   <div class="kicker">Next</div>
-  <h2>Capstone: Capstone project presentations</h2>
-  <p class="lead">REPLACE: what participants prepare before then; unfinished labs can be finished at home</p>
-  <aside class="notes">REPLACE: accounts, installs or reading participants need before the next unit</aside>
+  <h2>Capstone: validate a package and defend the decision</h2>
+  <p class="lead">Bring the package you chose, your plan's first three checks, and the week's notebooks. Unfinished labs can be finished at home from their reference state.</p>
+  <aside class="notes"><p>Remind participants that the capstone runs on the same laptop or Colab setup; nothing new to install. Each talk is eight minutes with four minutes of questions from the committee.</p></aside>
 </section>
