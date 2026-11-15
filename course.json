@@ -353,7 +353,7 @@
           ],
           "lab": {
             "id": "2.3",
-            "title": "Coverage by group, then by group",
+            "title": "Coverage by group, then per group",
             "summary": "Measure the loss intervals' coverage by loan size and region, find the large loans near 77%, then compute one threshold per loan-size band and show every band back near 90% with wider intervals where they are needed.",
             "minutes": 25,
             "href": "D2_3_measure_subgroup_coverage.ipynb",

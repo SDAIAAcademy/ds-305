@@ -170,7 +170,7 @@ uv run jupyter lab</code></pre>
       <div class="opt" data-why="Treats the absence of contrary evidence as support: nothing was measured, so nothing supports it">Supported, since no gap has been found</div>
       <div class="opt" data-ok>Unsupported, since the package has no evidence for it</div>
       <div class="opt" data-why="Confuses not yet tested with impossible to test: the holdout has the group columns, so it can be tested">Untestable, since groups were not measured</div>
-      <div class="opt" data-why="Assumes a validator may wait: the verdict is recorded on what the package holds, then the test is run">No verdict until the subgroup tables exist</div>
+      <div class="opt" data-why="Assumes a validator may wait: the verdict is recorded on what the package holds, then the test is run">No verdict until the subgroup tables of Lab 1.4 exist and are read</div>
     </div>
     <div class="callout tip why"><b>Why.</b> A claim is supported by evidence. The package has none for groups, and the holdout could test it, so it is unsupported now and testable later.</div>
   </div>
@@ -285,9 +285,9 @@ def log_loss(y, p):
   <div class="quiz" data-type="single" data-lo="LO1">
     <p class="lead">A second team's model has AUC 0.78 on your holdout and accuracy 90% at a threshold of 0.5. Its mean predicted default probability is 0.31; the default rate is 0.09. Which result tells the committee the probabilities cannot be read as rates?</p>
     <div class="opts">
-      <div class="opt" data-why="Treats ranking as calibration: AUC is unchanged when every score is multiplied by a constant">The AUC of 0.78</div>
+      <div class="opt" data-why="Treats ranking as calibration: AUC is unchanged when every score is multiplied by a constant">The AUC of 0.78, which is high for a credit model</div>
       <div class="opt" data-why="Uses a score that is not proper: accuracy at 0.5 ignores how far the probabilities are from the truth">The accuracy of 90%</div>
-      <div class="opt" data-why="Reads fit on rows the model has seen as calibration on new applicants">The model's training loss</div>
+      <div class="opt" data-why="Reads fit on rows the model has seen as calibration on new applicants">The model's training loss, reported by the developers at the end of fitting</div>
       <div class="opt" data-ok>A reliability diagram and a Brier score against the base rate</div>
     </div>
     <div class="callout tip why"><b>Why.</b> Calibration is shown by comparing predicted with observed rates; a proper score against the base-rate forecast puts a number on the cost.</div>
@@ -331,7 +331,7 @@ def log_loss(y, p):
 
 <section class="slide" data-label="Two maps" id="platt-and-isotonic" data-lo="LO1">
   <div class="kicker">Two methods</div>
-  <h2>Platt scaling bends nothing; isotonic regression can bend anywhere</h2>
+  <h2>Platt scaling fits one smooth curve; isotonic regression can step anywhere</h2>
   <div class="cols cols-2">
     <div class="card c-teal"><h4>Platt scaling</h4><p class="small mb0">A logistic regression of the outcome on the logit of the score: two parameters, a smooth S-shaped map. Steady with few rows.</p></div>
     <div class="card c-purple"><h4>Isotonic regression</h4><p class="small mb0">Any non-decreasing step function of the score. Flexible, needs many rows, can overfit a small calib set.</p></div>

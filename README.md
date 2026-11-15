@@ -55,7 +55,7 @@ Every lab is a notebook in `labs/`. Open it in Google Colab from the course page
 | 1.4 | Day 1 · Session 4 | Calibration by region and age band | [`D1_4_break_calibration_down.ipynb`](labs/D1_4_break_calibration_down.ipynb) |
 | 2.1 | Day 2 · Session 1 | Loss intervals with 90% coverage | [`D2_1_wrap_loss_regression.ipynb`](labs/D2_1_wrap_loss_regression.ipynb) |
 | 2.2 | Day 2 · Session 2 | Sets for three risk grades | [`D2_2_build_prediction_sets.ipynb`](labs/D2_2_build_prediction_sets.ipynb) |
-| 2.3 | Day 2 · Session 3 | Coverage by group, then by group | [`D2_3_measure_subgroup_coverage.ipynb`](labs/D2_3_measure_subgroup_coverage.ipynb) |
+| 2.3 | Day 2 · Session 3 | Coverage by group, then per group | [`D2_3_measure_subgroup_coverage.ipynb`](labs/D2_3_measure_subgroup_coverage.ipynb) |
 | 2.4 | Day 2 · Session 4 | An income shift, measured | [`D2_4_simulate_income_shift.ipynb`](labs/D2_4_simulate_income_shift.ipynb) |
 | 3.1 | Day 3 · Session 1 | Importance and its spread | [`D3_1_compute_permutation_importance.ipynb`](labs/D3_1_compute_permutation_importance.ipynb) |
 | 3.2 | Day 3 · Session 2 | Partial dependence against local effects | [`D3_2_show_where_partial.ipynb`](labs/D3_2_show_where_partial.ipynb) |

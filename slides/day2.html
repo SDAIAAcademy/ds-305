@@ -12,7 +12,7 @@
     <p class="lead">Platt scaling was fitted on the calib rows. On the holdout, the Brier score fell from 0.199 to 0.081 and the mean prediction is 9.0% against 9.9% observed. Which statement holds?</p>
     <div class="opts">
       <div class="opt" data-why="Assumes recalibration improves ranking: a monotone map leaves the AUC where it was">The AUC rose with the Brier score</div>
-      <div class="opt" data-why="Treats average calibration as calibration in every group; the Northern region stays 6.7 points under-predicted">Every region is now calibrated</div>
+      <div class="opt" data-why="Treats average calibration as calibration in every group; the Northern region stays 6.7 points under-predicted">Every region is now calibrated, since the map was fitted on all of them</div>
       <div class="opt" data-ok>The ranking is unchanged and the average is repaired</div>
       <div class="opt" data-why="Reads a map fitted on calib rows as a retrained model; the model itself was not touched">The developers' model was retrained</div>
     </div>
@@ -121,9 +121,9 @@
     <p class="lead">Split conformal on 895 calib defaults gives Amana's loss model intervals of plus or minus 8,134 riyals. A provisioning analyst asks what the "90%" means. What do you tell her?</p>
     <div class="opts">
       <div class="opt" data-why="Reads a marginal guarantee as a statement about each loan">Each loan has a 90% chance of a loss inside its own interval</div>
-      <div class="opt" data-why="Assumes the guarantee survives any population; it needs new loans drawn like the calib loans">Nine in ten losses fall inside, whoever applies next year</div>
+      <div class="opt" data-why="Assumes the guarantee survives any population; it needs new loans drawn like the calib loans">Nine in ten losses fall inside, whoever applies to Mizan next year</div>
       <div class="opt" data-why="Confuses coverage with accuracy of the point prediction, which conformal does not change">The loss model is now 90% accurate</div>
-      <div class="opt" data-ok>Over new loans like the calib loans, at least 90% of losses fall inside</div>
+      <div class="opt" data-ok>Over new loans like the calib loans, at least 90% fall inside</div>
     </div>
     <div class="callout tip why"><b>Why.</b> Conformal coverage is marginal and rests on exchangeability: it holds on average over loans drawn like the calib loans.</div>
   </div>
@@ -230,7 +230,7 @@ in_set = P_hold &gt;= 1 - q              # 0.166</code></pre>
       <div class="opt" data-ok>No: across applicants, about one in ten sets misses the true grade</div>
       <div class="opt" data-why="Reads a set of one as certainty; the guarantee is about the share of sets that contain the truth">Yes: only one grade could be the true one</div>
       <div class="opt" data-why="Confuses the set level with the probability of the grade inside it">Yes, with exactly 90% probability for this applicant</div>
-      <div class="opt" data-why="Thinks small sets are a sign of error; they are a sign the model separates this applicant well">No: a set of one means the model failed</div>
+      <div class="opt" data-why="Thinks small sets are a sign of error; they are a sign the model separates this applicant well">No: a set of one means the model failed to find enough grades to include</div>
     </div>
     <div class="callout tip why"><b>Why.</b> The 90% is the share of sets, over applicants, that hold the true grade; any single set can be wrong, and a small set says the model is relatively sure, not certain.</div>
   </div>
@@ -322,11 +322,11 @@ in_set = P_hold &gt;= 1 - q              # 0.166</code></pre>
       <div class="opt" data-why="Assumes conformal guarantees every group; it guarantees the average only">The conformal threshold was computed wrongly</div>
       <div class="opt" data-ok>Losses on large loans vary more, and one width averages over groups</div>
       <div class="opt" data-why="Confuses a group's share of the data with its spread of errors">Large loans are too rare in the calib rows</div>
-      <div class="opt" data-why="Reads under-coverage as a bias in the point prediction rather than in the width">The loss model under-predicts large losses</div>
+      <div class="opt" data-why="Reads under-coverage as a bias in the point prediction rather than in the width">The loss model under-predicts large losses, so their intervals sit too low</div>
     </div>
     <div class="callout tip why"><b>Why.</b> Split conformal promises marginal coverage. With errors that grow with loan size, one width is too narrow for large loans and too wide for the rest.</div>
   </div>
-  <aside class="notes"><p>Answer: B. Large loans are 34% of the holdout defaults, not rare. If the room picks D, show that the intervals are symmetric: the misses are on both sides.</p></aside>
+  <aside class="notes"><p>Answer: B. Large loans are 38% of the holdout defaults (382 of 993), not rare. If the room picks D, show that the intervals are symmetric: the misses are on both sides.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-2-3" data-auto="lab" data-lab="2.3">
@@ -415,9 +415,9 @@ shifted = hold.iloc[rng.choice(n, n, p=w / w.sum())]</code></pre>
   <div class="quiz" data-type="single" data-lo="LO2">
     <p class="lead">Under the same income shift, loss interval coverage falls from 91% to 77% while grade set coverage falls from 89% to 88%. Which explanation is right?</p>
     <div class="opts">
-      <div class="opt" data-why="Assumes set methods have a stronger guarantee; both rest on exchangeability">Prediction sets are guaranteed under shift; intervals are not</div>
+      <div class="opt" data-why="Assumes set methods have a stronger guarantee; both rest on exchangeability">Prediction sets keep their guarantee under shift; intervals for amounts do not</div>
       <div class="opt" data-why="Confuses sample size with robustness; both were judged on large samples">The grade model was calibrated on more rows</div>
-      <div class="opt" data-ok>The loss errors grow with income through loan size; the grade errors barely do</div>
+      <div class="opt" data-ok>Loss errors grow with income through loan size; grade errors barely do</div>
       <div class="opt" data-why="Assumes the shift changed the outcome; it only changed who applies">Richer applicants default less, so the sets are easier</div>
     </div>
     <div class="callout tip why"><b>Why.</b> A covariate shift breaks coverage where it moves the distribution of the errors. Loss errors depend on loan size, which rises with income.</div>

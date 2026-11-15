@@ -14,7 +14,7 @@
       <div class="opt" data-ok>Show officers one grouped income reason, and only reasons that survive refits</div>
       <div class="opt" data-why="Reads exact additivity as stability across equally valid models">The three reasons are exact, so they can be shown as they are</div>
       <div class="opt" data-why="Ranks members of a correlated pair, which no method here can separate">Bank inflow is a stronger reason than declared income</div>
-      <div class="opt" data-why="Takes instability of the second and third reasons as proof the model is wrong">The model must be retrained until the reasons are stable</div>
+      <div class="opt" data-why="Takes instability of the second and third reasons as proof the model is wrong">The model must be retrained until all three reasons are stable across refits</div>
     </div>
     <div class="callout tip why"><b>Why.</b> The top reason is fairly stable and the rest are not; the two incomes trade credit between refits, so they are one reason told two ways.</div>
   </div>
@@ -24,7 +24,7 @@
 <!-- ======================= SESSION 1 ======================= -->
 <section class="slide section" id="s1" data-auto="section" data-session="1"></section>
 
-<section class="slide" data-label="One table" id="one-audit-table" data-lo="LO4">
+<section class="slide" data-label="One table" id="one-audit-table" data-lo="LO5">
   <div class="kicker">Subgroup validation</div>
   <h2>One table, every group the lender answers for, every measure with its uncertainty</h2>
   <table class="t small">
@@ -37,7 +37,7 @@
   <aside class="notes"><p>Gender, age band and region are not features of Amana; they are kept in the validator's data to audit it. That is the point of excluding a column and still auditing by it. Ask: who decides which groups go in the table? The owners and the committee; the validator proposes and says why.</p></aside>
 </section>
 
-<section class="slide" data-label="Region" id="region-table" data-lo="LO4">
+<section class="slide" data-label="Region" id="region-table" data-lo="LO5">
   <div class="kicker">Lab 4.1 · region</div>
   <h2>The Northern region defaults at 15.4% against 8.7% predicted</h2>
   <table class="t small">
@@ -51,7 +51,7 @@
   <aside class="notes"><p>From the Lab 4.1 run on the 10,000 holdout rows. The North's interval is wide (508 applicants) and still sits far above the prediction: the gap is supported. Its coverage of 87.2% rests on 78 defaults, so it is not flagged. Wilson intervals, as on Day 1.</p></aside>
 </section>
 
-<section class="slide" data-label="Flags" id="flag-rules" data-lo="LO4">
+<section class="slide" data-label="Flags" id="flag-rules" data-lo="LO5">
   <div class="kicker">From numbers to flags</div>
   <h2>Flag a gap only when an interval supports it</h2>
   <div class="cols cols-2">
@@ -69,7 +69,7 @@
   <aside class="notes"><p>The rules are the course's, stated before looking, which is the protection against hunting for gaps. With five regions, five age bands, two genders and two channels, some group will look odd by chance; the interval rule keeps the flags to what the data support. Ask: is the 50-default floor arbitrary? Yes, and the report says so.</p></aside>
 </section>
 
-<section class="slide" data-label="Tag" id="bias-guide-tags" data-lo="LO4">
+<section class="slide" data-label="Tag" id="bias-guide-tags" data-lo="LO5">
   <div class="kicker">SDAIA AI Bias Reference Guide</div>
   <h2>A tag names how the gap arose, which points to the remedy</h2>
   <table class="t small">
@@ -79,10 +79,10 @@
     <tr><td>Large loans</td><td>Evaluation Bias</td><td class="num">p. 42</td><td>91% marginal coverage overstates how well they are covered</td></tr>
   </table>
   <div class="callout warn small mt-s"><b>A tag is not a verdict.</b> It names a mechanism from the guide. Whether a gap is unfair is the committee's judgement, made with the evidence.</div>
-  <aside class="notes"><p>More than one tag is defensible: the North can also be Sample Size or Coverage Bias. Lab 4.1 accepts any of a short list and asks for the one-line reason. Page numbers are those of the Guide's English edition (September 2026). Remedies are the owners' choice; fairness mitigation is DS-309's subject.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
+  <aside class="notes"><p>More than one tag is defensible: the North can also be Sample Size or Coverage Bias. Lab 4.1 accepts any of a short list and asks for the one-line reason. Page numbers are those of the Guide's English first edition (May 2026). Remedies are the owners' choice; fairness mitigation is DS-309's subject.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
 </section>
 
-<section class="slide" data-label="Rate" id="rating-rule" data-lo="LO4">
+<section class="slide" data-label="Rate" id="rating-rule" data-lo="LO5">
   <div class="kicker">Rating</div>
   <h2>Rate by what the gap does to people and how firmly it is supported</h2>
   <div class="flow">
@@ -96,7 +96,7 @@
   <aside class="notes"><p>The rule is the course's, written so that two validators reach the same rating. Coverage gaps affect provisioning, so they are medium under it; a lender who prices on the loss interval would rate them higher, and the report should say which use applies.</p></aside>
 </section>
 
-<section class="slide" data-label="Small cells" id="small-cells" data-lo="LO4">
+<section class="slide" data-label="Small cells" id="small-cells" data-lo="LO5">
   <div class="kicker">Lab 4.1 · stretch</div>
   <h2>Crossing groups multiplies the cells and divides the evidence</h2>
   <div class="cols cols-2">
@@ -113,14 +113,14 @@
   <aside class="notes"><p>Intersectional audits are right in principle and hard in data. The honest move is to say what the counts allow, and to name the cell as one to monitor once more outcomes mature.</p></aside>
 </section>
 
-<section class="slide" id="check-subgroup" data-lo="LO4">
+<section class="slide" id="check-subgroup" data-lo="LO5">
   <div class="kicker">Checkpoint</div>
   <h2>How do you report the gap for men?</h2>
-  <div class="quiz" data-type="single" data-lo="LO4">
+  <div class="quiz" data-type="single" data-lo="LO5">
     <p class="lead">After recalibration, men default at 10.5% against 8.9% predicted, interval 9.6 to 11.4; women at 9.5% against 9.1%. Under the course rules, what goes in the report?</p>
     <div class="opts">
       <div class="opt" data-why="Ignores that the prediction lies outside the interval: the gap is supported">Nothing: the gap is within noise</div>
-      <div class="opt" data-why="Rates a small gap high only because the group is protected; the rule asks for size too">A high finding of gender bias</div>
+      <div class="opt" data-why="Rates a small gap high only because the group is protected; the rule asks for size too">A high finding of gender bias, since gender is a protected attribute</div>
       <div class="opt" data-why="Turns a tag into a verdict the validator cannot give">Evidence that the model discriminates against men</div>
       <div class="opt" data-ok>A medium finding: supported, 1.6 points, monitored by gender</div>
     </div>
@@ -225,8 +225,8 @@
   <div class="quiz" data-type="single" data-lo="LO4">
     <p class="lead">The feed broke on 1 March 2025. Outcomes of March applications mature in March 2026. Which monitor raises the alarm in March 2025?</p>
     <div class="opts">
-      <div class="opt" data-ok>An input range check and the share of each top reason, computed on the day of scoring</div>
-      <div class="opt" data-why="Needs outcomes that do not exist until a year later">Monthly AUC on scored applications</div>
+      <div class="opt" data-ok>Input range checks and top-reason shares, on the day of scoring</div>
+      <div class="opt" data-why="Needs outcomes that do not exist until a year later">Monthly AUC on scored applications, against the holdout AUC of 0.755</div>
       <div class="opt" data-why="The loss intervals barely moved; this monitor misses this fault">Loss interval coverage on defaulted loans</div>
       <div class="opt" data-why="Retraining on schedule would learn the broken unit rather than detect it">Retraining every quarter on recent applications</div>
     </div>
@@ -272,7 +272,7 @@
 
 <section class="slide" data-label="Score" id="amana-scored" data-lo="LO5">
   <div class="kicker">Lab 4.3</div>
-  <h2>Amana: four items present or near it, nothing about monitoring</h2>
+  <h2>Amana: two items present, five partial, nothing about monitoring</h2>
   <table class="t">
     <tr><th>Part</th><th class="num">Present</th><th class="num">Partial</th><th class="num">Missing</th></tr>
     <tr><td>Soundness</td><td class="num">2</td><td class="num">3</td><td class="num">0</td></tr>
@@ -323,7 +323,7 @@
   <div class="quiz" data-type="single" data-lo="LO5">
     <p class="lead">metadata.json says officers see the three largest Shapley values. evidence.json says stability_checked: false. You tested stability yourself on Day 3. What is O5?</p>
     <div class="opts">
-      <div class="opt" data-why="Scores the validator's work instead of the package">Present, because the stability panel exists</div>
+      <div class="opt" data-why="Scores the validator's work instead of the package">Present, because the stability panel from Day 3 now exists</div>
       <div class="opt" data-why="Ignores that the method is stated, which is half of the item">Missing, because nothing about explanations is there</div>
       <div class="opt" data-ok>Partial: the method is stated, its stability is not checked by the developers</div>
       <div class="opt" data-why="Treats an unstable result as grounds to drop the item rather than score it">Not applicable, because the reasons were unstable</div>
@@ -348,7 +348,7 @@
     <div class="card c-amber"><h4>Fit with conditions</h4><p class="small mb0">Use only while named conditions hold, each with an owner.</p></div>
     <div class="card c-coral"><h4>Not fit</h4><p class="small mb0">Do not use. Say what would change the answer.</p></div>
   </div>
-  <aside class="notes"><p>The decision is Dr. Sameera Al-Fadda's committee's; the validator drafts it with the evidence. The NIST AI Risk Management Framework's Manage function and the SDAIA AI Ethics Principles both ask that risks be owned and monitored after deployment; conditions with owners are how a validation report does that.</p><p>Sources: NIST AI RMF 1.0; SDAIA AI Ethics Principles.</p></aside>
+  <aside class="notes"><p>The decision is Dr. Sameera Al-Fadda's committee's; the validator drafts it with the evidence. SDAIA's National AI Risk Management Framework gives entities a method for identifying, assessing, treating and monitoring AI risks; conditions with owners and monitoring are how a validation report puts that into practice for one model.</p><p>Sources: National AI Risk Management Framework, executive summary (SDAIA); SDAIA AI Ethics Principles.</p></aside>
 </section>
 
 <section class="slide" data-label="Findings" id="week-findings" data-lo="LO5">
@@ -387,7 +387,7 @@
     <div class="card c-teal"><h4>A rule</h4><p class="small mb0">Every application from the Northern region, aged 18 to 24, or with all three grades in its 90% set.</p></div>
   </div>
   <div class="callout warn small mt-s"><b>Automation Bias</b> (guide p. 19): officers who see only a score defer to it. They need the grade set, stable reasons, authority to decide differently, and their overrides monitored.</div>
-  <aside class="notes"><p>The grade set from Day 2 earns its place here: an application whose 90% set holds all three grades is one the model cannot place. Ask the room how many applications the rule sends to officers: the North is 5% of holdout applicants and 18 to 24 is 12%, so at least a sixth before the full sets are added; Fuad's team must be able to absorb it, and the report should state the share.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
+  <aside class="notes"><p>The grade set from Day 2 earns its place here: an application whose 90% set holds all three grades is one the model cannot place. Ask the room how many applications the rule sends to officers: the North is 5% of holdout applicants and 18 to 24 is 12%, so about a sixth before the full sets are added; Fuad's team must be able to absorb it, and the report should state the share.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
 </section>
 
 <section class="slide" data-label="Not fit?" id="when-not-fit" data-lo="LO5">
@@ -419,8 +419,8 @@
   <div class="quiz" data-type="single" data-lo="LO5">
     <p class="lead">Four drafts for the approval committee. Which one could an auditor check next year?</p>
     <div class="opts">
-      <div class="opt" data-why="Names no group, no owner and no test: a slogan">Borderline applications receive human review</div>
-      <div class="opt" data-ok>Model risk checks calibration by region and age band monthly; two breaches return the model to validation</div>
+      <div class="opt" data-why="Names no group, no owner and no test: a slogan">Borderline applications receive careful human review by experienced officers in every branch</div>
+      <div class="opt" data-ok>Model risk checks calibration by region and age monthly; two breaches mean revalidation</div>
       <div class="opt" data-why="An intention with no measure, threshold or owner">The model will be monitored for fairness</div>
       <div class="opt" data-why="Retraining is an action without a trigger or a check that it worked">The developers retrain the model every year</div>
     </div>

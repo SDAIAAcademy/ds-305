@@ -12,8 +12,8 @@
     <p class="lead">Split conformal intervals for Amana's loss model cover 91% of holdout defaults, 77% of large loans, and 77% of all defaults after a strong simulated income shift. Which sentence can go in the report?</p>
     <div class="opts">
       <div class="opt" data-why="Reads marginal coverage as a promise for every group">Every loan's interval holds 90% of the time</div>
-      <div class="opt" data-ok>Coverage holds overall on applicants like the calib rows, not for large loans or a richer population</div>
-      <div class="opt" data-why="Treats under-coverage as a modelling fault; the wrapper, not the model, sets the width">The loss model must be retrained before any interval is used</div>
+      <div class="opt" data-ok>Coverage holds overall, not for large loans or a richer population</div>
+      <div class="opt" data-why="Treats under-coverage as a modelling fault; the wrapper, not the model, sets the width">The loss model must be retrained before any of its intervals can be used</div>
       <div class="opt" data-why="Thinks a fixed width adapts to a new population; the threshold only knows the calib rows">Under a shift the intervals widen to keep 90%</div>
     </div>
     <div class="callout tip why"><b>Why.</b> The guarantee is marginal and rests on exchangeability; the group table and the stress test show where it stops.</div>
@@ -116,8 +116,8 @@
     <div class="opts">
       <div class="opt" data-why="Ranks members of a correlated pair, which the single shuffles cannot separate">Bank inflow is the more important of the two</div>
       <div class="opt" data-why="Adds importances as if they were independent shares of one total">Income accounts for 0.114 of the log loss</div>
-      <div class="opt" data-ok>Income matters, and the single numbers mostly measure reactions to impossible pairs</div>
-      <div class="opt" data-why="Reads a smaller grouped number as evidence that income is irrelevant">Together they matter little, so income can be dropped</div>
+      <div class="opt" data-ok>Income matters; the single numbers measure reactions to impossible pairs</div>
+      <div class="opt" data-why="Reads a smaller grouped number as evidence that income is irrelevant">Together they matter little, so income can be dropped from the next version</div>
     </div>
     <div class="callout tip why"><b>Why.</b> Shuffling one feature of a correlated pair creates rows outside the data; the grouped shuffle keeps realistic pairs and is the number to report.</div>
   </div>
@@ -179,7 +179,7 @@
   <div class="kicker">Making the disagreement checkable</div>
   <h2>Count the rows a curve was built from that no real applicant resembles</h2>
   <ul class="bullets">
-    <li>Real applicants declare 0.72 to 2.34 times their bank inflow (1st to 99th percentile).</li>
+    <li>In the 4,000 sampled applicants, declared income is 0.72 to 2.34 times bank inflow (1st to 99th percentile).</li>
     <li>At 18,930 riyals, <b>53%</b> of PD rows lie outside that range; at 4,310, <b>75%</b>.</li>
     <li>A curve point built mostly from such rows describes the model's behaviour on fiction.</li>
   </ul>
@@ -215,8 +215,8 @@
   <div class="quiz" data-type="single" data-lo="LO3">
     <p class="lead">PD for declared income rises 1.6 times as much as ALE between 9,000 and 19,000 riyals. Declared income and bank inflow correlate at 0.84, and overstating income is a risk signal in the model. What explains the gap?</p>
     <div class="opts">
-      <div class="opt" data-ok>PD pairs high declared incomes with low inflows that real applicants do not have</div>
-      <div class="opt" data-why="Blames sample size; the gap comes from which rows are evaluated, not how many">ALE uses too few applicants in each bin</div>
+      <div class="opt" data-ok>PD pairs high declared incomes with inflows real applicants do not have</div>
+      <div class="opt" data-why="Blames sample size; the gap comes from which rows are evaluated, not how many">ALE uses too few applicants in each bin, so its curve is flattened by noise</div>
       <div class="opt" data-why="Assumes the model is wrong; it reacts correctly to rows that do not occur">The model overreacts to declared income</div>
       <div class="opt" data-why="Confuses centring with the shape: both curves are centred">PD is not centred and ALE is</div>
     </div>
@@ -325,9 +325,9 @@ np.allclose(v.sum(axis=1), raw)   # True</code></pre>
     <p class="lead">For every applicant, the base value plus the Shapley values of the ten features equals the model's raw score exactly. A colleague says this proves the reasons shown to officers are reliable. What do you answer?</p>
     <div class="opts">
       <div class="opt" data-why="Reads exact accounting as stability across equally valid models">Yes: an exact decomposition cannot change</div>
-      <div class="opt" data-ok>It proves the accounting is complete for this model, not that it survives a refit</div>
+      <div class="opt" data-ok>Complete accounting for this model, not survival across a refit</div>
       <div class="opt" data-why="Reads additivity as a causal property of the features">Yes: each value is the feature's causal effect</div>
-      <div class="opt" data-why="Thinks additivity fails with correlated features; it holds, the split between them is what moves">No: Shapley values do not add up with correlated features</div>
+      <div class="opt" data-why="Thinks additivity fails with correlated features; it holds, the split between them is what moves">No: Shapley values stop adding up once two features are strongly correlated</div>
     </div>
     <div class="callout tip why"><b>Why.</b> Additivity is a property of one model's prediction. A refit is a different model, and the split between correlated features can change.</div>
   </div>
@@ -407,7 +407,7 @@ np.allclose(v.sum(axis=1), raw)   # True</code></pre>
   <div class="quiz" data-type="single" data-lo="LO3">
     <p class="lead">Wallet months correlates with age band at -0.44, is a top reason for 47% of applicants over 55 against 21% under 25, and narrows the age gap. What can you conclude?</p>
     <div class="opts">
-      <div class="opt" data-why="Claims a causal conclusion the observational data cannot support">Wallet history causes default, so the feature is legitimate</div>
+      <div class="opt" data-why="Claims a causal conclusion the observational data cannot support">Wallet history causes default, so the feature is legitimate to use</div>
       <div class="opt" data-why="Treats a modest correlation as no relation; the pattern of reasons by age shows the link at work">The correlation is too weak to matter</div>
       <div class="opt" data-why="Thinks excluding age from the features settles the question">Age is not in the model, so there is no age effect</div>
       <div class="opt" data-ok>It carries age information and would deliver age-linked reasons</div>

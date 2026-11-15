@@ -3,7 +3,7 @@
 # dependencies = ["numpy>=2.0", "pandas>=2.2", "matplotlib>=3.9", "scikit-learn>=1.6", "lightgbm>=4.5"]
 # ///
 # %% [markdown]
-# # Lab 2.3 · Coverage by group, then by group
+# # Lab 2.3 · Coverage by group, then per group
 #
 # Day 2 · Session 3 (Coverage by group) · 25 min.
 #
