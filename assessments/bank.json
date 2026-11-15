@@ -262,6 +262,240 @@
       "level": "understand",
       "pool": "practice",
       "weight": 1
+    },
+    {
+      "id": "d2-rank",
+      "type": "single",
+      "prompt": "You have 99 calibration scores and want 90% intervals. Which sorted score is the split conformal threshold?",
+      "options": [
+        "The 89th smallest",
+        "The 90th smallest",
+        "The 99th smallest, to be safe",
+        "The mean plus 1.645 standard deviations"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The rank is ceil((n + 1)(1 - alpha)) = ceil(100 x 0.9) = 90.",
+      "misconceptions": [
+        "Uses 90% of n and forgets to count the new point",
+        "",
+        "Takes the maximum, which over-covers and widens every interval for no guarantee gained",
+        "Assumes normal errors, which split conformal does not need"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": "day2",
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d2-exchangeable",
+      "type": "single",
+      "prompt": "Which situation breaks the assumption that split conformal coverage rests on?",
+      "options": [
+        "The loss model is a boosted tree rather than a linear model",
+        "The errors are skewed rather than normal",
+        "The calibration rows come from 2023 and the new loans from a year when a new product launched",
+        "The calibration set has 900 rows rather than 9,000"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Coverage needs new rows exchangeable with the calibration rows; a changed population breaks that.",
+      "misconceptions": [
+        "Conformal coverage makes no assumption about the model",
+        "No assumption on the shape of the errors is needed",
+        "",
+        "A smaller set gives a noisier threshold, but the guarantee still holds on average"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": "day2",
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d2-lac-aps",
+      "type": "single",
+      "prompt": "On the same holdout, LAC sets cover 89% with mean size 1.56 and APS sets cover 90% with mean size 1.67. Which statement is right?",
+      "options": [
+        "APS is worse because its sets are larger",
+        "LAC is invalid because it is below 90%",
+        "Both keep the marginal guarantee; they differ in where the larger sets go",
+        "APS guarantees 90% coverage within each grade"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Both are valid marginally. LAC gives the smallest sets on average; APS makes sets adapt to the spread of the probabilities.",
+      "misconceptions": [
+        "Judges set methods on size alone; APS trades size for sets that grow where the model is unsure",
+        "A point under target on one holdout is within sampling variation of a valid method",
+        "",
+        "Neither method promises coverage within a grade; that needs a threshold per grade"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": "day2",
+      "session": 2,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d2-by-grade",
+      "type": "single",
+      "prompt": "Prediction sets for three grades cover 90% of applicants but the true grade of only 44% of defaulters. The committee cares most about defaulters. What do you recommend?",
+      "options": [
+        "Raise the target to 99% for everyone",
+        "Report the 90% and note that it holds on average",
+        "Use a threshold per true grade, computed from the calib rows of that grade",
+        "Drop the sets and use the top grade"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Class-conditional thresholds give each grade its own coverage guarantee, which is what a decision about defaulters needs.",
+      "misconceptions": [
+        "Inflates every set to buy coverage for one grade, without a guarantee for that grade",
+        "States the guarantee but hides that it fails where the decision matters",
+        "",
+        "Removes the only statement of doubt the officers would have"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": "day2",
+      "session": 2,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d2-mondrian-cost",
+      "type": "single",
+      "prompt": "One threshold per loan-size band lifts large-loan coverage from 77% to 91%. Overall coverage stays at 91%. What did the repair cost?",
+      "options": [
+        "Nothing: coverage rose and nothing fell",
+        "Wider intervals for large loans and lower, but still near-target, coverage for the others",
+        "A retrained loss model",
+        "The marginal guarantee"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The repair moves coverage to the group that lacked it: large loans' intervals widened 1.6 times, the others narrowed.",
+      "misconceptions": [
+        "Overlooks that coverage moved between groups and widths changed",
+        "",
+        "Conformal thresholds need no retraining",
+        "Group-conditional thresholds still give at least the target coverage overall"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": "day2",
+      "session": 3,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d2-tiny-group",
+      "type": "single",
+      "prompt": "You want a 90% threshold for a group with 6 calibration defaults. What does split conformal give?",
+      "options": [
+        "A threshold from the 6th score",
+        "An infinite interval, because 90% needs a 7th score",
+        "The overall threshold, automatically",
+        "A narrower interval than for large groups"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "With n scores the rank ceil((n + 1)(1 - alpha)) can exceed n; then the only honest interval is unbounded.",
+      "misconceptions": [
+        "Forgets that ceil(7 x 0.9) = 7 exceeds the 6 scores available",
+        "",
+        "No method substitutes the overall threshold without being told to",
+        "Fewer scores cannot give a tighter guarantee"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": "day2",
+      "session": 3,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d2-shift-width",
+      "type": "single",
+      "prompt": "After applicants shift towards higher incomes, loss interval coverage falls from 91% to 77%, and the interval width barely changes. Why did the width not warn anyone?",
+      "options": [
+        "The threshold comes from the calib rows and does not see the new population",
+        "The shift was too small to matter",
+        "Conformal intervals always widen under shift",
+        "The loss model was retrained on the shifted data"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A conformal interval is a fact about its calibration rows; when new rows differ, coverage falls without any change in width.",
+      "misconceptions": [
+        "",
+        "A fall of 14 points is large; the width simply cannot reflect it",
+        "They widen only if recomputed on new data",
+        "Nothing was retrained in the stress test"
+      ],
+      "lo": [
+        "LO2",
+        "LO4"
+      ],
+      "day": "day2",
+      "session": 4,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d2-monitor",
+      "type": "single",
+      "prompt": "Losses are known months after a default. Which monitoring rule gives the earliest warning that the loss intervals are losing coverage?",
+      "options": [
+        "Monthly coverage of the intervals on new defaults",
+        "The share of new loans above 25,000 riyals, against the holdout share",
+        "The AUC of the default model",
+        "The mean predicted loss"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Coverage was lost because large loans, whose losses vary most, became more common; their share is known at application.",
+      "misconceptions": [
+        "Correct in the end, but it waits for losses that arrive months late",
+        "",
+        "Measures the default model's ranking, not the loss intervals",
+        "Can stay flat while the mix of loan sizes moves"
+      ],
+      "lo": [
+        "LO2",
+        "LO4"
+      ],
+      "day": "day2",
+      "session": 4,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
     }
   ]
 }

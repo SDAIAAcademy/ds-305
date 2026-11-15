@@ -1,158 +1,453 @@
+<!-- ======================= OPENING ======================= -->
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">REPLACE: welcome; introduce yourself; one question to the room that calibrates the pace; the rhythm of the day</aside>
+  <aside class="notes"><p>Open with yesterday's three findings: the in-sample AUC, the fourfold probabilities repaired by Platt, and the North and young applicants still under-predicted. Today moves from probabilities to intervals: how wrong can a prediction be, and for whom does the answer hold?</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
 
-<!-- Session 1 -->
-
-<section class="slide section" id="s1" data-auto="section" data-session="1"></section>
-
-<section class="slide" id="s1-idea" data-lo="LO2">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
-  <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+<section class="slide" data-label="Review" id="review-day1" data-lo="LO1">
+  <div class="kicker">Review of Day 1</div>
+  <h2>Which statement about Amana after Platt scaling is right?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1">
+    <p class="lead">Platt scaling was fitted on the calib rows. On the holdout, the Brier score fell from 0.199 to 0.081 and the mean prediction is 9.0% against 9.9% observed. Which statement holds?</p>
+    <div class="opts">
+      <div class="opt" data-why="Assumes recalibration improves ranking: a monotone map leaves the AUC where it was">The AUC rose with the Brier score</div>
+      <div class="opt" data-why="Treats average calibration as calibration in every group; the Northern region stays 6.7 points under-predicted">Every region is now calibrated</div>
+      <div class="opt" data-ok>The ranking is unchanged and the average is repaired</div>
+      <div class="opt" data-why="Reads a map fitted on calib rows as a retrained model; the model itself was not touched">The developers' model was retrained</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Platt scaling is a monotone map after the model: it repairs what the score means on average and cannot reorder applicants or see a column the score lacks.</div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Answer: C. Two minutes. If the room picks "every region", put the Northern row of Lab 1.4 back on the screen.</p></aside>
 </section>
 
-<section class="slide" id="s1-steps" data-lo="LO2">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<!-- ======================= SESSION 1 ======================= -->
+<section class="slide section" id="s1" data-auto="section" data-session="1"></section>
+
+<section class="slide" data-label="One number" id="point-prediction-silent" data-lo="LO2">
+  <div class="kicker">The problem</div>
+  <h2>A loss prediction of 12,000 riyals says nothing about how wrong it can be</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>Amana's loss model predicts the riyals lost <b>if</b> a loan defaults.</li>
+      <li>Finance provisions on it; collections plan on it.</li>
+      <li>A point prediction is silent about its error: 12,000 could mean 11,000 to 13,000 or 2,000 to 30,000.</li>
+    </ul>
+    <div class="card c-teal flat"><h4>What the validator adds</h4><p class="small mb0">An interval around every prediction that contains the real loss 90% of the time, with the condition under which that holds.</p></div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>Ask Talib's question: "If I provision for the predicted loss on 100 defaults, how many will cost more than I planned, and by how much?" A point prediction cannot answer it. The loss model is trained on defaulted loans only, so its holdout has 993 rows, not 10,000.</p></aside>
+</section>
+
+<section class="slide" data-label="Exchangeable" id="exchangeability" data-lo="LO2">
+  <div class="kicker">The one assumption</div>
+  <h2>Conformal prediction needs only one thing: new rows drawn like the calib rows</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li><b>Exchangeable</b>: the calib rows and the new row could be shuffled without changing their joint distribution. Independent draws from one population are exchangeable.</li>
+      <li>No assumption on the model, the shape of the errors or the features.</li>
+      <li>The guarantee breaks when the population moves: a new product, a new region, a shift in incomes.</li>
+    </ul>
+    <div class="callout warn small"><b>What goes wrong.</b> Quoting "90% guaranteed" for applicants who no longer look like the calib rows. Session 4 measures how much is lost.</div>
+  </div>
+  <aside class="notes"><p>This is the third row of yesterday's assumption table. Keep the definition informal: if you could not tell which row is the new one by looking at the joint distribution, the rows are exchangeable. Time order breaks it (later rows differ), and so does any selection of who applies.</p><p>Sources: Angelopoulos and Bates, A Gentle Introduction to Conformal Prediction.</p></aside>
+</section>
+
+<section class="slide" data-label="Split conformal" id="split-conformal-steps" data-lo="LO2">
+  <div class="kicker">Split conformal, in three steps</div>
+  <h2>Score the calib rows, take a quantile, widen every prediction by it</h2>
+  <div class="flow">
+    <div class="step c-teal"><b>1 · Score</b>On calib defaults, the error <code>|loss - prediction|</code></div>
+    <div class="arrow frag" data-frag="b">→</div>
+    <div class="step c-cyan frag" data-frag="b"><b>2 · Threshold</b>The <code>ceil((n+1)(1-α))</code>-th smallest score</div>
+    <div class="arrow frag" data-frag="c">→</div>
+    <div class="step c-coral frag" data-frag="c"><b>3 · Interval</b><code>prediction ± q</code>, clipped at zero</div>
+  </div>
+  <div class="callout tip mt frag"><b>No retraining.</b> The model is used as delivered; only its predictions on calib rows are needed.</div>
+  <aside class="notes"><p>Press once per step. Step 1: the score is how badly the model did; any score works, the absolute residual is the simplest. Step 2: with 895 calib defaults and alpha 0.1, the rank is ceil(896 x 0.9) = 807. Step 3: every holdout loan gets the same plus or minus q. The fact that the validator never opens the model is what makes this a validation tool.</p></aside>
+</section>
+
+<section class="slide" data-label="The plus one" id="finite-sample-correction" data-lo="LO2">
+  <div class="kicker">Why "n + 1"</div>
+  <h2>Counting the new loan turns "about 90%" into "at least 90%"</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 2.1 · step 2"><code class="language-python">def conformal_quantile(scores, alpha=0.1):
+    s = np.sort(scores)
+    k = ceil((len(s) + 1) * (1 - alpha))
+    if k > len(s):
+        return inf          # too few rows
+    return s[k - 1]</code></pre>
+    <ul class="bullets small">
+      <li>The new loan's score is equally likely to fall at any of the <b>n + 1</b> ranks.</li>
+      <li>So the chance it falls at or below rank k is k / (n + 1), at least 90%.</li>
+      <li>With 8 calib rows, 90% needs a ninth: the interval is infinite. Honest, and a warning about small groups.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The lab checks the infinite case: with 8 scores and alpha 0.1, k = 9 > 8. Return to it in Session 3: a group-conditional threshold for a group with few calib rows suffers the same way.</p></aside>
+</section>
+
+<section class="slide" data-label="Result" id="loss-interval-result" data-lo="LO2">
+  <div class="kicker">Lab 2.1 on the holdout</div>
+  <h2>Plus or minus 8,134 riyals covers 91% of real losses</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="stat"><div class="big">91.0%</div><div class="lbl">coverage on 993 holdout defaults, target 90%</div></div>
+    <div class="stat"><div class="big">8,134</div><div class="lbl">threshold q in riyals, from 895 calib defaults</div></div>
+    <div class="stat"><div class="big">15,667</div><div class="lbl">mean interval width in riyals; median loss 10,520</div></div>
+  </div>
+  <div class="callout note small mt"><b>Same answer from a library.</b> MAPIE's <code>SplitConformalRegressor</code> with <code>prefit=True</code> returns the same half-width, 8,134.</div>
+  <aside class="notes"><p>Numbers from the Lab 2.1 solution run. Point out the width: intervals wider than the median loss. That is honest about a hard target. The MAPIE cross-check matters for the capstone: participants may use either the course functions or the library, and must show they agree.</p><p>Sources: MAPIE documentation.</p></aside>
+</section>
+
+<section class="slide" data-label="On average" id="coverage-over-splits" data-lo="LO2">
+  <div class="kicker">What the 90% promises</div>
+  <h2>Coverage is a promise about the average over draws, not about one interval</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">0.900</div><div class="lbl">mean coverage over 100 random calib and test splits</div></div>
+      <div class="stat"><div class="big">0.867 to 0.935</div><div class="lbl">the range across those splits</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>One calib set can give 87% or 93% on one test set.</li>
+      <li>"This loan has a 90% chance to fall in its interval" is not the promise.</li>
+      <li>The promise is marginal: <b>over</b> loans and calib draws, on average.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The stretch of Lab 2.1, 100 splits of the 1,888 defaults outside the training rows. Do not let anyone leave with "each interval is 90% sure". The word marginal will carry the next two sessions.</p></aside>
+</section>
+
+<section class="slide" id="check-conformal-promise" data-lo="LO2">
+  <div class="kicker">Checkpoint</div>
+  <h2>What does the 90% interval promise?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2">
+    <p class="lead">Split conformal on 895 calib defaults gives Amana's loss model intervals of plus or minus 8,134 riyals. A provisioning analyst asks what the "90%" means. What do you tell her?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reads a marginal guarantee as a statement about each loan">Each loan has a 90% chance of a loss inside its own interval</div>
+      <div class="opt" data-why="Assumes the guarantee survives any population; it needs new loans drawn like the calib loans">Nine in ten losses fall inside, whoever applies next year</div>
+      <div class="opt" data-why="Confuses coverage with accuracy of the point prediction, which conformal does not change">The loss model is now 90% accurate</div>
+      <div class="opt" data-ok>Over new loans like the calib loans, at least 90% of losses fall inside</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Conformal coverage is marginal and rests on exchangeability: it holds on average over loans drawn like the calib loans.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. Option B is the dangerous one, and Session 4 shows it failing.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-2-1" data-auto="lab" data-lab="2.1">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: q 8,134 SAR, coverage 91.0%, mean width 15,667 SAR; MAPIE gives the same half-width. Common problems: forgetting the + 1 in the rank (coverage a little under target), and passing MAPIE a raw LightGBM booster (it needs the scikit-learn wrapper in the notebook). If MAPIE fails to install in Colab, the safety net continues with the course function.</p></aside>
 </section>
 
-<!-- Session 2 -->
-
+<!-- ======================= SESSION 2 ======================= -->
 <section class="slide section" id="s2" data-auto="section" data-session="2"></section>
 
-<section class="slide" id="s2-idea" data-lo="LO2">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="Top grade" id="top-grade-hides" data-lo="LO2">
+  <div class="kicker">Classification</div>
+  <h2>An officer who sees only the top grade cannot see the model's doubt</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
+    <ul class="bullets small">
+      <li>Amana's grade model gives three probabilities: on time (A), late but repaid (B), default (C).</li>
+      <li>The top grade is right for <b>74.4%</b> of holdout applicants.</li>
+      <li>For some it is a near-certainty; for others three grades are close. The top grade looks the same.</li>
     </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="card c-teal flat"><h4>A prediction set</h4><p class="small mb0">The grades the model cannot rule out, chosen so the true grade is in the set 90% of the time. Its size is the doubt.</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Grades in the holdout: A 72%, B 18%, C 10%. Ask: would Fuad's officers treat an applicant whose set is {A} the same as one whose set is {A, B, C}? They should not, and today they cannot tell them apart.</p></aside>
 </section>
 
-<section class="slide" id="s2-steps" data-lo="LO2">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" data-label="LAC" id="lac-sets" data-lo="LO2">
+  <div class="kicker">The simplest sets</div>
+  <h2>LAC keeps every grade whose probability clears one bar</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 2.2 · step 1"><code class="language-python">score = 1 - P_cal[i, true_grade]     # calib rows
+q = conformal_quantile(score, 0.1)    # 0.834
+in_set = P_hold &gt;= 1 - q              # 0.166</code></pre>
+    <ul class="bullets small">
+      <li>Score: one minus the probability of the true grade.</li>
+      <li>On Amana: a grade enters the set if its probability is at least <b>0.166</b>.</li>
+      <li>Smallest sets on average; can be empty.</li>
+    </ul>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>LAC stands for least ambiguous set-valued classifier. It is MAPIE's default for classification ("lac"). Its sets are the smallest that keep the marginal guarantee, which is why it spends its errors on the hard cases.</p><p>Sources: Angelopoulos and Bates; MAPIE documentation.</p></aside>
+</section>
+
+<section class="slide" data-label="APS" id="aps-sets" data-lo="LO2">
+  <div class="kicker">Adaptive sets</div>
+  <h2>APS adds grades from most to least likely until their total reaches the threshold</h2>
+  <div class="flow">
+    <div class="step c-teal"><b>Sort</b>grades by probability</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>Accumulate</b>add the next grade's probability</div>
+    <div class="arrow">→</div>
+    <div class="step c-coral"><b>Stop</b>when the total passes q (with a random share of the last grade)</div>
+  </div>
+  <ul class="bullets small mt">
+    <li>Unsure applicants, whose probabilities are spread, get larger sets.</li>
+    <li>The randomisation makes coverage exact rather than conservative.</li>
+  </ul>
+  <aside class="notes"><p>APS is from Romano, Sesia and Candes. The course helper implements the randomised version with a fixed seed so runs repeat. Without randomisation APS over-covers, sometimes badly with three classes: the threshold can land at 1 and every set holds all three grades.</p><p>Sources: Romano, Sesia and Candes, Classification with Valid and Adaptive Coverage.</p></aside>
+</section>
+
+<section class="slide" data-label="Results" id="set-results" data-lo="LO2">
+  <div class="kicker">Lab 2.2 on the holdout</div>
+  <h2>Both cover 90%; APS gives fewer one-grade sets</h2>
+  <table class="t">
+    <tr><th>Method</th><th class="num">Coverage</th><th class="num">Mean size</th><th class="num">Size 1</th><th class="num">Size 2</th><th class="num">Size 3</th></tr>
+    <tr><td>LAC</td><td class="num">89.2%</td><td class="num">1.56</td><td class="num">56.7%</td><td class="num">30.6%</td><td class="num">12.7%</td></tr>
+    <tr><td>APS</td><td class="num">90.3%</td><td class="num">1.67</td><td class="num">43.1%</td><td class="num">46.4%</td><td class="num">10.5%</td></tr>
+  </table>
+  <p class="small mt-s">No empty sets with either method on this holdout.</p>
+  <aside class="notes"><p>From the Lab 2.2 solution run. Read the table as a cost: APS gives up 14 points of single-grade sets for adaptivity. The stretch shows the cost of the level: mean APS size 1.33 at 80%, 1.67 at 90%, 2.03 at 95%.</p></aside>
+</section>
+
+<section class="slide" data-label="By grade" id="coverage-by-true-grade" data-lo="LO2">
+  <div class="kicker">What the average hides</div>
+  <h2>The sets miss the true grade of more than half the defaulters</h2>
+  <div class="bars">
+    <div class="row"><span>A · on time</span><div class="bar c-teal" style="--w:99%"></div><span class="val">99.8% / 99.4%</span></div>
+    <div class="row"><span>B · late</span><div class="bar c-amber" style="--w:75%"></div><span class="val">70.7% / 79.6%</span></div>
+    <div class="row"><span>C · default</span><div class="bar c-coral" style="--w:44%"></div><span class="val">44.9% / 43.0%</span></div>
+  </div>
+  <p class="small mt-s">Coverage by true grade, LAC / APS. Marginal 90% is reached by over-covering the 72% who pay on time.</p>
+  <aside class="notes"><p>This is the most important slide of the session. Neither method promises coverage within a grade. If the decision is about defaulters, the guarantee that matters is class-conditional: one threshold per true grade, computed from calib rows of that grade. Participants meet the same idea for groups of applicants in Session 3.</p></aside>
+</section>
+
+<section class="slide" data-label="Doubt" id="set-size-as-doubt" data-lo="LO2">
+  <div class="kicker">Reading set size</div>
+  <h2>Applicants whose set holds all three grades default three times as often</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">1,046</div><div class="lbl">holdout applicants (10.5%) with the set {A, B, C}</div></div>
+      <div class="stat"><div class="big">24.8% vs 8.2%</div><div class="lbl">their default rate, against everyone else's</div></div>
+    </div>
+    <div class="card c-coral flat"><h4>A use for the set</h4><p class="small mb0">A set of three grades could route an application to Fuad's officers for review instead of an automatic decision. Day 4 turns this into a condition of use.</p></div>
+  </div>
+  <aside class="notes"><p>From Lab 2.2 step 5. The set size flags exactly the applicants a human should look at. That is a concrete, testable human-review rule, much better than "officers review borderline cases".</p></aside>
+</section>
+
+<section class="slide" id="check-set-size" data-lo="LO2">
+  <div class="kicker">Checkpoint</div>
+  <h2>What does a set of size one tell the officer?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2">
+    <p class="lead">An applicant's 90% APS set is {A}. The officer asks whether the model is certain this applicant will repay on time. What is the right answer?</p>
+    <div class="opts">
+      <div class="opt" data-ok>No: across applicants, about one in ten sets misses the true grade</div>
+      <div class="opt" data-why="Reads a set of one as certainty; the guarantee is about the share of sets that contain the truth">Yes: only one grade could be the true one</div>
+      <div class="opt" data-why="Confuses the set level with the probability of the grade inside it">Yes, with exactly 90% probability for this applicant</div>
+      <div class="opt" data-why="Thinks small sets are a sign of error; they are a sign the model separates this applicant well">No: a set of one means the model failed</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The 90% is the share of sets, over applicants, that hold the true grade; any single set can be wrong, and a small set says the model is relatively sure, not certain.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. Link back to the by-grade slide: the misses are concentrated among defaulters.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-2-2" data-auto="lab" data-lab="2.2">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: LAC threshold 0.834 (grades with probability at least 0.166), coverage 89.2%, mean size 1.56; APS coverage 90.3%, mean size 1.67; defaulters covered 44.9% (LAC) and 43.0% (APS); 1,046 applicants with all three grades, default rate 24.8% against 8.2%. Common problem: indexing the probability of the true grade with a column label instead of the integer grade index.</p></aside>
 </section>
 
-<!-- Session 3 -->
-
+<!-- ======================= SESSION 3 ======================= -->
 <section class="slide section" id="s3" data-auto="section" data-session="3"></section>
 
-<section class="slide" id="s3-idea" data-lo="LO2">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="Marginal" id="marginal-not-conditional" data-lo="LO2">
+  <div class="kicker">Marginal and conditional</div>
+  <h2>90% for everyone together can be 77% for the loans that matter</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
+    <ul class="bullets small">
+      <li><b>Marginal</b> coverage: over all loans, 90%. This is what split conformal guarantees.</li>
+      <li><b>Conditional</b> coverage: within a group (large loans, a region), 90%. Not guaranteed.</li>
+      <li>One width for all loans is too wide for loans whose losses vary little and too narrow for those that vary a lot.</li>
     </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="card c-teal flat"><h4>The question at Mizan</h4><p class="small mb0">Talib provisions large loans separately. He needs their intervals to hold, not the average.</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Ask the room to predict which loans the single width under-covers before showing the table. Most will say large loans; ask why. Losses are a share of the loan, so their spread grows with the loan. The data generator plants exactly that, and adds extra spread in the North.</p></aside>
 </section>
 
-<section class="slide" id="s3-steps" data-lo="LO2">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" data-label="By group" id="coverage-by-loan-size" data-lo="LO2">
+  <div class="kicker">Lab 2.3 · one threshold for all</div>
+  <h2>Large loans are covered 77% of the time, the others 100%</h2>
+  <table class="t">
+    <tr><th>Loan size</th><th class="num">Holdout defaults</th><th class="num">Coverage</th><th class="num">Mean width (SAR)</th></tr>
+    <tr class="hl"><td>Large, above 25,000</td><td class="num">382</td><td class="num">76.7%</td><td class="num">16,268</td></tr>
+    <tr><td>Medium, 10,000 to 25,000</td><td class="num">532</td><td class="num">100%</td><td class="num">15,737</td></tr>
+    <tr><td>Small, up to 10,000</td><td class="num">79</td><td class="num">100%</td><td class="num">12,286</td></tr>
+  </table>
+  <p class="small mt-s">By region, the Northern region is lowest: 87.2% on 78 defaults, too few to call it a finding on its own.</p>
+  <aside class="notes"><p>From Lab 2.3 step 1. First reading AI-off. The overall 91% is an average of near-certainty and three in four. Small loans' widths are smaller only because the interval is clipped at zero.</p></aside>
+</section>
+
+<section class="slide" data-label="Mondrian" id="group-conditional-conformal" data-lo="LO2">
+  <div class="kicker">The repair</div>
+  <h2>One threshold per group gives each group its own guarantee</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 2.3 · step 2"><code class="language-python">def group_thresholds(s, groups, alpha=0.1):
+    return {g: conformal_quantile(
+                   s[groups == g], alpha)
+            for g in sorted(set(groups))}</code></pre>
+    <ul class="bullets small">
+      <li>Called <b>group-conditional</b> or <b>Mondrian</b> conformal.</li>
+      <li>Thresholds: large 13,256, medium 4,332, small 1,536 riyals.</li>
+      <li>Each group needs enough calib rows: 79 small-loan defaults give a threshold from 79 scores.</li>
+    </ul>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>The groups must be defined before looking at the holdout and known for a new applicant (loan size is known at application). Calib defaults per band: medium 476, large 340, small 79. With finer groups (band by region by age) the cells empty out and thresholds become infinite.</p></aside>
+</section>
+
+<section class="slide" data-label="Who pays" id="who-pays-in-width" data-lo="LO2">
+  <div class="kicker">Lab 2.3 · before and after</div>
+  <h2>Large loans get wider intervals; small loans get narrower ones</h2>
+  <table class="t">
+    <tr><th>Loan size</th><th class="num">Coverage before</th><th class="num">after</th><th class="num">Width before</th><th class="num">after</th></tr>
+    <tr class="hl"><td>Large</td><td class="num">76.7%</td><td class="num">90.6%</td><td class="num">16,268</td><td class="num">26,422</td></tr>
+    <tr><td>Medium</td><td class="num">100%</td><td class="num">92.5%</td><td class="num">15,737</td><td class="num">8,665</td></tr>
+    <tr><td>Small</td><td class="num">100%</td><td class="num">86.1%</td><td class="num">12,286</td><td class="num">3,072</td></tr>
+  </table>
+  <p class="small mt-s">Overall coverage stays at 91.2%. Small loans' 86.1% is on 79 defaults: within chance of 90%.</p>
+  <aside class="notes"><p>The repair does not create coverage; it moves it to where it was missing. For the report: the cost is 1.6 times wider intervals on large loans. The stretch tries a normalised score (error divided by the predicted loss): large loans reach 86.1%, better than one width, not as good as per-band thresholds.</p></aside>
+</section>
+
+<section class="slide" data-label="The finding" id="coverage-finding" data-lo="LO2 LO5">
+  <div class="kicker">What the report says</div>
+  <h2>A coverage finding names the group, the number and the cost of the repair</h2>
+  <div class="callout tip"><b>Finding.</b> The loss intervals cover 91% of defaults overall but only 77% of loans above 25,000 SAR (382 holdout defaults). One threshold per loan-size band restores 91% for large loans, with intervals 1.6 times wider.</div>
+  <div class="cols cols-3 gap-s mt">
+    <div class="card c-teal flat"><h4>What</h4><p class="small mb0">Under-coverage of large loans</p></div>
+    <div class="card c-cyan flat"><h4>Evidence</h4><p class="small mb0">382 holdout defaults, coverage table</p></div>
+    <div class="card c-coral flat"><h4>Recommendation</h4><p class="small mb0">Per-band thresholds, recomputed when the loan mix changes</p></div>
+  </div>
+  <aside class="notes"><p>The sentence is the output of Lab 2.3 step 5, generated from the numbers. Insist on this shape all week: what, how much, for whom, the repair and its cost.</p></aside>
+</section>
+
+<section class="slide" id="check-group-coverage" data-lo="LO2">
+  <div class="kicker">Checkpoint</div>
+  <h2>Why did one threshold under-cover large loans?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2">
+    <p class="lead">Split conformal with one threshold reaches 91% coverage overall on Amana's loss intervals, 77% on large loans and 100% on medium and small loans. What explains it?</p>
+    <div class="opts">
+      <div class="opt" data-why="Assumes conformal guarantees every group; it guarantees the average only">The conformal threshold was computed wrongly</div>
+      <div class="opt" data-ok>Losses on large loans vary more, and one width averages over groups</div>
+      <div class="opt" data-why="Confuses a group's share of the data with its spread of errors">Large loans are too rare in the calib rows</div>
+      <div class="opt" data-why="Reads under-coverage as a bias in the point prediction rather than in the width">The loss model under-predicts large losses</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Split conformal promises marginal coverage. With errors that grow with loan size, one width is too narrow for large loans and too wide for the rest.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. Large loans are 34% of the holdout defaults, not rare. If the room picks D, show that the intervals are symmetric: the misses are on both sides.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-2-3" data-auto="lab" data-lab="2.3">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: before, large 76.7% (382), medium and small 100%; thresholds large 13,256, medium 4,332, small 1,536; after, large 90.6%, medium 92.5%, small 86.1%; overall 91.2%. The first reading of the coverage table is AI-off. Common problem: computing thresholds per band on the holdout rather than the calib rows.</p></aside>
 </section>
 
-<!-- Session 4 -->
-
+<!-- ======================= SESSION 4 ======================= -->
 <section class="slide section" id="s4" data-auto="section" data-session="4"></section>
 
-<section class="slide" id="s4-idea" data-lo="LO2">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="Shift" id="when-population-moves" data-lo="LO2 LO4">
+  <div class="kicker">Coverage under shift</div>
+  <h2>When applicants change, the interval does not know</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
+    <ul class="bullets small">
+      <li>A conformal threshold is a fact about the <b>calib rows</b>.</li>
+      <li>If next year's applicants earn more, borrow more or come from a new region, the rows are no longer exchangeable.</li>
+      <li>The interval keeps its width and quietly loses coverage.</li>
     </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="card c-coral flat"><h4>At Mizan</h4><p class="small mb0">A planned campaign for salaried applicants with higher incomes. Higher incomes mean larger loans.</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Covariate shift: the mix of applicants changes, the relation between features and losses does not. It is the gentlest shift, and it still breaks the guarantee where it moves the errors. Day 4 shows a harsher kind, a broken data feed.</p></aside>
 </section>
 
-<section class="slide" id="s4-steps" data-lo="LO2">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" data-label="Simulate" id="simulating-a-shift" data-lo="LO2">
+  <div class="kicker">A shift you control</div>
+  <h2>Tilt the holdout towards higher incomes and measure what is lost</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 2.4 · step 1"><code class="language-python">z = standardise(log(declared_income))
+w = exp(strength * z)
+shifted = hold.iloc[rng.choice(n, n, p=w / w.sum())]</code></pre>
+    <ul class="bullets small">
+      <li>Strength 0: the holdout as it is.</li>
+      <li>Strength 1: median declared income of defaulters from 9,400 to 16,100 riyals.</li>
+      <li>The truth of every resampled row is known, so coverage can be measured exactly.</li>
+    </ul>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>Simulation by reweighting is the validator's stress test: no new data needed, and the shift is chosen to match a plausible business change. Name the business change in the report, so the stress has a meaning.</p></aside>
+</section>
+
+<section class="slide" data-label="Coverage lost" id="coverage-lost-under-shift" data-lo="LO2">
+  <div class="kicker">Lab 2.4</div>
+  <h2>A strong income shift costs the loss intervals 14 points; the grade sets lose 1</h2>
+  <table class="t">
+    <tr><th>Shift strength</th><th class="num">Loss interval coverage</th><th class="num">Large-loan share</th><th class="num">Grade set coverage</th></tr>
+    <tr><td>0 (holdout)</td><td class="num">91.0%</td><td class="num">38.5%</td><td class="num">89.2%</td></tr>
+    <tr><td>0.5</td><td class="num">88.4%</td><td class="num">47.5%</td><td class="num">89.3%</td></tr>
+    <tr><td>1.0</td><td class="num">83.2%</td><td class="num">58.1%</td><td class="num">88.7%</td></tr>
+    <tr class="hl"><td>1.5</td><td class="num">77.1%</td><td class="num">69.4%</td><td class="num">88.0%</td></tr>
+  </table>
+  <p class="small mt-s">The loss intervals' mean width moves by less than 5% across the four rows.</p>
+  <aside class="notes"><p>From the Lab 2.4 solution run. Why the difference: the loss errors grow with loan size, which grows with income; the grade model's errors do not depend much on income. A shift breaks a guarantee only where it moves the errors. Within large loans at strength 1, coverage is 71.1%, below the 76.7% of the unshifted holdout: richer borrowers take the largest loans.</p></aside>
+</section>
+
+<section class="slide" data-label="Restoring" id="weighted-conformal" data-lo="LO2">
+  <div class="kicker">When the shift is known</div>
+  <h2>Weighting the calib scores by the shift restores the coverage</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">83.2%</div><div class="lbl">plain split conformal at strength 1</div></div>
+      <div class="stat"><div class="big">93.6%</div><div class="lbl">weighted conformal with the true weights</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>Each calib score counts as much as its row is more likely after the shift.</li>
+      <li>Needs the weights: in a simulation you know them; with real applicants you estimate them.</li>
+      <li>The guarantee then rests on that estimate.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The stretch of Lab 2.4. Weighted conformal prediction is from Tibshirani, Barber, Candes and Ramdas. Present it as an option for the developers when a planned change is known in advance, not as the validator's default.</p><p>Sources: Tibshirani and others, Conformal Prediction Under Covariate Shift.</p></aside>
+</section>
+
+<section class="slide" data-label="Monitoring" id="monitoring-rule" data-lo="LO2 LO4">
+  <div class="kicker">From a stress test to a condition</div>
+  <h2>The result becomes a monitoring rule with a trigger and an action</h2>
+  <table class="t small">
+    <tr><th>Watch</th><td>Monthly: the share of new loans above 25,000 riyals and the median declared income</td></tr>
+    <tr><th>Trigger</th><td>Large-loan share above 48% (holdout: 38%)</td></tr>
+    <tr><th>Action</th><td>Recompute the per-band thresholds on recent defaults, or stop quoting the 90%</td></tr>
+  </table>
+  <div class="callout warn small mt-s"><b>What goes wrong.</b> Monitoring coverage itself: losses are known only months after a default. Watch the inputs that predict the loss of coverage.</div>
+  <aside class="notes"><p>Lab 2.4 step 5. The trigger is set where the simulation showed coverage falling below 88%. Point out the delay: a loan defaults within 12 months and its loss is known later still. Input monitoring is the early warning; outcome monitoring confirms.</p></aside>
+</section>
+
+<section class="slide" id="check-shift" data-lo="LO2">
+  <div class="kicker">Checkpoint</div>
+  <h2>Why did the grade sets survive the shift that broke the loss intervals?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2">
+    <p class="lead">Under the same income shift, loss interval coverage falls from 91% to 77% while grade set coverage falls from 89% to 88%. Which explanation is right?</p>
+    <div class="opts">
+      <div class="opt" data-why="Assumes set methods have a stronger guarantee; both rest on exchangeability">Prediction sets are guaranteed under shift; intervals are not</div>
+      <div class="opt" data-why="Confuses sample size with robustness; both were judged on large samples">The grade model was calibrated on more rows</div>
+      <div class="opt" data-ok>The loss errors grow with income through loan size; the grade errors barely do</div>
+      <div class="opt" data-why="Assumes the shift changed the outcome; it only changed who applies">Richer applicants default less, so the sets are easier</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> A covariate shift breaks coverage where it moves the distribution of the errors. Loss errors depend on loan size, which rises with income.</div>
+  </div>
+  <aside class="notes"><p>Answer: C.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-2-4" data-auto="lab" data-lab="2.4">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected: loss coverage 91.0, 88.4, 83.2, 77.1% at strengths 0, 0.5, 1, 1.5; grade set coverage 89.2, 89.3, 88.7, 88.0%; weighted conformal at strength 1: 93.6%. Common problem: recomputing the threshold on the shifted sample, which hides the loss. The threshold stays the one from the calib rows.</p></aside>
 </section>
 
-<section class="slide" id="wrap-up">
-  <div class="kicker">Day 2 · wrap-up</div>
-  <h2>Three things to keep</h2>
-  <div class="cols cols-3">
-    <div class="card c-teal"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-coral"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-purple"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
+<!-- ======================= CLOSE ======================= -->
+<section class="slide" data-label="Wrap-up" id="wrap-up">
+  <div class="kicker">Day 2 · three things to keep</div>
+  <h2>What today showed about Amana's intervals and sets</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-teal"><h4>The guarantee is marginal</h4><p class="small mb0">91% overall; 77% for large loans; defaulters' grade covered 45% of the time.</p></div>
+    <div class="card c-cyan"><h4>Groups need their own threshold</h4><p class="small mb0">Per-band thresholds restore 91% for large loans, at 1.6 times the width.</p></div>
+    <div class="card c-coral"><h4>Shift breaks it silently</h4><p class="small mb0">A strong income shift: 77% coverage, same width. Watch the loan mix.</p></div>
   </div>
+  <aside class="notes"><p>Each participant writes the coverage table of the report: target against achieved, with widths and set sizes, overall, by group and under shift. That is the evidence of outcome LO2.</p></aside>
 </section>
 
-<section class="slide dark" id="next" data-label="Next">
-  <div class="kicker">Next</div>
-  <h2>Day 3: What drives the predictions</h2>
-  <p class="lead">REPLACE: what participants prepare before then; unfinished labs can be finished at home</p>
-  <aside class="notes">REPLACE: accounts, installs or reading participants need before the next unit</aside>
+<section class="slide dark" data-label="Next" id="next">
+  <div class="kicker">Tomorrow</div>
+  <h2>Day 3: what drives the predictions</h2>
+  <ul class="bullets">
+    <li>Officers see three reasons with every application. Are they right, and are they stable?</li>
+    <li>Permutation importance, effect plots and Shapley values, on two income features that move together.</li>
+    <li>Prepare: one question about the reasons a credit model should be allowed to give.</li>
+  </ul>
+  <aside class="notes"><p>Close on claim 6 of the model card: "the reasons shown to officers are the causes of an applicant's risk". Tomorrow tests what the reasons are, if not causes.</p></aside>
 </section>

@@ -41,3 +41,24 @@ accepted with a reason; the reference repair (`U.recalibrated`) is Platt on the 
 17.49% observed, interval 15.44 to 19.74, outside; the others inside. Stretch: men 8.89% against 10.48%
 (interval 9.59 to 11.44, just outside), branch channel 8.21% against 9.23% (just outside). The worst
 group is the Northern region.
+
+## Day 2
+
+**Lab 2.1.** 895 calib and 993 holdout defaults. Threshold q = 8,134 SAR; coverage 91.0%; mean width
+15,667 SAR (median loss 10,520). MAPIE's half-width equals q. Stretch: 100 random splits of the 1,888
+defaults outside the training rows, mean coverage 0.900, range 0.867 to 0.935.
+
+**Lab 2.2.** Top grade right for 74.4%. LAC threshold 0.834 (grade probability at least 0.166):
+coverage 89.2%, mean size 1.56 (sizes 1, 2, 3: 56.7, 30.6, 12.7%). APS: 90.3%, mean size 1.67 (43.1,
+46.4, 10.5%). By true grade (LAC / APS): A 99.8 / 99.4%, B 70.7 / 79.6%, C 44.9 / 43.0%. 1,046 applicants
+get all three grades; their default rate is 24.8% against 8.2%. Stretch: mean APS size 1.33 at 80%,
+1.67 at 90%, 2.03 at 95%. Trap: claiming APS repairs coverage of the defaulters; it does not.
+
+**Lab 2.3.** One threshold: large 76.7% (382 defaults), medium and small 100%; Northern region 87.2%
+on 78 defaults. Per-band thresholds: large 13,256, medium 4,332, small 1,536 SAR (calib defaults 340,
+476, 79). After: large 90.6%, medium 92.5%, small 86.1%; overall 91.2%; large-loan width 16,268 to
+26,422 SAR. Stretch (normalised score): large 86.1%, medium 97.6%, small 97.5%.
+
+**Lab 2.4.** Loss interval coverage at strengths 0, 0.5, 1, 1.5: 91.0, 88.4, 83.2, 77.1%; large-loan
+share 38.5, 47.5, 58.1, 69.4%; width moves less than 5%. Grade sets: 89.2, 89.3, 88.7, 88.0%. Within
+large loans at strength 1: 71.1%. Weighted conformal at strength 1: 93.6%.
