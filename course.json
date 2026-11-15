@@ -1,0 +1,443 @@
+{
+  "$schema": "https://sdaiaacademy.github.io/engine/schemas/course.schema.json",
+  "engine": "1",
+  "id": "ds-305",
+  "code": "DS-305",
+  "version": "2027.1.0",
+  "lang": "en",
+  "title": {
+    "en": "Uncertainty, Interpretability and Model Validation",
+    "ar": "عدم اليقين وقابلية التفسير والتحقق من صحة النماذج"
+  },
+  "tagline": "REPLACE: one line under the title: what participants can do after the course",
+  "description": "Participants produce the evidence an independent validator needs about a trained model: whether its probabilities can be trusted, how wide its errors are, what drives its predictions, where it stops working and whom it fails. For Mizan Community Lending, a fictional microfinance lender, they repair calibration, wrap models in conformal intervals and prediction sets, test coverage by subgroup and under shift, show where explanations mislead, tabulate subgroup error and write a validation report against a published checklist. Fairness mitigation and documentation are DS-309.",
+  "track": "data-science",
+  "level": 300,
+  "badge": {
+    "name": "Data Science",
+    "level": "Associate"
+  },
+  "audience": "Specialists. Analysts and data scientists who have completed the level 200 set or can show equivalent work: an analysis or model they built, validated and can explain.",
+  "prerequisites": [
+    "DS-204 Machine Learning for Tabular Data: Baselines and Validation",
+    "DS-301 Regression and Generalised Linear Modelling",
+    "Trains and cross-validates a gradient-boosted classifier"
+  ],
+  "site": {
+    "url": "https://sdaiaacademy.github.io/ds-305/",
+    "repo": "SDAIAAcademy/ds-305"
+  },
+  "outcomes": [
+    {
+      "id": "LO1",
+      "text": "Measure calibration with proper scores and reliability diagrams, recalibrate, and report the effect by subgroup, given a trained default classifier and a held-out set",
+      "level": "Applied",
+      "evidence": "before-and-after diagrams, Brier scores and a subgroup table"
+    },
+    {
+      "id": "LO2",
+      "text": "Implement conformal intervals and prediction sets and test coverage overall, by subgroup and under simulated shift, given a loss-amount regression and a three-grade risk classifier",
+      "level": "Applied",
+      "evidence": "a table of target against achieved coverage with widths and set sizes"
+    },
+    {
+      "id": "LO3",
+      "text": "Apply permutation, accumulated-local-effect and Shapley-value explanations and test their stability across refits, given a boosted model with two correlated income features",
+      "level": "Applied",
+      "evidence": "an explanation report with a stability panel and one documented misleading result"
+    },
+    {
+      "id": "LO4",
+      "text": "Diagnose why a model degrades on a later batch from slice metrics, coverage loss and changed explanations, given a shifted batch with a seeded cause",
+      "level": "Performance",
+      "evidence": "a memo naming the cause and an action"
+    },
+    {
+      "id": "LO5",
+      "text": "Audit a model package for conceptual soundness, outcome performance and monitoring readiness and decide whether it is fit for use, given another team's model, documentation and data, with a reporting checklist and the national bias guide",
+      "level": "Performance",
+      "evidence": "a validation report with rated findings, subgroup gaps and conditions of use, defended before a panel"
+    }
+  ],
+  "case_study": {
+    "name": "REPLACE: the name of the fictional organisation every lab works on",
+    "summary": "REPLACE: two sentences on the case study and its synthetic data"
+  },
+  "format": "intensive",
+  "format_note": "Intensive: 4 teaching days of four sessions and a capstone day, with guided pre-work and a tracked follow-up task",
+  "hours": {
+    "instruction": 6,
+    "lab": 7,
+    "guided_self_study": 6,
+    "assessment": 1,
+    "capstone": 6
+  },
+  "unit": "day",
+  "days": [
+    {
+      "id": "day1",
+      "kind": "day",
+      "title": "Can the probabilities be trusted",
+      "deck": "slides/day1.html",
+      "sessions": [
+        {
+          "title": "What a validator needs",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO5"
+          ],
+          "lab": {
+            "id": "1.1",
+            "title": "Mark six model-card claims supported, unsupported or untestable",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D1_1_mark_six_model.ipynb"
+          }
+        },
+        {
+          "title": "Proper scores and reliability",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO1"
+          ],
+          "lab": {
+            "id": "1.2",
+            "title": "Compute Brier score and log loss and draw a reliability diagram",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D1_2_compute_brier_score.ipynb"
+          }
+        },
+        {
+          "title": "Recalibration",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO1"
+          ],
+          "lab": {
+            "id": "1.3",
+            "title": "Recalibrate with two methods on a held-out set",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D1_3_recalibrate_two_methods.ipynb"
+          }
+        },
+        {
+          "title": "Calibration by subgroup",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO1"
+          ],
+          "lab": {
+            "id": "1.4",
+            "title": "Break calibration down by region and age band and name the worst group",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D1_4_break_calibration_down.ipynb"
+          }
+        }
+      ]
+    },
+    {
+      "id": "day2",
+      "kind": "day",
+      "title": "Intervals with guarantees",
+      "deck": "slides/day2.html",
+      "sessions": [
+        {
+          "title": "Conformal intervals",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO2"
+          ],
+          "lab": {
+            "id": "2.1",
+            "title": "Wrap the loss regression in split conformal intervals and check 90% coverage",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D2_1_wrap_loss_regression.ipynb"
+          }
+        },
+        {
+          "title": "Prediction sets",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO2"
+          ],
+          "lab": {
+            "id": "2.2",
+            "title": "Build prediction sets for three risk grades and measure set sizes",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D2_2_build_prediction_sets.ipynb"
+          }
+        },
+        {
+          "title": "Coverage by group",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO2"
+          ],
+          "lab": {
+            "id": "2.3",
+            "title": "Measure subgroup coverage and apply a group-conditional variant",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D2_3_measure_subgroup_coverage.ipynb"
+          }
+        },
+        {
+          "title": "Coverage under shift",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO2"
+          ],
+          "lab": {
+            "id": "2.4",
+            "title": "Simulate an income shift and measure the coverage lost",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D2_4_simulate_income_shift.ipynb"
+          }
+        }
+      ]
+    },
+    {
+      "id": "day3",
+      "kind": "day",
+      "title": "What drives the predictions",
+      "deck": "slides/day3.html",
+      "sessions": [
+        {
+          "title": "Permutation importance",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO3"
+          ],
+          "lab": {
+            "id": "3.1",
+            "title": "Compute permutation importance and its spread over repeats",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D3_1_compute_permutation_importance.ipynb"
+          }
+        },
+        {
+          "title": "Effect plots",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO3"
+          ],
+          "lab": {
+            "id": "3.2",
+            "title": "Show where partial dependence and accumulated local effects disagree for income",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D3_2_show_where_partial.ipynb"
+          }
+        },
+        {
+          "title": "Shapley values",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO3"
+          ],
+          "lab": {
+            "id": "3.3",
+            "title": "Explain ten applicants and check stability over five refits",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D3_3_explain_ten_applicants.ipynb"
+          }
+        },
+        {
+          "title": "When explanations mislead",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO3"
+          ],
+          "lab": {
+            "id": "3.4",
+            "title": "Show how a correlated proxy shifts attributions and write a caution",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D3_4_show_how_correlated.ipynb"
+          }
+        }
+      ]
+    },
+    {
+      "id": "day4",
+      "kind": "day",
+      "title": "Validate and decide",
+      "deck": "slides/day4.html",
+      "sessions": [
+        {
+          "title": "Subgroup validation",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO4"
+          ],
+          "lab": {
+            "id": "4.1",
+            "title": "Tabulate calibration, coverage and error by subgroup and tag each gap with a bias type from the national guide",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D4_1_tabulate_calibration_coverage.ipynb"
+          }
+        },
+        {
+          "title": "Diagnosing degradation",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO4"
+          ],
+          "lab": {
+            "id": "4.2",
+            "title": "Find the seeded cause of decline in a later batch",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D4_2_find_seeded_cause.ipynb"
+          }
+        },
+        {
+          "title": "Checklists and model cards",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO5"
+          ],
+          "lab": {
+            "id": "4.3",
+            "title": "Score a model package against a checklist and list missing evidence",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D4_3_score_model_package.ipynb"
+          }
+        },
+        {
+          "title": "The fit-for-use decision",
+          "outcomes": [
+            "REPLACE: what a participant can do after this session"
+          ],
+          "lo": [
+            "LO5"
+          ],
+          "lab": {
+            "id": "4.4",
+            "title": "Draft a decision with conditions of use and choose the capstone package",
+            "summary": "REPLACE: one line on what participants build and take away; then list the steps of the lab in course.json, their minutes adding up to 25",
+            "minutes": 25,
+            "href": "D4_4_draft_decision_conditions.ipynb"
+          }
+        }
+      ]
+    },
+    {
+      "id": "capstone",
+      "kind": "capstone",
+      "title": "Capstone project presentations",
+      "deck": "slides/capstone.html",
+      "subtitle": "REPLACE: the catalog gives 8 minutes for each presentation and nothing about questions; decide whether the questions are inside those minutes, set capstone.talk_minutes and capstone.qa_minutes in course.json and the timers of the now-presenting slide, and remove this line"
+    }
+  ],
+  "capstone": {
+    "summary": "An independent validation of another participant's or a course model package, in a public repository whose README reports calibration, coverage, explanation stability, subgroup findings and a fit-for-use decision; eight-minute panel defence plus questions",
+    "submission": "REPLACE: what participants submit and how: a public repository link, or a shared folder for a course without code",
+    "talk_minutes": 8,
+    "rubric": [
+      {
+        "criterion": "Calibration and coverage",
+        "weight": 25
+      },
+      {
+        "criterion": "Explanations",
+        "weight": 20
+      },
+      {
+        "criterion": "Subgroup and shift findings",
+        "weight": 25
+      },
+      {
+        "criterion": "Decision",
+        "weight": 20
+      },
+      {
+        "criterion": "Reproducibility",
+        "weight": 10
+      }
+    ]
+  },
+  "labs": {
+    "kind": "notebooks",
+    "base": "labs/"
+  },
+  "tools": [
+    {
+      "slot": "Model training and calibration",
+      "examples": [
+        "scikit-learn",
+        "LightGBM",
+        "statsmodels"
+      ]
+    },
+    {
+      "slot": "Conformal prediction",
+      "examples": [
+        "MAPIE",
+        "course-provided split conformal functions"
+      ]
+    },
+    {
+      "slot": "Model explanation",
+      "examples": [
+        "SHAP",
+        "scikit-learn inspection tools",
+        "DALEX"
+      ]
+    },
+    {
+      "slot": "Subgroup metrics",
+      "examples": [
+        "Fairlearn",
+        "course-provided subgroup audit functions"
+      ]
+    },
+    {
+      "slot": "Reporting checklist and documentation",
+      "examples": [
+        "REFORMS checklist",
+        "model cards"
+      ]
+    }
+  ]
+}
