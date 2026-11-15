@@ -1,158 +1,445 @@
+<!-- ======================= OPENING ======================= -->
 <section class="slide title" id="title" data-auto="title">
-  <aside class="notes">REPLACE: welcome; introduce yourself; one question to the room that calibrates the pace; the rhythm of the day</aside>
+  <aside class="notes"><p>Recap in one sentence: probabilities repaired, intervals that hold on average and fail for large loans and under shift. Today: the reasons. Every application at Mizan is shown to an officer with three reasons. The model card says they are the causes of risk. By the end of the day participants can say what they are instead.</p></aside>
 </section>
 
 <section class="slide" id="agenda" data-auto="agenda"></section>
 
-<!-- Session 1 -->
-
-<section class="slide section" id="s1" data-auto="section" data-session="1"></section>
-
-<section class="slide" id="s1-idea" data-lo="LO3">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
-  <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
-    </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+<section class="slide" data-label="Review" id="review-day2" data-lo="LO2">
+  <div class="kicker">Review of Day 2</div>
+  <h2>Which statement about the loss intervals is supported?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2">
+    <p class="lead">Split conformal intervals for Amana's loss model cover 91% of holdout defaults, 77% of large loans, and 77% of all defaults after a strong simulated income shift. Which sentence can go in the report?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reads marginal coverage as a promise for every group">Every loan's interval holds 90% of the time</div>
+      <div class="opt" data-ok>Coverage holds overall on applicants like the calib rows, not for large loans or a richer population</div>
+      <div class="opt" data-why="Treats under-coverage as a modelling fault; the wrapper, not the model, sets the width">The loss model must be retrained before any interval is used</div>
+      <div class="opt" data-why="Thinks a fixed width adapts to a new population; the threshold only knows the calib rows">Under a shift the intervals widen to keep 90%</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The guarantee is marginal and rests on exchangeability; the group table and the stress test show where it stops.</div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Answer: B. Two minutes.</p></aside>
 </section>
 
-<section class="slide" id="s1-steps" data-lo="LO3">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<!-- ======================= SESSION 1 ======================= -->
+<section class="slide section" id="s1" data-auto="section" data-session="1"></section>
+
+<section class="slide" data-label="Three questions" id="three-explanation-questions" data-lo="LO3">
+  <div class="kicker">Explanations</div>
+  <h2>Each explanation method answers a different question</h2>
+  <table class="t small">
+    <tr><th>Method</th><th>Its question</th><th>Session</th></tr>
+    <tr><td>Permutation importance</td><td>How much worse does the model do without this feature?</td><td>1</td></tr>
+    <tr><td>Partial dependence, ALE</td><td>How does the prediction change as this feature changes?</td><td>2</td></tr>
+    <tr><td>Shapley values</td><td>How much did each feature move this one prediction?</td><td>3</td></tr>
+  </table>
+  <div class="callout warn small mt-s"><b>None of them asks</b> what causes default. All three describe the model, on data that may have features moving together.</div>
+  <aside class="notes"><p>Recap from DS-204 Day 2: built-in split-gain importances say what the trees used in training, not what matters on new data. Today's three methods are model-agnostic or exact, and each fails in its own way with correlated features. Tools are interchangeable: the scikit-learn inspection module, the SHAP library, DALEX; the labs use the course functions and LightGBM's own TreeSHAP.</p></aside>
+</section>
+
+<section class="slide" data-label="Shuffle" id="permutation-idea" data-lo="LO3">
+  <div class="kicker">Permutation importance</div>
+  <h2>Shuffle one column on the holdout and measure how much worse the predictions get</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 3.1 · step 1"><code class="language-python">def rise_one(df, col, rng):
+    d = df.copy()
+    d[col] = d[col].to_numpy()[rng.permutation(len(d))]
+    return log_loss(y, predict(d)) - base</code></pre>
+    <ul class="bullets small">
+      <li>On the <b>holdout</b>: importance for new applicants, not memorised noise.</li>
+      <li>On the validator's model: Amana with the Platt repair, log loss 0.284.</li>
+      <li>One shuffle is one draw: repeat and report the spread.</li>
+    </ul>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <aside class="notes"><p>The rise is in log loss, a proper score, so importance means "how much worse the probabilities get". Ask: what does a negative importance mean? Shuffling helped, by chance: the feature carries nothing measurable.</p><p>Sources: scikit-learn user guide, permutation feature importance.</p></aside>
+</section>
+
+<section class="slide" data-label="Spread" id="importance-with-spread" data-lo="LO3">
+  <div class="kicker">Lab 3.1 · ten repeats</div>
+  <h2>Two income features lead; the last two cannot be told from zero</h2>
+  <div class="bars">
+    <div class="row"><span>bank_inflow</span><div class="bar c-teal" style="--w:100%"></div><span class="val">0.068</span></div>
+    <div class="row"><span>declared_income</span><div class="bar c-teal" style="--w:67%"></div><span class="val">0.046</span></div>
+    <div class="row"><span>term_months</span><div class="bar c-cyan" style="--w:48%"></div><span class="val">0.033</span></div>
+    <div class="row"><span>loan_amount</span><div class="bar c-cyan" style="--w:37%"></div><span class="val">0.025</span></div>
+    <div class="row"><span>prior_missed</span><div class="bar c-navy" style="--w:13%"></div><span class="val">0.009</span></div>
+    <div class="row"><span>household_size, channel</span><div class="bar c-coral" style="--w:1%"></div><span class="val">range includes 0</span></div>
+  </div>
+  <aside class="notes"><p>From the Lab 3.1 solution run (full mode, ten repeats). Bank inflow ranges 0.064 to 0.072 over the repeats; household size -0.0003 to 0.0010, channel -0.0007 to 0.0003. The order of the top four is stable; the claim "channel matters" is not supported. The ranking is identical with the Brier score in place of log loss (the stretch).</p></aside>
+</section>
+
+<section class="slide" data-label="Impossible rows" id="shuffle-creates-impossible" data-lo="LO3">
+  <div class="kicker">The correlated pair</div>
+  <h2>Shuffling one income creates applicants who do not exist</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">0.84</div><div class="lbl">correlation of log declared income and log bank inflow</div></div>
+      <div class="stat"><div class="big">36%</div><div class="lbl">of rows outside the real declared-to-inflow range after shuffling declared income</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>98% of real applicants declare between 0.72 and 2.36 times their bank inflow.</li>
+      <li>Shuffle declared income alone and a third of rows declare 20,000 against an inflow of 4,000.</li>
+      <li>The model reads that as overstatement and predicts high risk: importance measures its reaction to fiction.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>This is the extrapolation problem named by Hooker, Mentch and Zhou: unrestricted permutation forces the model to predict outside the data. Overstatement is a real risk signal in these data (the generator plants it), so the model is right to react; the importance number is simply not about the feature alone.</p><p>Sources: Hooker, Mentch and Zhou, Unrestricted Permutation forces Extrapolation.</p></aside>
+</section>
+
+<section class="slide" data-label="Together" id="grouped-permutation" data-lo="LO3">
+  <div class="kicker">Lab 3.1 · step 4</div>
+  <h2>Shuffled together, the pair matters less than either one alone</h2>
+  <table class="t">
+    <tr><th>Shuffled</th><th class="num">Rise in log loss</th><th class="num">Range over 10 repeats</th></tr>
+    <tr><td>bank_inflow alone</td><td class="num">0.068</td><td class="num">0.064 to 0.072</td></tr>
+    <tr><td>declared_income alone</td><td class="num">0.046</td><td class="num">0.043 to 0.050</td></tr>
+    <tr class="hl"><td>Both, same permutation</td><td class="num">0.034</td><td class="num">0.030 to 0.037</td></tr>
+  </table>
+  <div class="callout tip small mt-s"><b>For the report.</b> Give features that travel together one grouped importance. Do not rank them against each other.</div>
+  <aside class="notes"><p>Shuffled together, each row keeps a real pair of incomes from another applicant: the information about income level is lost, the overstatement signal is not invented. With features that only share information (no interaction), the opposite happens: each alone looks unimportant because the other covers for it. Either way the single numbers mislead.</p></aside>
+</section>
+
+<section class="slide" data-label="May say" id="what-importance-may-say" data-lo="LO3">
+  <div class="kicker">Writing it up</div>
+  <h2>The table supports a statement about the model, never about the world</h2>
+  <div class="cols cols-2">
+    <div class="card c-green"><h4>Supported</h4><p class="small mb0">Amana's holdout log loss depends most on the two income features, then on term and loan size.</p></div>
+    <div class="card c-coral"><h4>Not supported</h4><p class="small mb0">"Bank inflow matters more than declared income", or "income drives default".</p></div>
+  </div>
+  <aside class="notes"><p>Lab 3.1 step 5. The first unsupported sentence ranks members of a correlated pair; the second is causal. Both appear in real model documentation. The SDAIA AI Ethics Principles ask that AI systems be explainable to those affected: an explanation that ranks the wrong thing is not one.</p></aside>
+</section>
+
+<section class="slide" id="check-permutation" data-lo="LO3">
+  <div class="kicker">Checkpoint</div>
+  <h2>What do the two single-income importances tell you?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3">
+    <p class="lead">Shuffled alone, bank inflow raises the log loss by 0.068 and declared income by 0.046. Shuffled together, by 0.034. The two correlate at 0.84. Which reading is right?</p>
+    <div class="opts">
+      <div class="opt" data-why="Ranks members of a correlated pair, which the single shuffles cannot separate">Bank inflow is the more important of the two</div>
+      <div class="opt" data-why="Adds importances as if they were independent shares of one total">Income accounts for 0.114 of the log loss</div>
+      <div class="opt" data-ok>Income matters, and the single numbers mostly measure reactions to impossible pairs</div>
+      <div class="opt" data-why="Reads a smaller grouped number as evidence that income is irrelevant">Together they matter little, so income can be dropped</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Shuffling one feature of a correlated pair creates rows outside the data; the grouped shuffle keeps realistic pairs and is the number to report.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. If the room picks D, recall that 0.034 is still the third largest importance in the table.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-3-1" data-auto="lab" data-lab="3.1">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected (full mode): bank inflow 0.068, declared income 0.046, term 0.033, loan amount 0.025; grouped incomes 0.034; 36% of rows outside the real ratio range after shuffling declared income. Quick mode uses five repeats and gives the same order. Common problem: shuffling both incomes with different permutations, which is two single shuffles at once.</p></aside>
 </section>
 
-<!-- Session 2 -->
-
+<!-- ======================= SESSION 2 ======================= -->
 <section class="slide section" id="s2" data-auto="section" data-session="2"></section>
 
-<section class="slide" id="s2-idea" data-lo="LO3">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="PD" id="partial-dependence-idea" data-lo="LO3">
+  <div class="kicker">Partial dependence</div>
+  <h2>Partial dependence sets everyone's value to the same number and averages</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
+    <pre class="code" data-file="Lab 3.2 · step 1"><code class="language-python">for v in grid:
+    d = sample.copy()
+    d["declared_income"] = v      # everyone
+    pd_curve.append(predict(d).mean())</code></pre>
+    <ul class="bullets small">
+      <li>Answers: what if every applicant had declared <b>v</b>, all else unchanged?</li>
+      <li>Fine when the feature is independent of the others.</li>
+      <li>With bank inflow fixed, a high <b>v</b> means overstatement for most applicants.</li>
     </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>The individual curves behind the average are ICE curves (the stretch). The question PD answers is a counterfactual about the model's input, which is exactly where correlated features create rows that never occur.</p><p>Sources: scikit-learn user guide, partial dependence and individual conditional expectation.</p></aside>
 </section>
 
-<section class="slide" id="s2-steps" data-lo="LO3">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
+<section class="slide" data-label="ALE" id="ale-idea" data-lo="LO3">
+  <div class="kicker">Accumulated local effects</div>
+  <h2>ALE moves each applicant only a little, inside their own bin</h2>
   <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+    <div class="step c-teal"><b>1 · Bin</b>Cut declared income at the grid values</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>2 · Nudge</b>Move only that bin's applicants from its lower to its upper edge</div>
+    <div class="arrow">→</div>
+    <div class="step c-coral"><b>3 · Accumulate</b>Add the mean changes from left to right, centre at zero</div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <p class="small mt">Every prediction is for a nearby, realistic applicant: their bank inflow already matches an income in that bin.</p>
+  <aside class="notes"><p>ALE was proposed by Apley and Zhu to fix exactly this: effects of correlated predictors without extrapolation. Its price: it answers a local question ("how does risk change between similar real applicants?"), and it is harder to explain to a committee than PD.</p><p>Sources: Apley and Zhu, Visualizing the Effects of Predictor Variables in Black Box Supervised Learning Models.</p></aside>
+</section>
+
+<section class="slide" data-label="Disagree" id="pd-ale-disagree" data-lo="LO3">
+  <div class="kicker">Lab 3.2</div>
+  <h2>Both curves rise above 10,000 riyals; partial dependence rises 1.6 times as much</h2>
+  <table class="t small">
+    <tr><th>Declared income (SAR)</th><th class="num">4,310</th><th class="num">7,290</th><th class="num">9,070</th><th class="num">11,650</th><th class="num">13,880</th><th class="num">18,930</th></tr>
+    <tr><td>PD, centred</td><td class="num">-0.036</td><td class="num">-0.055</td><td class="num">-0.033</td><td class="num">0.035</td><td class="num">0.073</td><td class="num">0.133</td></tr>
+    <tr><td>ALE, centred</td><td class="num">-0.032</td><td class="num">-0.032</td><td class="num">-0.026</td><td class="num">0.012</td><td class="num">0.047</td><td class="num">0.080</td></tr>
+    <tr class="hl"><td>PD rows outside the data</td><td class="num">75%</td><td class="num">29%</td><td class="num">17%</td><td class="num">17%</td><td class="num">27%</td><td class="num">53%</td></tr>
+  </table>
+  <p class="small mt-s">From 9,070 to 18,930 riyals: PD rises by 0.166, ALE by 0.106 (change in predicted default probability).</p>
+  <aside class="notes"><p>From the Lab 3.2 solution run on 4,000 holdout applicants. The two agree where few PD rows are impossible (the middle of the grid) and part where most are (the ends). The disagreement is not huge, and that is a fair finding too: the report says by how much the curves differ and why, rather than declaring PD wrong.</p></aside>
+</section>
+
+<section class="slide" data-label="Count them" id="counting-impossible-rows" data-lo="LO3">
+  <div class="kicker">Making the disagreement checkable</div>
+  <h2>Count the rows a curve was built from that no real applicant resembles</h2>
+  <ul class="bullets">
+    <li>Real applicants declare 0.72 to 2.34 times their bank inflow (1st to 99th percentile).</li>
+    <li>At 18,930 riyals, <b>53%</b> of PD rows lie outside that range; at 4,310, <b>75%</b>.</li>
+    <li>A curve point built mostly from such rows describes the model's behaviour on fiction.</li>
+  </ul>
+  <div class="callout tip small mt-s"><b>A habit for any effect plot.</b> Report, under the plot, the share of evaluated rows outside the data.</div>
+  <aside class="notes"><p>Lab 3.2 step 4. This turns "PD extrapolates" from a textbook warning into a number the panel can check. The same count can be made for any pair of correlated features in the capstone package.</p></aside>
+</section>
+
+<section class="slide" data-label="Individual" id="ice-curves" data-lo="LO3">
+  <div class="kicker">Behind the average</div>
+  <h2>Individual curves show who the average hides</h2>
+  <div class="cols cols-2">
+    <div class="stat"><div class="big">37 of 50</div><div class="lbl">applicants whose predicted risk moves more than 10 points across the grid</div></div>
+    <ul class="bullets small">
+      <li>An ICE curve is one applicant's partial dependence.</li>
+      <li>Their average is the PD curve.</li>
+      <li>The curves are not parallel: how much a declared income moves risk depends on the applicant's own bank inflow, through the overstatement signal.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The stretch of Lab 3.2. ICE curves are a good diagnostic for interactions: if they are not parallel, a single curve misdescribes the effect. Here the bend depends on bank inflow, which is the interaction the generator plants through the overstatement ratio.</p></aside>
+</section>
+
+<section class="slide" data-label="Report" id="which-curve-report" data-lo="LO3">
+  <div class="kicker">What the report shows</div>
+  <h2>Put ALE in the report, and say what PD would have claimed</h2>
+  <div class="callout tip">Among realistic applicants, predicted risk changes little with declared income below about 12,000 riyals and rises above it, by 0.11 between 9,070 and 18,930 riyals. Partial dependence shows 1.6 times that rise because, at the top of the grid, 53% of the rows it averages over pair a high declared income with a bank inflow no real applicant has.</div>
+  <div class="callout warn small mt-s"><b>Neither is causal.</b> ALE does not say what would happen if an applicant earned more.</div>
+  <aside class="notes"><p>The caption is the output of Lab 3.2 step 5 in full mode. Insist that both curves are correct answers to different questions; the validator chooses the question that matches the use (an officer comparing applicants).</p></aside>
+</section>
+
+<section class="slide" id="check-effect-plots" data-lo="LO3">
+  <div class="kicker">Checkpoint</div>
+  <h2>Why does partial dependence overstate the rise?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3">
+    <p class="lead">PD for declared income rises 1.6 times as much as ALE between 9,000 and 19,000 riyals. Declared income and bank inflow correlate at 0.84, and overstating income is a risk signal in the model. What explains the gap?</p>
+    <div class="opts">
+      <div class="opt" data-ok>PD pairs high declared incomes with low inflows that real applicants do not have</div>
+      <div class="opt" data-why="Blames sample size; the gap comes from which rows are evaluated, not how many">ALE uses too few applicants in each bin</div>
+      <div class="opt" data-why="Assumes the model is wrong; it reacts correctly to rows that do not occur">The model overreacts to declared income</div>
+      <div class="opt" data-why="Confuses centring with the shape: both curves are centred">PD is not centred and ALE is</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Partial dependence evaluates the model on combinations outside the data; with a correlated, interacting pair those combinations look like overstatement.</div>
+  </div>
+  <aside class="notes"><p>Answer: A.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-3-2" data-auto="lab" data-lab="3.2">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected (full mode, 4,000 applicants): PD rises 0.166 and ALE 0.106 from 9,070 to 18,930 SAR; 75% of PD rows outside the data at the bottom of the grid and 53% at the top; 37 of 50 ICE curves move more than 10 points. Quick mode uses 2,000 applicants and gives 0.211 against 0.132. Common problem: comparing uncentred PD with centred ALE.</p></aside>
 </section>
 
-<!-- Session 3 -->
-
+<!-- ======================= SESSION 3 ======================= -->
 <section class="slide section" id="s3" data-auto="section" data-session="3"></section>
 
-<section class="slide" id="s3-idea" data-lo="LO3">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="Shapley" id="shapley-accounting" data-lo="LO3">
+  <div class="kicker">Shapley values</div>
+  <h2>Shapley values split one prediction exactly among the features</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
+    <ul class="bullets small">
+      <li>Each feature's value is its average contribution over all orders of adding features.</li>
+      <li>For trees it is computed exactly and fast (TreeSHAP).</li>
+      <li>They <b>add up</b>: base value plus the features' values equals the raw score of that applicant.</li>
     </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <pre class="code s" data-file="Lab 3.3 · step 1"><code class="language-python">v = amana.predict(X10, pred_contrib=True)
+# columns: one per feature, then the base
+raw = amana.predict(X10, raw_score=True)
+np.allclose(v.sum(axis=1), raw)   # True</code></pre>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>LightGBM computes TreeSHAP itself; the SHAP library's TreeExplainer gives the same numbers and nicer plots. The values are on the log-odds scale of the raw model, before the Platt repair; a monotone map after the model does not change which features push risk up.</p><p>Sources: Lundberg and Lee, A Unified Approach to Interpreting Model Predictions; LightGBM documentation.</p></aside>
 </section>
 
-<section class="slide" id="s3-steps" data-lo="LO3">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
+<section class="slide" data-label="Reasons" id="reasons-to-officers" data-lo="LO3">
+  <div class="kicker">How Mizan uses them</div>
+  <h2>Officers see the three features that pushed risk up most</h2>
+  <table class="t small">
+    <tr><th>Applicant</th><th>Reasons shown</th></tr>
+    <tr><td>M008832</td><td>bank_inflow, prior_loans, channel</td></tr>
+    <tr><td>M004026</td><td>bank_inflow, prior_missed, years_in_business</td></tr>
+    <tr><td>M027921</td><td>declared_income, channel, business_type</td></tr>
+    <tr><td>M046515</td><td>term_months, years_in_business, channel</td></tr>
+  </table>
+  <div class="callout note small mt-s"><b>The question.</b> Would the same applicant get the same reasons from a model the developers could equally have shipped?</div>
+  <aside class="notes"><p>Four of the ten applicants of Lab 3.3. Ask Fuad's question: if an applicant is declined and asks why, is "your bank inflow" the honest answer? Lab 3.3 tests one condition of honesty: stability.</p></aside>
+</section>
+
+<section class="slide" data-label="Refits" id="refits-equally-shippable" data-lo="LO3">
+  <div class="kicker">Stability</div>
+  <h2>Refit with the developers' own recipe and see whether the reasons survive</h2>
   <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+    <div class="step c-teal"><b>Recipe</b>From metadata.json: rebalance to 50/50, 300 rounds, bagging</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>Five refits</b>Bootstrap samples of the training rows, seeds 1 to 5</div>
+    <div class="arrow">→</div>
+    <div class="step c-coral"><b>Panel</b>Top reason per applicant per refit</div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <p class="small mt">Each refit is a model the developers could have shipped: same data source, same recipe, different random draws.</p>
+  <aside class="notes"><p>The validator needs only the recipe and the training rows, both in the package. Without them, stability cannot be tested and that becomes a finding about the package (Lab 4.3). Refit cost: a few seconds each on a laptop.</p></aside>
+</section>
+
+<section class="slide" data-label="Panel" id="stability-panel" data-lo="LO3">
+  <div class="kicker">Lab 3.3 · the stability panel</div>
+  <h2>Two of ten applicants change their top reason; only one keeps all three</h2>
+  <table class="t small">
+    <tr><th>Applicant</th><th>Refit 1</th><th>Refit 2</th><th>Refit 3</th><th>Refit 4</th><th>Refit 5</th></tr>
+    <tr class="hl"><td>M004026</td><td>bank_inflow</td><td>prior_missed</td><td>bank_inflow</td><td>prior_missed</td><td>bank_inflow</td></tr>
+    <tr class="hl"><td>M008361</td><td>loan_amount</td><td>years_in_business</td><td>loan_amount</td><td>loan_amount</td><td>years_in_business</td></tr>
+    <tr><td>M008832</td><td>bank_inflow</td><td>bank_inflow</td><td>bank_inflow</td><td>bank_inflow</td><td>bank_inflow</td></tr>
+    <tr><td>Seven others</td><td colspan="5">the same top reason in all five refits</td></tr>
+  </table>
+  <p class="small mt-s">The set of three reasons is the same in all five refits for 1 of the 10 applicants.</p>
+  <aside class="notes"><p>From the Lab 3.3 solution run (full mode; quick mode gives 8 stable top reasons and 2 stable sets of three). The top reason is fairly stable; the second and third reasons, which officers also see, are not. A rule follows in the next slide.</p></aside>
+</section>
+
+<section class="slide" data-label="Trade" id="incomes-trade-credit" data-lo="LO3">
+  <div class="kicker">Why they move</div>
+  <h2>The two incomes trade credit between refits; their sum moves less</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">3.35</div><div class="lbl">widest range of one income feature's value for one applicant, in log-odds</div></div>
+      <div class="stat"><div class="big">1.70</div><div class="lbl">widest range of the two incomes' sum</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>The model needs both incomes; how it splits the credit between them is partly chance.</li>
+      <li>"Your bank inflow" and "your declared income" are one reason told two ways.</li>
+      <li>Grouping them as "income" is the more honest reason.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The stretch of Lab 3.3. Same lesson as grouped permutation importance, at the level of one applicant. If the SHAP library is used in the capstone, the grouping is done by summing the columns of the pair.</p></aside>
+</section>
+
+<section class="slide" data-label="Rule" id="reason-display-rule" data-lo="LO3 LO5">
+  <div class="kicker">From the panel to a rule</div>
+  <h2>Show a reason only when it survives refits</h2>
+  <div class="cols cols-2">
+    <div class="card c-teal"><h4>Proposed rule</h4><p class="small mb0">Show a reason when it is the top reason in at least four of five refits; group correlated features into one reason; otherwise say the model has no stable main reason.</p></div>
+    <div class="card c-coral"><h4>Why it matters</h4><p class="small mb0">An applicant told a reason that flips with a refit has been given an accident of training, not an explanation.</p></div>
+  </div>
+  <aside class="notes"><p>Lab 3.3 step 5. The SDAIA AI Ethics Principles put transparency and explainability to those affected among the principles, especially for outcomes that may harm them. A refused loan is such an outcome. The principle does not specify a stability test; the rule here is the validator's recommendation, labelled as such.</p><p>Sources: SDAIA AI Ethics Principles.</p></aside>
+</section>
+
+<section class="slide" id="check-shapley" data-lo="LO3">
+  <div class="kicker">Checkpoint</div>
+  <h2>What does "the values add up" guarantee?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3">
+    <p class="lead">For every applicant, the base value plus the Shapley values of the ten features equals the model's raw score exactly. A colleague says this proves the reasons shown to officers are reliable. What do you answer?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reads exact accounting as stability across equally valid models">Yes: an exact decomposition cannot change</div>
+      <div class="opt" data-ok>It proves the accounting is complete for this model, not that it survives a refit</div>
+      <div class="opt" data-why="Reads additivity as a causal property of the features">Yes: each value is the feature's causal effect</div>
+      <div class="opt" data-why="Thinks additivity fails with correlated features; it holds, the split between them is what moves">No: Shapley values do not add up with correlated features</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Additivity is a property of one model's prediction. A refit is a different model, and the split between correlated features can change.</div>
+  </div>
+  <aside class="notes"><p>Answer: B.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-3-3" data-auto="lab" data-lab="3.3">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected (full mode): every applicant's values add up to the raw score; 8 of 10 keep their top reason over five refits (M004026 and M008361 change); 1 of 10 keeps all three reasons. Common problem: comparing Shapley values of the raw model with probabilities after Platt; keep everything on the raw model's log-odds. Refits take a few seconds each.</p></aside>
 </section>
 
-<!-- Session 4 -->
-
+<!-- ======================= SESSION 4 ======================= -->
 <section class="slide section" id="s4" data-auto="section" data-session="4"></section>
 
-<section class="slide" id="s4-idea" data-lo="LO3">
-  <div class="kicker">REPLACE: the question this slide answers</div>
-  <h2>REPLACE: one idea, stated as a sentence</h2>
+<section class="slide" data-label="Proposal" id="wallet-proposal" data-lo="LO3">
+  <div class="kicker">A change request</div>
+  <h2>Version 2.2 adds mobile-wallet months and gains 0.004 of AUC</h2>
   <div class="cols cols-2">
-    <ul class="bullets">
-      <li>REPLACE: at most six bullets, each a complete thought</li>
-      <li>REPLACE: bold the key phrase; numbers come from the lab run, not from memory</li>
+    <ul class="bullets small">
+      <li>Rasil's team proposes one new feature: how long the applicant has used a mobile wallet.</li>
+      <li>Holdout AUC: 0.757 without, 0.761 with.</li>
+      <li>Age is excluded from the model on purpose, and remains so.</li>
     </ul>
-    <div class="card c-teal"><h4>In the case study</h4><p class="small mb0">REPLACE: tie the idea to the case study and its data</p></div>
+    <div class="card c-coral flat"><h4>The validator's question</h4><p class="small mb0">What does the new feature carry, and who will be told it is their reason?</p></div>
   </div>
-  <div class="callout warn mt"><b>What goes wrong.</b> REPLACE: the failure participants will hit, and how to recognise it</div>
-  <aside class="notes">REPLACE: what to say, the demo to run, the question to ask the room, the common failure and its fix</aside>
+  <aside class="notes"><p>Both models are refits with seed 1 on all training rows, so the comparison is fair. A gain of 0.004 is within what a refit alone can change. Ask the room to guess which applicants have the shortest wallet histories.</p></aside>
 </section>
 
-<section class="slide" id="s4-steps" data-lo="LO3">
-  <div class="kicker">Step by step</div>
-  <h2>REPLACE: a process, shown one step per key press</h2>
-  <div class="flow">
-    <div class="step c-teal"><b>1 · REPLACE: name</b>REPLACE: what happens first</div>
-    <div class="arrow frag" data-frag="b">→</div><div class="step c-cyan frag" data-frag="b"><b>2 · REPLACE: name</b>REPLACE: the next piece</div>
-    <div class="arrow frag" data-frag="c">→</div><div class="step c-coral frag" data-frag="c"><b>3 · REPLACE: name</b>REPLACE: the result</div>
+<section class="slide" data-label="Proxy" id="what-a-proxy-is" data-lo="LO3 LO5">
+  <div class="kicker">Proxies</div>
+  <h2>A proxy is a permitted feature that carries an excluded one</h2>
+  <ul class="bullets">
+    <li>Wallet months correlates with age band at <b>-0.44</b>: median 43 months for 18 to 24, 12 for 55 and over.</li>
+    <li>Age is related to default in these data, so the model learns to use what wallet months carries of it.</li>
+    <li>"Uses no age" stays true as written and becomes misleading in effect.</li>
+  </ul>
+  <div class="callout warn small mt-s"><b>What goes wrong.</b> Checking only the feature list. Claim 3 of the card passed Lab 1.1 on exactly that check.</div>
+  <aside class="notes"><p>Remind the room of the trap in Lab 1.1: claim 3 was supported as written. This session is where its limit shows. Other features can carry age too (years in business, prior loans); the validator cannot remove them all, which is why the audit by age band becomes a condition of use on Day 4.</p></aside>
+</section>
+
+<section class="slide" data-label="Who is told" id="who-gets-wallet-reason" data-lo="LO3">
+  <div class="kicker">Lab 3.4</div>
+  <h2>Applicants over 55 are told "short wallet history" more than twice as often</h2>
+  <div class="bars">
+    <div class="row"><span>18-24</span><div class="bar c-teal" style="--w:44%"></div><span class="val">20.6%</span></div>
+    <div class="row"><span>25-34</span><div class="bar c-teal" style="--w:46%"></div><span class="val">21.3%</span></div>
+    <div class="row"><span>35-44</span><div class="bar c-teal" style="--w:54%"></div><span class="val">25.1%</span></div>
+    <div class="row"><span>45-54</span><div class="bar c-amber" style="--w:66%"></div><span class="val">30.7%</span></div>
+    <div class="row"><span>55+</span><div class="bar c-coral" style="--w:100%"></div><span class="val">46.5%</span></div>
   </div>
-  <div class="callout tip mt frag"><b>Takeaway.</b> REPLACE: the one sentence to remember</div>
-  <aside class="notes">Press once per step and say what each step adds before the next one appears. REPLACE: the example to walk through</aside>
+  <p class="small mt-s">Share of holdout applicants for whom wallet months is among the three reasons. For the 55+ band its mean value pushes risk up (+0.073 log-odds).</p>
+  <aside class="notes"><p>From the Lab 3.4 solution run (full mode). Overall, the new feature is a top-three reason for 26.5% of applicants. The pattern by age is the finding; the overall share hides it.</p></aside>
+</section>
+
+<section class="slide" data-label="Gap" id="proxy-narrows-gap" data-lo="LO3">
+  <div class="kicker">The tell-tale</div>
+  <h2>The proxy narrows the age calibration gap a little, which is what a proxy does</h2>
+  <table class="t">
+    <tr><th>Age band</th><th class="num">Gap without wallet months</th><th class="num">Gap with it</th></tr>
+    <tr><td>18-24</td><td class="num">4.9 points</td><td class="num">4.7 points</td></tr>
+    <tr class="hl"><td>55+</td><td class="num">1.2 points</td><td class="num">0.8 points</td></tr>
+  </table>
+  <p class="small mt-s">Observed minus predicted default rate after Platt scaling, holdout rows.</p>
+  <aside class="notes"><p>The stretch of Lab 3.4. A feature that reduces a calibration gap by age is bringing age information back. That can look like an improvement on the subgroup table, which is exactly why the explanation side must be read too.</p></aside>
+</section>
+
+<section class="slide" data-label="Caution" id="writing-the-caution" data-lo="LO3 LO5">
+  <div class="kicker">The documented misleading result</div>
+  <h2>A caution names what the feature carries, who receives it and what to do</h2>
+  <div class="callout warn">Wallet months correlates with age (r = -0.44) and is a top-three reason for 47% of applicants over 55 against 21% of those aged 18 to 24. Shown to officers or applicants, "short wallet history" would in effect tell older applicants that their age counts against them, in a model that excludes age.</div>
+  <div class="callout tip small mt-s"><b>Recommendation.</b> Do not add the feature for an AUC gain of 0.004; if it is added, do not show it as a reason, and audit by age band.</div>
+  <aside class="notes"><p>Lab 3.4 step 5. This is the "one documented misleading result" that outcome LO3 asks for. Mitigation of such effects is DS-309's subject; the validator's job is the evidence and the caution.</p></aside>
+</section>
+
+<section class="slide" id="check-proxy" data-lo="LO3">
+  <div class="kicker">Checkpoint</div>
+  <h2>Is wallet months a proxy for age?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3">
+    <p class="lead">Wallet months correlates with age band at -0.44, is a top reason for 47% of applicants over 55 against 21% under 25, and narrows the age gap. What can you conclude?</p>
+    <div class="opts">
+      <div class="opt" data-why="Claims a causal conclusion the observational data cannot support">Wallet history causes default, so the feature is legitimate</div>
+      <div class="opt" data-why="Treats a modest correlation as no relation; the pattern of reasons by age shows the link at work">The correlation is too weak to matter</div>
+      <div class="opt" data-why="Thinks excluding age from the features settles the question">Age is not in the model, so there is no age effect</div>
+      <div class="opt" data-ok>It carries age information and would deliver age-linked reasons</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The link with age, the pattern of reasons and the narrowed gap show it carrying age; a causal role cannot be settled here, and the caution does not need one.</div>
+  </div>
+  <aside class="notes"><p>Answer: D.</p></aside>
 </section>
 
 <section class="slide lab" id="lab-3-4" data-auto="lab" data-lab="3.4">
-  <aside class="notes">REPLACE: what to watch for while participants work, the typical problems, and the fallback for anyone who did not finish an earlier lab</aside>
+  <aside class="notes"><p>Expected (full mode): AUC 0.757 without, 0.761 with; wallet months among the reasons for 20.6% (18-24) up to 46.5% (55+); correlation with age band -0.44. Common problem: comparing a bootstrap refit with a non-bootstrap one; both models here use bootstrap=False and seed 1.</p></aside>
 </section>
 
-<section class="slide" id="wrap-up">
-  <div class="kicker">Day 3 · wrap-up</div>
-  <h2>Three things to keep</h2>
-  <div class="cols cols-3">
-    <div class="card c-teal"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-coral"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
-    <div class="card c-purple"><h4>Remember</h4><p class="small mb0">REPLACE: one idea participants keep</p></div>
+<!-- ======================= CLOSE ======================= -->
+<section class="slide" data-label="Wrap-up" id="wrap-up">
+  <div class="kicker">Day 3 · three things to keep</div>
+  <h2>What today showed about Amana's explanations</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-teal"><h4>Correlated features</h4><p class="small mb0">Group them: one importance, one reason. Single numbers measure reactions to impossible rows.</p></div>
+    <div class="card c-cyan"><h4>Stability</h4><p class="small mb0">Top reasons survive five refits for 8 of 10 applicants; full sets of three for 1.</p></div>
+    <div class="card c-coral"><h4>Proxies</h4><p class="small mb0">An excluded attribute comes back through a permitted feature, and so do its reasons.</p></div>
   </div>
+  <aside class="notes"><p>Each participant drafts the explanation report: the importance table with spread, the ALE curve with its caption, the stability panel and the caution. That is the evidence of outcome LO3.</p></aside>
 </section>
 
-<section class="slide dark" id="next" data-label="Next">
-  <div class="kicker">Next</div>
-  <h2>Day 4: Validate and decide</h2>
-  <p class="lead">REPLACE: what participants prepare before then; unfinished labs can be finished at home</p>
-  <aside class="notes">REPLACE: accounts, installs or reading participants need before the next unit</aside>
+<section class="slide dark" data-label="Next" id="next">
+  <div class="kicker">Tomorrow</div>
+  <h2>Day 4: validate and decide</h2>
+  <ul class="bullets">
+    <li>Every finding by subgroup in one table, tagged with a bias type from the national guide.</li>
+    <li>A later batch where performance fell, with a cause to find.</li>
+    <li>A checklist, a decision, and the choice of your capstone package.</li>
+  </ul>
+  <aside class="notes"><p>Ask participants to skim the SDAIA AI Bias Reference Guide's list of bias types tonight; tomorrow's first lab tags each gap with one of them.</p></aside>
 </section>

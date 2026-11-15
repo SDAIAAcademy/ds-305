@@ -448,7 +448,7 @@
           "lab": {
             "id": "3.1",
             "title": "Importance and its spread",
-            "summary": "Write permutation importance on the holdout with ten repeats, report the spread, then permute the two correlated income features together and see their importance collapse from about 0.3 each to 0.05.",
+            "summary": "Write permutation importance on the holdout with ten repeats, report the spread, then permute the two correlated income features together and see the pair matter less than either one shuffled alone.",
             "minutes": 25,
             "href": "D3_1_compute_permutation_importance.ipynb",
             "steps": [

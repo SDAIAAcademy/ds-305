@@ -496,6 +496,239 @@
       "level": "evaluate",
       "pool": "practice",
       "weight": 1
+    },
+    {
+      "id": "d3-holdout-importance",
+      "type": "single",
+      "prompt": "Why is permutation importance for a validation report computed on the holdout rather than on the training rows?",
+      "options": [
+        "The holdout is larger",
+        "On training rows a shuffled feature the model overfitted looks more important than it is for new applicants",
+        "Permutation importance cannot be computed on training rows",
+        "The holdout has no correlated features"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Importance on held-out rows measures what the model needs for new applicants, not what it memorised.",
+      "misconceptions": [
+        "Size is not the reason; the training rows are larger here",
+        "",
+        "It can; it answers a different, less useful question there",
+        "Correlation between features is the same in both"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": "day3",
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d3-grouped",
+      "type": "single",
+      "prompt": "Two features correlate at 0.9. Shuffled alone, each shows a large importance; shuffled together, their joint importance is smaller than either. What should the report say?",
+      "options": [
+        "Report both single numbers and rank them",
+        "Drop the feature with the smaller number",
+        "Report one grouped importance for the pair and do not rank them against each other",
+        "Add the two single numbers to get the pair's importance"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Shuffling one member of a correlated pair creates rows outside the data; the grouped shuffle keeps realistic pairs.",
+      "misconceptions": [
+        "Ranks members of a correlated pair, which the single shuffles cannot separate",
+        "Treats a single-shuffle number as the feature's own value to the model",
+        "",
+        "Assumes the single shuffles measure separate shares of one total"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": "day3",
+      "session": 1,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d3-pd-ale",
+      "type": "single",
+      "prompt": "For a feature strongly correlated with another, partial dependence and accumulated local effects disagree at the ends of the range. Which one describes the model on realistic applicants?",
+      "options": [
+        "Partial dependence, because it uses every applicant at every value",
+        "Accumulated local effects, because each applicant is moved only within their own bin",
+        "Neither: effect plots are invalid with correlated features",
+        "Both equally: they answer the same question"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "ALE uses only small, local changes inside the data, so it avoids the impossible combinations that partial dependence averages over.",
+      "misconceptions": [
+        "Using every applicant at every value is exactly what creates combinations outside the data",
+        "",
+        "ALE was designed for this case",
+        "They answer different questions: a counterfactual for everyone, and a local change between similar applicants"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": "day3",
+      "session": 2,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d3-outside-share",
+      "type": "single",
+      "prompt": "At the top of the grid, 53% of the rows behind a partial dependence point pair a high declared income with a bank inflow no real applicant has. What do you do with this number?",
+      "options": [
+        "Remove those rows and redraw partial dependence",
+        "Report it under the plot as the share of evaluated rows outside the data",
+        "Ignore it: the model still produces a prediction for those rows",
+        "Use it to rescale the curve by 0.47"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The share makes the extrapolation checkable: a reader sees how much of the curve rests on rows outside the data.",
+      "misconceptions": [
+        "Partial dependence by definition evaluates every row at the grid value; removing rows changes the method silently",
+        "",
+        "A prediction for a row the model never saw tells nothing about real applicants",
+        "There is no such correction; the share is a warning, not a factor"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": "day3",
+      "session": 2,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d3-additive",
+      "type": "single",
+      "prompt": "Shapley values of a tree model add up exactly to each prediction. Which statement follows?",
+      "options": [
+        "The explanation accounts completely for this model's prediction",
+        "The explanation is the same for any refit of the model",
+        "Each value is the causal effect of its feature",
+        "Correlated features get equal shares"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Additivity guarantees a complete account of one prediction by one model; stability and causality must be tested separately.",
+      "misconceptions": [
+        "",
+        "Additivity is about one model; a refit can split the credit differently",
+        "Additivity is an accounting property, not a causal one",
+        "Nothing forces equal shares; the split between correlated features is what moves between refits"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": "day3",
+      "session": 3,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d3-stability-rule",
+      "type": "single",
+      "prompt": "An applicant's top reason is bank inflow in three of five equally valid refits and declared income in two. What should the officer be shown?",
+      "options": [
+        "Bank inflow, the majority reason",
+        "Declared income, the reason in the shipped model",
+        "Both incomes as one reason, income, or no single main reason",
+        "All ten features with their values"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "The two incomes trade credit between refits; grouping them, or stating that there is no stable main reason, is the honest explanation.",
+      "misconceptions": [
+        "Shows an accident of training as if it were a stable reason",
+        "Depends on which refit happened to ship",
+        "",
+        "Swaps an unstable reason for an unreadable one"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": "day3",
+      "session": 3,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d3-proxy",
+      "type": "single",
+      "prompt": "A proposed feature raises AUC by 0.004, correlates with age band at -0.44, and becomes a top reason for 47% of applicants over 55 against 21% of those under 25. Age is excluded from the model. What do you recommend?",
+      "options": [
+        "Accept it: the model still uses no age column",
+        "Accept it and show it as a reason, since it is not age",
+        "Reject the whole model",
+        "Do not add it for so small a gain; if added, do not show it as a reason and audit by age band"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "The feature carries age information and would deliver age-linked reasons; its small gain does not justify that.",
+      "misconceptions": [
+        "Checks the feature list instead of what the feature carries",
+        "Delivers age-linked reasons under another name",
+        "Over-reacts: the finding is about one proposed feature",
+        ""
+      ],
+      "lo": [
+        "LO3",
+        "LO5"
+      ],
+      "day": "day3",
+      "session": 4,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1
+    },
+    {
+      "id": "d3-proxy-evidence",
+      "type": "single",
+      "prompt": "Adding a feature narrows the calibration gap of the oldest age band from 1.2 to 0.8 points. What does this suggest?",
+      "options": [
+        "The feature carries some of the age information the model lacked",
+        "The feature fixes an age bias and should be kept",
+        "The gap was noise all along",
+        "Calibration by age is unaffected by features"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A permitted feature that reduces an age-band gap is bringing age information back, which is the mark of a proxy.",
+      "misconceptions": [
+        "",
+        "Reads a proxy's effect as a fair repair",
+        "A consistent narrowing in the direction of the age effect is not noise",
+        "Calibration within a group changes when the model gains information about that group"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": "day3",
+      "session": 4,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1
     }
   ]
 }
