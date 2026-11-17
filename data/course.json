@@ -1,0 +1,1094 @@
+{
+  "v": 1,
+  "engine": "1.0.0",
+  "build": {
+    "at": "2026-11-15T18:29:43Z",
+    "version": "2027.1.0",
+    "commit": "cc8abd5"
+  },
+  "lang": "en",
+  "dir": "ltr",
+  "langs": [
+    "en"
+  ],
+  "alt": {},
+  "course": {
+    "id": "ds-305",
+    "code": "DS-305",
+    "version": "2027.1.0",
+    "title": "Uncertainty, Interpretability and Model Validation",
+    "tagline": "Produce the evidence an independent validator needs: calibrated probabilities, intervals with guarantees, honest explanations and a fit-for-use decision",
+    "description": "Participants produce the evidence an independent validator needs about a trained model: whether its probabilities can be trusted, how wide its errors are, what drives its predictions, where it stops working and whom it fails. For Mizan Community Lending, a fictional microfinance lender, they repair calibration, wrap models in conformal intervals and prediction sets, test coverage by subgroup and under shift, show where explanations mislead, tabulate subgroup error and write a validation report against a published checklist. Fairness mitigation and documentation are DS-309.",
+    "track": "data-science",
+    "track_name": "Data Science Track",
+    "level": 300,
+    "badge": {
+      "name": "Data Science",
+      "level": "Associate"
+    },
+    "audience": "Specialists. Analysts and data scientists who have completed the level 200 set or can show equivalent work: an analysis or model they built, validated and can explain.",
+    "prerequisites": [
+      "DS-204 Machine Learning for Tabular Data: Baselines and Validation",
+      "DS-301 Regression and Generalised Linear Modelling",
+      "Trains and cross-validates a gradient-boosted classifier"
+    ],
+    "url": "https://sdaiaacademy.github.io/ds-305/",
+    "repo": "SDAIAAcademy/ds-305",
+    "home": "../index.html",
+    "format": "intensive",
+    "format_note": "Intensive: 4 teaching days of four sessions and a capstone day, with guided pre-work and a tracked follow-up task",
+    "shape": "4 teaching days + capstone day",
+    "hours": {
+      "instruction": 6,
+      "lab": 7,
+      "guided_self_study": 6,
+      "assessment": 1,
+      "capstone": 6,
+      "total": 26
+    },
+    "unit": "day",
+    "outcomes": [
+      {
+        "id": "LO1",
+        "text": "Measure calibration with proper scores and reliability diagrams, recalibrate, and report the effect by subgroup, given a trained default classifier and a held-out set",
+        "level": "Applied",
+        "evidence": "before-and-after diagrams, Brier scores and a subgroup table"
+      },
+      {
+        "id": "LO2",
+        "text": "Implement conformal intervals and prediction sets and test coverage overall, by subgroup and under simulated shift, given a loss-amount regression and a three-grade risk classifier",
+        "level": "Applied",
+        "evidence": "a table of target against achieved coverage with widths and set sizes"
+      },
+      {
+        "id": "LO3",
+        "text": "Apply permutation, accumulated-local-effect and Shapley-value explanations and test their stability across refits, given a boosted model with two correlated income features",
+        "level": "Applied",
+        "evidence": "an explanation report with a stability panel and one documented misleading result"
+      },
+      {
+        "id": "LO4",
+        "text": "Diagnose why a model degrades on a later batch from slice metrics, coverage loss and changed explanations, given a shifted batch with a seeded cause",
+        "level": "Performance",
+        "evidence": "a memo naming the cause and an action"
+      },
+      {
+        "id": "LO5",
+        "text": "Audit a model package for conceptual soundness, outcome performance and monitoring readiness and decide whether it is fit for use, given another team's model, documentation and data, with a reporting checklist and the national bias guide",
+        "level": "Performance",
+        "evidence": "a validation report with rated findings, subgroup gaps and conditions of use, defended before a panel"
+      }
+    ],
+    "case_study": {
+      "name": "Mizan Community Lending",
+      "summary": "Mizan Community Lending is a fictional microfinance lender whose credit analytics team hands its model package Amana (a default model, a three-grade model and a loss model) to the model risk team for independent validation. Participants are that team: on 50,000 synthetic applications, a held-out set and a later batch from 2025, they test the package's claims, repair calibration, wrap the models in conformal intervals and prediction sets, test what the explanations say and how stable they are, find the seeded cause of a decline, and decide whether Amana is fit for use and under which conditions. All data is synthetic and generated with a fixed seed."
+    },
+    "days": [
+      {
+        "id": "day1",
+        "kind": "day",
+        "n": 1,
+        "number": 1,
+        "label": "Day 1",
+        "title": "Can the probabilities be trusted",
+        "subtitle": "Read the package as a validator, score its probabilities with proper scores, repair them and check the repair in every group",
+        "shape": "4 sessions · 4 labs",
+        "deck": "../slides/day1.html",
+        "md": "../slides/day1.md",
+        "url": "https://sdaiaacademy.github.io/ds-305/slides/day1.html",
+        "sessions": [
+          {
+            "n": 1,
+            "label": "Session 1",
+            "title": "What a validator needs",
+            "summary": "Validation is evidence on conceptual soundness, outcomes and monitoring, and each claim in a model card is supported, unsupported or untestable",
+            "outcomes": [
+              "Name the three kinds of evidence an independent validation must produce",
+              "Separate a claim the data can test from one it cannot",
+              "Recompute a headline metric on rows the developers never saw"
+            ],
+            "lo": [
+              "LO5"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "1.1",
+              "title": "Six claims, three verdicts",
+              "summary": "Read Amana's model card, metadata and evidence, recompute the claimed AUC on the validator's held-out rows, and mark each of six claims supported, unsupported or untestable with the evidence that decides it.",
+              "minutes": 25,
+              "href": "../labs/D1_1_mark_six_model.ipynb",
+              "steps": [
+                {
+                  "text": "Open the package: card, metadata, evidence",
+                  "minutes": 5
+                },
+                {
+                  "text": "Recompute the AUC on the holdout",
+                  "minutes": 6
+                },
+                {
+                  "text": "Compare mean prediction with the default rate",
+                  "minutes": 4
+                },
+                {
+                  "text": "Mark the six claims with their evidence",
+                  "minutes": 7
+                },
+                {
+                  "text": "Rewrite one untestable claim as a test",
+                  "minutes": 3
+                }
+              ],
+              "stretch": "Find out on which rows the developers measured their AUC, and say why it is higher"
+            }
+          },
+          {
+            "n": 2,
+            "label": "Session 2",
+            "title": "Proper scores and reliability",
+            "summary": "A proper score rewards honest probabilities; the Brier score, log loss and a reliability diagram show what AUC hides",
+            "outcomes": [
+              "Compute the Brier score and log loss by hand and against a constant forecast",
+              "Draw a reliability diagram from equal-count bins",
+              "Explain why a model can rank well and still be miscalibrated"
+            ],
+            "lo": [
+              "LO1"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "1.2",
+              "title": "Scores and a reliability diagram",
+              "summary": "Write the Brier score, log loss and equal-count reliability bins, score Amana against the constant base-rate forecast on the holdout, and draw the diagram that shows its probabilities are about four times too high.",
+              "minutes": 25,
+              "href": "../labs/D1_2_compute_brier_score.ipynb",
+              "steps": [
+                {
+                  "text": "Write the Brier score and log loss",
+                  "minutes": 5
+                },
+                {
+                  "text": "Score Amana and the base-rate forecast",
+                  "minutes": 5
+                },
+                {
+                  "text": "Write equal-count reliability bins",
+                  "minutes": 6
+                },
+                {
+                  "text": "Draw the reliability diagram",
+                  "minutes": 5
+                },
+                {
+                  "text": "Name the cause in the metadata",
+                  "minutes": 4
+                }
+              ],
+              "stretch": "Split the Brier score into reliability, resolution and uncertainty"
+            }
+          },
+          {
+            "n": 3,
+            "label": "Session 3",
+            "title": "Recalibration",
+            "summary": "Platt scaling and isotonic regression repair probabilities on rows the model never saw, and leave the ranking untouched",
+            "outcomes": [
+              "Fit Platt scaling and isotonic regression on a calibration split",
+              "Score both on separate held-out rows, never on the rows that fitted them",
+              "Choose a method and state what it cannot repair"
+            ],
+            "lo": [
+              "LO1"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "1.3",
+              "title": "Platt and isotonic on held-out rows",
+              "summary": "Fit Platt scaling and isotonic regression on the calib rows, score both on the holdout against the raw model, show that AUC does not move, and see what fitting on the wrong rows would have reported.",
+              "minutes": 25,
+              "href": "../labs/D1_3_recalibrate_two_methods.ipynb",
+              "steps": [
+                {
+                  "text": "Fit Platt scaling on the calib rows",
+                  "minutes": 6
+                },
+                {
+                  "text": "Fit isotonic regression on the same rows",
+                  "minutes": 4
+                },
+                {
+                  "text": "Score raw, Platt and isotonic on the holdout",
+                  "minutes": 6
+                },
+                {
+                  "text": "Draw the three reliability curves",
+                  "minutes": 5
+                },
+                {
+                  "text": "Choose one and write why",
+                  "minutes": 4
+                }
+              ],
+              "stretch": "Recalibrate with only 500 calib rows and compare the two methods again"
+            }
+          },
+          {
+            "n": 4,
+            "label": "Session 4",
+            "title": "Calibration by subgroup",
+            "summary": "A model calibrated on average can be miscalibrated for a group it never saw as a feature; small groups need intervals",
+            "outcomes": [
+              "Break calibration down by a grouping column with an interval for each group",
+              "Tell a real gap from noise in a small group",
+              "Name the worst group and the evidence that it is not chance"
+            ],
+            "lo": [
+              "LO1"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "1.4",
+              "title": "Calibration by region and age band",
+              "summary": "Break the recalibrated probabilities down by region and age band, put a 95% interval on each observed rate, and name the worst group: the young applicants and the small Northern region, which the model cannot see.",
+              "minutes": 25,
+              "href": "../labs/D1_4_break_calibration_down.ipynb",
+              "steps": [
+                {
+                  "text": "Write the calibration table by group",
+                  "minutes": 7
+                },
+                {
+                  "text": "Add a 95% interval to each observed rate",
+                  "minutes": 5
+                },
+                {
+                  "text": "Run it for region and age band",
+                  "minutes": 4
+                },
+                {
+                  "text": "Plot predicted against observed per group",
+                  "minutes": 5
+                },
+                {
+                  "text": "Name the worst group and why",
+                  "minutes": 4
+                }
+              ],
+              "stretch": "Run the same table for gender and channel and say which gap you would report"
+            }
+          }
+        ]
+      },
+      {
+        "id": "day2",
+        "kind": "day",
+        "n": 2,
+        "number": 2,
+        "label": "Day 2",
+        "title": "Intervals with guarantees",
+        "subtitle": "Wrap the loss model and the grade model in conformal intervals and prediction sets, then test the guarantee by group and under shift",
+        "shape": "4 sessions · 4 labs",
+        "deck": "../slides/day2.html",
+        "md": "../slides/day2.md",
+        "url": "https://sdaiaacademy.github.io/ds-305/slides/day2.html",
+        "sessions": [
+          {
+            "n": 1,
+            "label": "Session 1",
+            "title": "Conformal intervals",
+            "summary": "Split conformal prediction turns any regression into intervals with 90% coverage, as long as the rows are exchangeable",
+            "outcomes": [
+              "Compute the split conformal threshold with its finite-sample correction",
+              "Wrap a fitted regression in intervals and check coverage on new rows",
+              "State the one assumption the guarantee rests on"
+            ],
+            "lo": [
+              "LO2"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "2.1",
+              "title": "Loss intervals with 90% coverage",
+              "summary": "Wrap Amana's loss model in split conformal intervals from the calib defaults, check 90% coverage and width on the holdout defaults, and confirm the same numbers with MAPIE.",
+              "minutes": 25,
+              "href": "../labs/D2_1_wrap_loss_regression.ipynb",
+              "steps": [
+                {
+                  "text": "Score the calib defaults: absolute residuals",
+                  "minutes": 4
+                },
+                {
+                  "text": "Write the conformal threshold",
+                  "minutes": 6
+                },
+                {
+                  "text": "Intervals for the holdout defaults",
+                  "minutes": 4
+                },
+                {
+                  "text": "Coverage and mean width",
+                  "minutes": 5
+                },
+                {
+                  "text": "The same with MAPIE",
+                  "minutes": 6
+                }
+              ],
+              "stretch": "Repeat over 100 random calib and test splits and plot the coverage you get"
+            }
+          },
+          {
+            "n": 2,
+            "label": "Session 2",
+            "title": "Prediction sets",
+            "summary": "For the three risk grades, conformal prediction returns a set of grades, and the size of the set is the uncertainty",
+            "outcomes": [
+              "Build LAC prediction sets from calibrated scores",
+              "Build adaptive (APS) sets and compare their sizes",
+              "Read a set of size one, two or three as a decision"
+            ],
+            "lo": [
+              "LO2"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "2.2",
+              "title": "Sets for three risk grades",
+              "summary": "Build LAC and adaptive prediction sets for grades A, B and C from the grade model, check 90% coverage on the holdout, and measure how set sizes differ by method and by true grade.",
+              "minutes": 25,
+              "href": "../labs/D2_2_build_prediction_sets.ipynb",
+              "steps": [
+                {
+                  "text": "Write the LAC score and its sets",
+                  "minutes": 7
+                },
+                {
+                  "text": "Coverage and set sizes",
+                  "minutes": 4
+                },
+                {
+                  "text": "Adaptive sets (APS) from the helper",
+                  "minutes": 5
+                },
+                {
+                  "text": "Coverage and size by true grade",
+                  "minutes": 5
+                },
+                {
+                  "text": "Which applicants get all three grades",
+                  "minutes": 4
+                }
+              ],
+              "stretch": "Make sets at 80% and 95% and plot the mean set size against the level"
+            }
+          },
+          {
+            "n": 3,
+            "label": "Session 3",
+            "title": "Coverage by group",
+            "summary": "The 90% is an average over everyone: large loans and the Northern region can sit far below it, and a group-conditional variant repairs that",
+            "outcomes": [
+              "Measure coverage and width by subgroup",
+              "Explain why marginal coverage says nothing about a group",
+              "Apply group-conditional (Mondrian) conformal and read its cost in width"
+            ],
+            "lo": [
+              "LO2"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "2.3",
+              "title": "Coverage by group, then per group",
+              "summary": "Measure the loss intervals' coverage by loan size and region, find the large loans near 77%, then compute one threshold per loan-size band and show every band back near 90% with wider intervals where they are needed.",
+              "minutes": 25,
+              "href": "../labs/D2_3_measure_subgroup_coverage.ipynb",
+              "steps": [
+                {
+                  "text": "Coverage and width by loan size and region",
+                  "minutes": 6
+                },
+                {
+                  "text": "Write group-conditional thresholds",
+                  "minutes": 7
+                },
+                {
+                  "text": "Coverage by group again",
+                  "minutes": 5
+                },
+                {
+                  "text": "Width by group: who pays for the repair",
+                  "minutes": 4
+                },
+                {
+                  "text": "Write one finding for the report",
+                  "minutes": 3
+                }
+              ],
+              "stretch": "Scale the residuals by the predicted loss and compare with the group-conditional repair"
+            }
+          },
+          {
+            "n": 4,
+            "label": "Session 4",
+            "title": "Coverage under shift",
+            "summary": "When the population moves, the rows are no longer exchangeable and the guarantee quietly fails; a simulated shift measures how much",
+            "outcomes": [
+              "Simulate a covariate shift by reweighting a held-out sample",
+              "Measure the coverage lost for intervals and for sets",
+              "Explain why the guarantee needs exchangeability and what restores it"
+            ],
+            "lo": [
+              "LO2",
+              "LO4"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "2.4",
+              "title": "An income shift, measured",
+              "summary": "Tilt the holdout towards higher declared incomes at three strengths, measure the coverage the loss intervals and the grade sets lose, and see that the cost falls on the large loans.",
+              "minutes": 25,
+              "href": "../labs/D2_4_simulate_income_shift.ipynb",
+              "steps": [
+                {
+                  "text": "Write the shifted sample",
+                  "minutes": 5
+                },
+                {
+                  "text": "Loss interval coverage at three strengths",
+                  "minutes": 7
+                },
+                {
+                  "text": "Grade set coverage at three strengths",
+                  "minutes": 5
+                },
+                {
+                  "text": "Which loans lose coverage",
+                  "minutes": 5
+                },
+                {
+                  "text": "A monitoring rule from the result",
+                  "minutes": 3
+                }
+              ],
+              "stretch": "Reweight the calib scores by the known shift and restore the coverage (weighted conformal)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "day3",
+        "kind": "day",
+        "n": 3,
+        "number": 3,
+        "label": "Day 3",
+        "title": "What drives the predictions",
+        "subtitle": "Explain the default model three ways, test how stable each explanation is, and find where explanations mislead",
+        "shape": "4 sessions · 4 labs",
+        "deck": "../slides/day3.html",
+        "md": "../slides/day3.md",
+        "url": "https://sdaiaacademy.github.io/ds-305/slides/day3.html",
+        "sessions": [
+          {
+            "n": 1,
+            "label": "Session 1",
+            "title": "Permutation importance",
+            "summary": "Permutation importance measures what the model loses without a feature, and with correlated features it measures something else",
+            "outcomes": [
+              "Compute permutation importance on held-out rows with repeats",
+              "Report its spread, not a single number",
+              "Permute correlated features together and explain the difference"
+            ],
+            "lo": [
+              "LO3"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "3.1",
+              "title": "Importance and its spread",
+              "summary": "Write permutation importance on the holdout with ten repeats, report the spread, then permute the two correlated income features together and see the pair matter less than either one shuffled alone.",
+              "minutes": 25,
+              "href": "../labs/D3_1_compute_permutation_importance.ipynb",
+              "steps": [
+                {
+                  "text": "Write permutation importance for one feature",
+                  "minutes": 7
+                },
+                {
+                  "text": "All features, ten repeats, with spread",
+                  "minutes": 5
+                },
+                {
+                  "text": "Plot the importances with their range",
+                  "minutes": 4
+                },
+                {
+                  "text": "Permute the two incomes together",
+                  "minutes": 5
+                },
+                {
+                  "text": "Write what the table may and may not say",
+                  "minutes": 4
+                }
+              ],
+              "stretch": "Use the Brier score in place of log loss and see whether the order changes"
+            }
+          },
+          {
+            "n": 2,
+            "label": "Session 2",
+            "title": "Effect plots",
+            "summary": "Partial dependence averages over combinations that never occur; accumulated local effects stay inside the data",
+            "outcomes": [
+              "Compute a partial dependence curve and individual curves",
+              "Compute accumulated local effects for the same feature",
+              "Show where the two disagree and which one to report"
+            ],
+            "lo": [
+              "LO3"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "3.2",
+              "title": "Partial dependence against local effects",
+              "summary": "Draw partial dependence and accumulated local effects for declared income, find where they disagree, and trace the disagreement to applicants whose declared income is set far from their bank inflow.",
+              "minutes": 25,
+              "href": "../labs/D3_2_show_where_partial.ipynb",
+              "steps": [
+                {
+                  "text": "Write partial dependence for declared income",
+                  "minutes": 6
+                },
+                {
+                  "text": "Accumulated local effects from the helper",
+                  "minutes": 4
+                },
+                {
+                  "text": "Plot both, centred",
+                  "minutes": 5
+                },
+                {
+                  "text": "Count the impossible rows partial dependence used",
+                  "minutes": 6
+                },
+                {
+                  "text": "Say which curve goes in the report",
+                  "minutes": 4
+                }
+              ],
+              "stretch": "Draw individual conditional expectation curves for 50 applicants and find the ones that bend"
+            }
+          },
+          {
+            "n": 3,
+            "label": "Session 3",
+            "title": "Shapley values",
+            "summary": "Shapley values split one prediction among the features, add up exactly, and can change when the model is refitted",
+            "outcomes": [
+              "Compute exact tree Shapley values and check that they add up",
+              "Read the top reasons for one applicant",
+              "Measure whether the reasons survive five refits"
+            ],
+            "lo": [
+              "LO3"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "3.3",
+              "title": "Ten applicants, five refits",
+              "summary": "Explain ten applicants with LightGBM's exact tree Shapley values, check they add up to the prediction, then refit the model five times on bootstrap samples and build a stability panel of each applicant's top reason.",
+              "minutes": 25,
+              "href": "../labs/D3_3_explain_ten_applicants.ipynb",
+              "steps": [
+                {
+                  "text": "Shapley values for ten applicants",
+                  "minutes": 5
+                },
+                {
+                  "text": "Check that they add up",
+                  "minutes": 4
+                },
+                {
+                  "text": "Refit five times with the developers' recipe",
+                  "minutes": 6
+                },
+                {
+                  "text": "The stability panel: top reason per refit",
+                  "minutes": 6
+                },
+                {
+                  "text": "Mark the explanations you would not show",
+                  "minutes": 4
+                }
+              ],
+              "stretch": "Measure the spread of the declared-income and bank-inflow values across the refits"
+            }
+          },
+          {
+            "n": 4,
+            "label": "Session 4",
+            "title": "When explanations mislead",
+            "summary": "A feature correlated with a protected attribute takes its attribution, and the reason shown to an applicant then names a proxy",
+            "outcomes": [
+              "Show how a correlated proxy moves attributions",
+              "Tell a proxy from a cause with the data you have",
+              "Write a caution that a validator can attach to the explanations"
+            ],
+            "lo": [
+              "LO3",
+              "LO5"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "3.4",
+              "title": "A proxy takes the credit",
+              "summary": "Refit the model with mobile-wallet months added, show that the new feature becomes a top reason far more often for older applicants, check its link with age, and write the caution for the validation report.",
+              "minutes": 25,
+              "href": "../labs/D3_4_show_how_correlated.ipynb",
+              "steps": [
+                {
+                  "text": "Refit with wallet months added",
+                  "minutes": 5
+                },
+                {
+                  "text": "Shapley values with and without it",
+                  "minutes": 5
+                },
+                {
+                  "text": "How often it is a top reason, by age band",
+                  "minutes": 6
+                },
+                {
+                  "text": "Its link with age",
+                  "minutes": 4
+                },
+                {
+                  "text": "Write the caution",
+                  "minutes": 5
+                }
+              ],
+              "stretch": "Remove the proxy and check whether the age-band calibration gap of Lab 1.4 changed"
+            }
+          }
+        ]
+      },
+      {
+        "id": "day4",
+        "kind": "day",
+        "n": 4,
+        "number": 4,
+        "label": "Day 4",
+        "title": "Validate and decide",
+        "subtitle": "Turn the evidence into rated findings by subgroup, diagnose a decline, score the package against a checklist and decide",
+        "shape": "4 sessions · 4 labs",
+        "deck": "../slides/day4.html",
+        "md": "../slides/day4.md",
+        "url": "https://sdaiaacademy.github.io/ds-305/slides/day4.html",
+        "sessions": [
+          {
+            "n": 1,
+            "label": "Session 1",
+            "title": "Subgroup validation",
+            "summary": "Calibration, coverage and error by subgroup are validation evidence, and each gap gets a cause and a bias type from the national guide",
+            "outcomes": [
+              "Tabulate calibration, coverage and error by subgroup in one table",
+              "Separate a gap from noise with an interval",
+              "Tag each gap with a bias type from the SDAIA AI Bias Reference Guide"
+            ],
+            "lo": [
+              "LO1",
+              "LO2",
+              "LO5"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "4.1",
+              "title": "Gaps by group, tagged",
+              "summary": "Build one audit table of calibration, loss-interval coverage and error by region, age band, gender and channel, flag the gaps an interval supports, and tag each with a bias type from the national guide and a reason.",
+              "minutes": 25,
+              "href": "../labs/D4_1_tabulate_calibration_coverage.ipynb",
+              "steps": [
+                {
+                  "text": "The audit table for one column",
+                  "minutes": 7
+                },
+                {
+                  "text": "All four columns",
+                  "minutes": 4
+                },
+                {
+                  "text": "Flag the gaps an interval supports",
+                  "minutes": 5
+                },
+                {
+                  "text": "Tag each gap with a bias type",
+                  "minutes": 6
+                },
+                {
+                  "text": "Rate each finding",
+                  "minutes": 3
+                }
+              ],
+              "stretch": "Compute the same table for the age band within the Northern region and say what the counts allow"
+            }
+          },
+          {
+            "n": 2,
+            "label": "Session 2",
+            "title": "Diagnosing degradation",
+            "summary": "A decline is diagnosed from slices, coverage and explanations together, and the cause decides the action",
+            "outcomes": [
+              "Find the slice and the month where performance fell",
+              "Check feature distributions, coverage and explanations in that slice",
+              "Write a memo that names one cause and one action"
+            ],
+            "lo": [
+              "LO4"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "4.2",
+              "title": "The cause of the decline",
+              "summary": "Score the 2025 batch, find that the decline sits in the app channel from March, trace it to bank inflow arriving a thousand times too small, reject the income rise as a decoy, and write a memo with the cause and the action.",
+              "minutes": 25,
+              "href": "../labs/D4_2_find_seeded_cause.ipynb",
+              "steps": [
+                {
+                  "text": "Score the batch by month and channel",
+                  "minutes": 6
+                },
+                {
+                  "text": "Feature stability in the failing slice",
+                  "minutes": 5
+                },
+                {
+                  "text": "Coverage and explanations in that slice",
+                  "minutes": 5
+                },
+                {
+                  "text": "Rule out the decoy",
+                  "minutes": 4
+                },
+                {
+                  "text": "Write the memo",
+                  "minutes": 5
+                }
+              ],
+              "stretch": "Write the input check that would have stopped the batch on the first day"
+            }
+          },
+          {
+            "n": 3,
+            "label": "Session 3",
+            "title": "Checklists and model cards",
+            "summary": "A reporting checklist turns \"is it documented?\" into items with evidence, and the missing evidence is a finding",
+            "outcomes": [
+              "Score a package against a reporting checklist item by item",
+              "Distinguish missing evidence from evidence of a problem",
+              "List what the developers must supply before a decision"
+            ],
+            "lo": [
+              "LO5"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "4.3",
+              "title": "The package against a checklist",
+              "summary": "Score Amana against a 12-item course checklist drawn from REFORMS and model cards, mark each item present, partial or missing with the file that shows it, and turn the gaps into a request to the developers.",
+              "minutes": 25,
+              "href": "../labs/D4_3_score_model_package.ipynb",
+              "steps": [
+                {
+                  "text": "Read the checklist",
+                  "minutes": 4
+                },
+                {
+                  "text": "Score each item with its evidence",
+                  "minutes": 9
+                },
+                {
+                  "text": "Count by part: soundness, outcomes, monitoring",
+                  "minutes": 4
+                },
+                {
+                  "text": "Write the request for missing evidence",
+                  "minutes": 5
+                },
+                {
+                  "text": "Which gap blocks a decision",
+                  "minutes": 3
+                }
+              ],
+              "stretch": "Score one of the two capstone packages with the same checklist"
+            }
+          },
+          {
+            "n": 4,
+            "label": "Session 4",
+            "title": "The fit-for-use decision",
+            "summary": "A validation ends in a decision: fit, fit with conditions, or not fit, with conditions of use, human review and monitoring",
+            "outcomes": [
+              "Rate findings by severity and link each to evidence",
+              "Draft a decision with conditions of use and human review",
+              "Choose the capstone package and plan its validation"
+            ],
+            "lo": [
+              "LO5"
+            ],
+            "minutes": 50,
+            "lab": {
+              "id": "4.4",
+              "title": "The decision and the capstone choice",
+              "summary": "Collect the week's findings, rate them, draft Amana's decision with conditions of use, human review and monitoring, test that every high finding has a condition, and choose the package for the capstone.",
+              "minutes": 25,
+              "href": "../labs/D4_4_draft_decision_conditions.ipynb",
+              "steps": [
+                {
+                  "text": "Collect and rate the findings",
+                  "minutes": 6
+                },
+                {
+                  "text": "Draft the decision and its conditions",
+                  "minutes": 8
+                },
+                {
+                  "text": "Check every high finding has a condition",
+                  "minutes": 4
+                },
+                {
+                  "text": "Compare the capstone packages",
+                  "minutes": 4
+                },
+                {
+                  "text": "Choose one and plan it",
+                  "minutes": 3
+                }
+              ],
+              "stretch": "Write the two sentences you would say to the approval committee if it asked to approve without conditions"
+            }
+          }
+        ]
+      },
+      {
+        "id": "capstone",
+        "kind": "capstone",
+        "n": 5,
+        "number": null,
+        "label": "Capstone",
+        "title": "Capstone: an independent validation",
+        "subtitle": "Eight-minute panel defence of a validation report, then four minutes of questions in which the panel picks one finding to rerun",
+        "shape": "",
+        "deck": "../slides/capstone.html",
+        "md": "../slides/capstone.md",
+        "url": "https://sdaiaacademy.github.io/ds-305/slides/capstone.html",
+        "sessions": []
+      }
+    ],
+    "capstone": {
+      "summary": "An independent validation of another participant's or a course model package, in a public repository whose README reports calibration, coverage, explanation stability, subgroup findings and a fit-for-use decision; eight-minute panel defence plus questions",
+      "submission": "A link to a public GitHub repository holding the validation notebooks, the run logs, and a README that reports calibration, coverage, explanation stability, subgroup findings and the fit-for-use decision",
+      "talk_minutes": 8,
+      "qa_minutes": 4,
+      "rubric": [
+        {
+          "criterion": "Calibration and coverage",
+          "weight": 25
+        },
+        {
+          "criterion": "Explanations",
+          "weight": 20
+        },
+        {
+          "criterion": "Subgroup and shift findings",
+          "weight": 25
+        },
+        {
+          "criterion": "Decision",
+          "weight": 20
+        },
+        {
+          "criterion": "Reproducibility",
+          "weight": 10
+        }
+      ]
+    },
+    "labs": {
+      "kind": "notebooks",
+      "base": "labs/"
+    },
+    "tools": [
+      {
+        "slot": "Model training and calibration",
+        "examples": [
+          "scikit-learn",
+          "LightGBM",
+          "statsmodels"
+        ]
+      },
+      {
+        "slot": "Conformal prediction",
+        "examples": [
+          "MAPIE",
+          "course-provided split conformal functions"
+        ]
+      },
+      {
+        "slot": "Model explanation",
+        "examples": [
+          "SHAP",
+          "scikit-learn inspection tools",
+          "DALEX"
+        ]
+      },
+      {
+        "slot": "Subgroup metrics",
+        "examples": [
+          "Fairlearn",
+          "course-provided subgroup audit functions"
+        ]
+      },
+      {
+        "slot": "Reporting checklist and documentation",
+        "examples": [
+          "REFORMS checklist",
+          "model cards"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "group": "National references",
+        "items": [
+          {
+            "title": "AI Ethics Principles (SDAIA)",
+            "url": "https://sdaia.gov.sa/en/SDAIA/about/Documents/ai-principles.pdf"
+          },
+          {
+            "title": "AI Bias Reference Guide, first edition (SDAIA, May 2026)",
+            "url": "https://sdaia.gov.sa/en/MediaCenter/KnowledgeCenter/ResearchLibrary/EN-AI-BIAS.pdf"
+          },
+          {
+            "title": "National AI Risk Management Framework, English executive summary (SDAIA, April 2026)",
+            "url": "https://sdaia.gov.sa/en/MediaCenter/KnowledgeCenter/ResearchLibrary/ExecutiveSummaryEn.pdf"
+          },
+          {
+            "title": "Personal Data Protection Law (SDAIA)",
+            "url": "https://sdaia.gov.sa/en/SDAIA/about/Documents/PersonalDataProtectionLaw.pdf"
+          },
+          {
+            "title": "Implementing Regulation of the Personal Data Protection Law (SDAIA)",
+            "url": "https://sdaia.gov.sa/en/SDAIA/about/Documents/ImplementingRegulationPersonalDataProtectionLaw.pdf"
+          }
+        ]
+      },
+      {
+        "group": "Validation and reporting",
+        "items": [
+          {
+            "title": "Board of Governors of the Federal Reserve System, SR 11-7: Guidance on Model Risk Management (2011)",
+            "url": "https://www.federalreserve.gov/boarddocs/srletters/2011/sr1107.htm"
+          },
+          {
+            "title": "Kapoor and others, REFORMS: Reporting Standards for Machine Learning Based Science",
+            "url": "https://arxiv.org/abs/2308.07832"
+          },
+          {
+            "title": "REFORMS checklist and guidelines",
+            "url": "https://reforms.cs.princeton.edu/"
+          },
+          {
+            "title": "Mitchell and others, Model Cards for Model Reporting",
+            "url": "https://arxiv.org/abs/1810.03993"
+          }
+        ]
+      },
+      {
+        "group": "Calibration",
+        "items": [
+          {
+            "title": "Gneiting and Raftery, Strictly Proper Scoring Rules, Prediction, and Estimation (JASA, 2007)",
+            "url": "https://sites.stat.washington.edu/raftery/Research/PDF/Gneiting2007jasa.pdf"
+          },
+          {
+            "title": "Niculescu-Mizil and Caruana, Predicting Good Probabilities with Supervised Learning (ICML, 2005)",
+            "url": "https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf"
+          },
+          {
+            "title": "scikit-learn user guide: probability calibration",
+            "url": "https://scikit-learn.org/stable/modules/calibration.html"
+          }
+        ]
+      },
+      {
+        "group": "Conformal prediction",
+        "items": [
+          {
+            "title": "Angelopoulos and Bates, A Gentle Introduction to Conformal Prediction and Distribution-Free Uncertainty Quantification",
+            "url": "https://arxiv.org/abs/2107.07511"
+          },
+          {
+            "title": "Romano, Sesia and Candes, Classification with Valid and Adaptive Coverage",
+            "url": "https://arxiv.org/abs/2006.02544"
+          },
+          {
+            "title": "Tibshirani, Barber, Candes and Ramdas, Conformal Prediction Under Covariate Shift",
+            "url": "https://arxiv.org/abs/1904.06019"
+          },
+          {
+            "title": "MAPIE documentation",
+            "url": "https://mapie.readthedocs.io/en/stable/"
+          }
+        ]
+      },
+      {
+        "group": "Explanations",
+        "items": [
+          {
+            "title": "Apley and Zhu, Visualizing the Effects of Predictor Variables in Black Box Supervised Learning Models",
+            "url": "https://arxiv.org/abs/1612.08468"
+          },
+          {
+            "title": "Hooker, Mentch and Zhou, Unrestricted Permutation forces Extrapolation",
+            "url": "https://arxiv.org/abs/1905.03151"
+          },
+          {
+            "title": "Lundberg and Lee, A Unified Approach to Interpreting Model Predictions",
+            "url": "https://arxiv.org/abs/1705.07874"
+          },
+          {
+            "title": "scikit-learn user guide: permutation feature importance",
+            "url": "https://scikit-learn.org/stable/modules/permutation_importance.html"
+          },
+          {
+            "title": "scikit-learn user guide: partial dependence and individual conditional expectation",
+            "url": "https://scikit-learn.org/stable/modules/partial_dependence.html"
+          },
+          {
+            "title": "Molnar, Interpretable Machine Learning",
+            "url": "https://christophm.github.io/interpretable-ml-book/"
+          }
+        ]
+      },
+      {
+        "group": "Tools",
+        "items": [
+          {
+            "title": "LightGBM documentation",
+            "url": "https://lightgbm.readthedocs.io/en/stable/"
+          },
+          {
+            "title": "SHAP documentation",
+            "url": "https://shap.readthedocs.io/en/latest/"
+          },
+          {
+            "title": "Fairlearn",
+            "url": "https://fairlearn.org/"
+          },
+          {
+            "title": "DALEX",
+            "url": "https://dalex.drwhy.ai/"
+          }
+        ]
+      }
+    ]
+  }
+}

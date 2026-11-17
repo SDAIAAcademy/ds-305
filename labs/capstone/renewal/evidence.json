@@ -1,0 +1,9 @@
+{
+ "metric": "AUC",
+ "evaluated_on": "a random 2,000 of the training rows, held out before training",
+ "calibration_checked": false,
+ "subgroup_results": null,
+ "stability_checked": false,
+ "auc_holdout": 0.902,
+ "holdout_rows": 2000
+}

@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-ax="deck" data-track="data-science">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 4 · Validate and decide · Uncertainty, Interpretability and Model Validation</title>
+<meta name="generator" content="SDAIA Academy engine 1.0.0">
+<link rel="icon" href="../_engine/icon.svg">
+<link rel="alternate" type="text/markdown" href="day4.md">
+<link rel="describedby" href="../llms.txt">
+<link rel="stylesheet" href="../_engine/academy.css">
+</head>
+<body>
+<div class="deck" data-course="Uncertainty, Interpretability and Model Validation" data-track="data-science" data-day="Day 4">
+<!-- ======================= OPENING ======================= -->
+<section class="slide title" id="title" data-auto="title" data-label="Welcome" data-n="1">
+  <div class="kicker">SDAIA Academy · Uncertainty, Interpretability and Model Validation</div>
+  <h1>Validate and decide</h1>
+  <p class="lead mt">Day 4: Turn the evidence into rated findings by subgroup, diagnose a decline, score the package against a checklist and decide</p>
+  <div class="meta"><span class="track">Data Science Track</span><span>4 teaching days + capstone day</span><span>4 sessions · 4 labs</span><span>DS-305</span></div>
+  <aside class="notes"><p>Recap in one sentence: probabilities repaired, intervals that fail for large loans, explanations that are unstable for correlated features and a proxy for age. Today the validator puts it together: one subgroup table, one diagnosed decline, one scored package and one decision for Dr. Sameera Al-Fadda's approval committee. The day ends with the choice of the capstone package.</p></aside>
+</section>
+
+<section class="slide" id="agenda" data-auto="agenda" data-label="Agenda" data-n="2">
+  <div class="kicker">Today</div>
+  <h2>Validate and decide</h2>
+  <div class="agenda"><div class="item"><div><b>Session 1 · Subgroup validation</b><small>Calibration, coverage and error by subgroup are validation evidence, and each gap gets a cause and a bias type from the national guide</small></div></div><div class="item"><div><b>Session 2 · Diagnosing degradation</b><small>A decline is diagnosed from slices, coverage and explanations together, and the cause decides the action</small></div></div><div class="item"><div><b>Session 3 · Checklists and model cards</b><small>A reporting checklist turns "is it documented?" into items with evidence, and the missing evidence is a finding</small></div></div><div class="item"><div><b>Session 4 · The fit-for-use decision</b><small>A validation ends in a decision: fit, fit with conditions, or not fit, with conditions of use, human review and monitoring</small></div></div></div>
+</section>
+
+<section class="slide" data-label="Review" id="review-day3" data-lo="LO3" data-n="3">
+  <div class="kicker">Review of Day 3</div>
+  <h2>Which explanation statement can go in the report?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3" data-id="review-day3-q1">
+    <p class="lead">Over five refits, 8 of 10 applicants keep their top reason and 1 of 10 keeps all three. Bank inflow and declared income correlate at 0.84. Which sentence is supported?</p>
+    <div class="opts">
+      <div class="opt" data-ok data-k="A">Show officers one grouped income reason, and only reasons that survive refits</div>
+      <div class="opt" data-why="Reads exact additivity as stability across equally valid models" data-k="B">The three reasons are exact, so they can be shown as they are</div>
+      <div class="opt" data-why="Ranks members of a correlated pair, which no method here can separate" data-k="C">Bank inflow is a stronger reason than declared income</div>
+      <div class="opt" data-why="Takes instability of the second and third reasons as proof the model is wrong" data-k="D">The model must be retrained until all three reasons are stable across refits</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The top reason is fairly stable and the rest are not; the two incomes trade credit between refits, so they are one reason told two ways.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. Two minutes. This rule becomes condition C4 in the decision this afternoon.</p></aside>
+</section>
+
+<!-- ======================= SESSION 1 ======================= -->
+<section class="slide section" id="s1" data-auto="section" data-session="1" data-n="4">
+  <div class="kicker">Session 1</div>
+  <h1>Subgroup validation</h1>
+  <ul class="bullets outcomes"><li>Tabulate calibration, coverage and error by subgroup in one table</li><li>Separate a gap from noise with an interval</li><li>Tag each gap with a bias type from the SDAIA AI Bias Reference Guide</li></ul>
+  <div class="sess-no">01</div>
+</section>
+
+<section class="slide" data-label="One table" id="one-audit-table" data-lo="LO5" data-n="5" data-session="1">
+  <div class="kicker">Subgroup validation</div>
+  <h2>One table, every group the lender answers for, every measure with its uncertainty</h2>
+  <table class="t small">
+    <tr><th>Column</th><th>Measures per group</th></tr>
+    <tr><td>region, age band, gender, channel</td><td>n, mean predicted, observed rate with a 95% interval, Brier, AUC</td></tr>
+    <tr><td>the same groups, defaulters only</td><td>loss interval coverage and the number of defaults behind it</td></tr>
+    <tr><td>loan size band</td><td>loss coverage, because Talib provisions by loan size</td></tr>
+  </table>
+  <div class="callout note small mt-s"><b>The validator's model.</b> Amana with the Platt repair from Day 1 and one conformal threshold of 8,134 SAR from Day 2.</div>
+  <aside class="notes"><p>Gender, age band and region are not features of Amana; they are kept in the validator's data to audit it. That is the point of excluding a column and still auditing by it. Ask: who decides which groups go in the table? The owners and the committee; the validator proposes and says why.</p></aside>
+</section>
+
+<section class="slide" data-label="Region" id="region-table" data-lo="LO5" data-n="6" data-session="1">
+  <div class="kicker">Lab 4.1 · region</div>
+  <h2>The Northern region defaults at 15.4% against 8.7% predicted</h2>
+  <table class="t small">
+    <tr><th>Region</th><th class="num">n</th><th class="num">Predicted</th><th class="num">Observed (95% interval)</th><th class="num">AUC</th><th class="num">Loss coverage</th></tr>
+    <tr><td>Central</td><td class="num">3,448</td><td class="num">8.9%</td><td class="num">9.8% (8.9 to 10.9)</td><td class="num">0.775</td><td class="num">90.0%</td></tr>
+    <tr><td>Eastern</td><td class="num">1,951</td><td class="num">9.2%</td><td class="num">9.0% (7.8 to 10.4)</td><td class="num">0.766</td><td class="num">93.2%</td></tr>
+    <tr class="hl"><td>Northern</td><td class="num">508</td><td class="num">8.7%</td><td class="num">15.4% (12.5 to 18.8)</td><td class="num">0.720</td><td class="num">87.2%</td></tr>
+    <tr><td>Southern</td><td class="num">1,386</td><td class="num">9.2%</td><td class="num">9.7% (8.2 to 11.3)</td><td class="num">0.751</td><td class="num">93.3%</td></tr>
+    <tr><td>Western</td><td class="num">2,707</td><td class="num">8.9%</td><td class="num">9.8% (8.8 to 11.0)</td><td class="num">0.740</td><td class="num">91.0%</td></tr>
+  </table>
+  <aside class="notes"><p>From the Lab 4.1 run on the 10,000 holdout rows. The North's interval is wide (508 applicants) and still sits far above the prediction: the gap is supported. Its coverage of 87.2% rests on 78 defaults, so it is not flagged. Wilson intervals, as on Day 1.</p></aside>
+</section>
+
+<section class="slide" data-label="Flags" id="flag-rules" data-lo="LO5" data-n="7" data-session="1">
+  <div class="kicker">From numbers to flags</div>
+  <h2>Flag a gap only when an interval supports it</h2>
+  <div class="cols cols-2">
+    <div class="card c-teal"><h4>Calibration</h4><p class="small mb0">Flag when the mean prediction lies outside the observed rate's 95% interval.</p></div>
+    <div class="card c-cyan"><h4>Coverage</h4><p class="small mb0">Flag when loss coverage is below 85% on at least 50 defaults.</p></div>
+  </div>
+  <table class="t small mt-s">
+    <tr><th>Flagged</th><th class="num">Value</th></tr>
+    <tr class="hl"><td>Northern, calibration</td><td class="num">+6.7 points</td></tr>
+    <tr class="hl"><td>Age 18 to 24, calibration</td><td class="num">+4.8 points</td></tr>
+    <tr><td>Age 55+, coverage</td><td class="num">83.1% on 83 defaults</td></tr>
+    <tr><td>Men; branch channel, calibration</td><td class="num">+1.6; +1.0 points</td></tr>
+    <tr><td>Loans above 25,000 SAR, coverage</td><td class="num">76.7% on 382 defaults</td></tr>
+  </table>
+  <aside class="notes"><p>The rules are the course's, stated before looking, which is the protection against hunting for gaps. With five regions, five age bands, two genders and two channels, some group will look odd by chance; the interval rule keeps the flags to what the data support. Ask: is the 50-default floor arbitrary? Yes, and the report says so.</p></aside>
+</section>
+
+<section class="slide" data-label="Tag" id="bias-guide-tags" data-lo="LO5" data-n="8" data-session="1">
+  <div class="kicker">SDAIA AI Bias Reference Guide</div>
+  <h2>A tag names how the gap arose, which points to the remedy</h2>
+  <table class="t small">
+    <tr><th>Gap</th><th>Tag</th><th>Guide</th><th>Mechanism in Amana</th></tr>
+    <tr><td>Northern</td><td>Aggregation Bias</td><td class="num">p. 12</td><td>5% of rows, pooled with larger regions, fitted worst</td></tr>
+    <tr><td>Age 18 to 24</td><td>Age Bias</td><td class="num">p. 11</td><td>age excluded, its differences not accounted for</td></tr>
+    <tr><td>Large loans</td><td>Evaluation Bias</td><td class="num">p. 42</td><td>91% marginal coverage overstates how well they are covered</td></tr>
+  </table>
+  <div class="callout warn small mt-s"><b>A tag is not a verdict.</b> It names a mechanism from the guide. Whether a gap is unfair is the committee's judgement, made with the evidence.</div>
+  <aside class="notes"><p>More than one tag is defensible: the North can also be Sample Size or Coverage Bias. Lab 4.1 accepts any of a short list and asks for the one-line reason. Page numbers are those of the Guide's English first edition (May 2026). Remedies are the owners' choice; fairness mitigation is DS-309's subject.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
+</section>
+
+<section class="slide" data-label="Rate" id="rating-rule" data-lo="LO5" data-n="9" data-session="1">
+  <div class="kicker">Rating</div>
+  <h2>Rate by what the gap does to people and how firmly it is supported</h2>
+  <div class="flow">
+    <div class="step c-coral"><b>High</b>Affects approval or price, interval supports it, 2 points or more</div>
+    <div class="arrow">→</div>
+    <div class="step c-amber"><b>Medium</b>Affects provisioning, or supported but small</div>
+    <div class="arrow">→</div>
+    <div class="step c-navy"><b>Low</b>Neither</div>
+  </div>
+  <p class="small mt">Two high findings from this table: the Northern region and applicants aged 18 to 24.</p>
+  <aside class="notes"><p>The rule is the course's, written so that two validators reach the same rating. Coverage gaps affect provisioning, so they are medium under it; a lender who prices on the loss interval would rate them higher, and the report should say which use applies.</p></aside>
+</section>
+
+<section class="slide" data-label="Small cells" id="small-cells" data-lo="LO5" data-n="10" data-session="1">
+  <div class="kicker">Lab 4.1 · stretch</div>
+  <h2>Crossing groups multiplies the cells and divides the evidence</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">6 to 30</div><div class="lbl">defaults per age band within the Northern region</div></div>
+      <div class="stat"><div class="big">9 to 27</div><div class="lbl">points: width of the observed rate's interval per cell</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>Young Northern applicants default at 39% in the sample, on 18 defaults.</li>
+      <li>The interval runs from 26% to 54%: a reason to watch, not a finding.</li>
+      <li>Report crossed cells with their counts and intervals, or not at all.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>Intersectional audits are right in principle and hard in data. The honest move is to say what the counts allow, and to name the cell as one to monitor once more outcomes mature.</p></aside>
+</section>
+
+<section class="slide" id="check-subgroup" data-lo="LO5" data-n="11" data-session="1">
+  <div class="kicker">Checkpoint</div>
+  <h2>How do you report the gap for men?</h2>
+  <div class="quiz" data-type="single" data-lo="LO5" data-id="check-subgroup-q1">
+    <p class="lead">After recalibration, men default at 10.5% against 8.9% predicted, interval 9.6 to 11.4; women at 9.5% against 9.1%. Under the course rules, what goes in the report?</p>
+    <div class="opts">
+      <div class="opt" data-why="Ignores that the prediction lies outside the interval: the gap is supported" data-k="A">Nothing: the gap is within noise</div>
+      <div class="opt" data-why="Rates a small gap high only because the group is protected; the rule asks for size too" data-k="B">A high finding of gender bias, since gender is a protected attribute</div>
+      <div class="opt" data-why="Turns a tag into a verdict the validator cannot give" data-k="C">Evidence that the model discriminates against men</div>
+      <div class="opt" data-ok data-k="D">A medium finding: supported, 1.6 points, monitored by gender</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The interval supports the gap, and the rule rates supported gaps under 2 points as medium; the report states it and asks for monitoring.</div>
+  </div>
+  <aside class="notes"><p>Answer: D.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-4-1" data-auto="lab" data-lab="4.1" data-label="Lab 4.1" data-n="12" data-session="1">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 4.1 · 25 min</div><h2>Gaps by group, tagged</h2><p class="lead small">Build one audit table of calibration, loss-interval coverage and error by region, age band, gender and channel, flag the gaps an interval supports, and tag each with a bias type from the national guide and a reason.</p><a class="nb" href="../labs/D4_1_tabulate_calibration_coverage.ipynb">D4_1_tabulate_calibration_coverage.ipynb</a></div><ul class="checklist"><li>The audit table for one column <span class="min">7 min</span></li><li>All four columns <span class="min">4 min</span></li><li>Flag the gaps an interval supports <span class="min">5 min</span></li><li>Tag each gap with a bias type <span class="min">6 min</span></li><li>Rate each finding <span class="min">3 min</span></li><li class="stretch">✱ Stretch: Compute the same table for the age band within the Northern region and say what the counts allow</li></ul></div>
+  <aside class="notes"><p>Expected: Northern +6.7 points and 18-24 +4.8 points rated high; 55+ coverage 83.1%, men +1.6, branch +1.0 and large loans 76.7% medium. Quick mode gives the same numbers. Common problems: computing coverage over all rows instead of defaulters only (non-defaulters have no loss); tagging with a type that is not in the guide. Anyone who missed Day 1 or 2 starts from the package: the lab rebuilds the Platt map and the threshold.</p></aside>
+</section>
+
+<!-- ======================= SESSION 2 ======================= -->
+<section class="slide section" id="s2" data-auto="section" data-session="2" data-n="13">
+  <div class="kicker">Session 2</div>
+  <h1>Diagnosing degradation</h1>
+  <ul class="bullets outcomes"><li>Find the slice and the month where performance fell</li><li>Check feature distributions, coverage and explanations in that slice</li><li>Write a memo that names one cause and one action</li></ul>
+  <div class="sess-no">02</div>
+</section>
+
+<section class="slide" data-label="Complaint" id="model-got-worse" data-lo="LO4" data-n="14" data-session="2">
+  <div class="kicker">Six months in production</div>
+  <h2>Talib reports that Amana "got worse" in 2025</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">0.755 → 0.677</div><div class="lbl">AUC, holdout 2023-24 to the 2025 batch</div></div>
+      <div class="stat"><div class="big">17.6% vs 9.2%</div><div class="lbl">mean predicted against observed default, 2025</div></div>
+    </div>
+    <div class="card c-coral flat"><h4>The tempting memo</h4><p class="small mb0">"The model has degraded and must be retrained on recent data."</p></div>
+  </div>
+  <aside class="notes"><p>10,000 applications from January to June 2025, outcomes now known. Ask the room for the first thing they would compute. Steer to "where and since when" before "why".</p></aside>
+</section>
+
+<section class="slide" data-label="Where" id="where-and-since-when" data-lo="LO4" data-n="15" data-session="2">
+  <div class="kicker">Lab 4.2 · step 1</div>
+  <h2>Slice by month and channel: the failure is the app channel from March</h2>
+  <table class="t small">
+    <tr><th>Month</th><th class="num">App predicted</th><th class="num">App observed</th><th class="num">App AUC</th><th class="num">Branch AUC</th></tr>
+    <tr><td>2025-01</td><td class="num">9.9%</td><td class="num">10.1%</td><td class="num">0.728</td><td class="num">0.740</td></tr>
+    <tr><td>2025-02</td><td class="num">9.8%</td><td class="num">9.9%</td><td class="num">0.723</td><td class="num">0.770</td></tr>
+    <tr class="hl"><td>2025-03</td><td class="num">46.6%</td><td class="num">11.0%</td><td class="num">0.680</td><td class="num">0.766</td></tr>
+    <tr class="hl"><td>2025-04 to 06</td><td class="num">46%</td><td class="num">9 to 11%</td><td class="num">0.53 to 0.68</td><td class="num">0.69 to 0.77</td></tr>
+  </table>
+  <aside class="notes"><p>From the Lab 4.2 run. The overall decline is an average of an unharmed branch channel and a broken slice. A drop that starts in one month in one channel points to a change in a process, not in the world.</p></aside>
+</section>
+
+<section class="slide" data-label="Inputs" id="psi-inputs" data-lo="LO4" data-n="16" data-session="2">
+  <div class="kicker">Lab 4.2 · step 2</div>
+  <h2>One input has moved: bank inflow, by a factor of a thousand</h2>
+  <div class="cols cols-2">
+    <div class="bars">
+      <div class="row"><span>bank_inflow</span><div class="bar c-coral" style="--w:100%"></div><span class="val">8.28</span></div>
+      <div class="row"><span>declared_income</span><div class="bar c-teal" style="--w:2%"></div><span class="val">0.037</span></div>
+      <div class="row"><span>loan_amount</span><div class="bar c-teal" style="--w:1%"></div><span class="val">0.016</span></div>
+      <div class="row"><span>five others</span><div class="bar c-teal" style="--w:1%"></div><span class="val">below 0.011</span></div>
+    </div>
+    <ul class="bullets small">
+      <li>Population stability index against the holdout's app applicants: below 0.1 little change, above 0.25 large.</li>
+      <li>Median app bank inflow: 8,065 SAR in January, <b>8.14</b> in March.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>PSI is a binned divergence between two distributions, standard in credit monitoring. A PSI of 8 is not a shift in the population; it is a different unit. Ask: what in a lender's data pipeline changes on the first of a month? A new feed, a vendor, a form.</p></aside>
+</section>
+
+<section class="slide" data-label="Clues" id="coverage-and-reasons" data-lo="LO4" data-n="17" data-session="2">
+  <div class="kicker">Lab 4.2 · step 3</div>
+  <h2>The explanations changed before anyone read the outcomes</h2>
+  <table class="t small">
+    <tr><th>Slice</th><th class="num">Bank inflow is the top reason</th><th class="num">Loss coverage</th></tr>
+    <tr><td>Holdout, app</td><td class="num">21.6%</td><td class="num">92.4%</td></tr>
+    <tr class="hl"><td>2025, app from March</td><td class="num">98.4%</td><td class="num">94.8%</td></tr>
+    <tr><td>2025, branch</td><td class="num">15.9%</td><td class="num">88.1%</td></tr>
+  </table>
+  <div class="callout tip small mt-s"><b>Use it.</b> Reasons are available on the day of scoring; outcomes take twelve months. A sudden change in the reasons officers see is an early alarm.</div>
+  <aside class="notes"><p>The loss intervals barely move: the loss model relies on bank inflow less, so this measure alone would have missed the fault. Different monitors see different failures.</p></aside>
+</section>
+
+<section class="slide" data-label="Decoy" id="rule-out-decoy" data-lo="LO4" data-n="18" data-session="2">
+  <div class="kicker">Lab 4.2 · step 4</div>
+  <h2>Incomes also rose, in both channels; the branch channel is unharmed</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>Median declared income +9.3% (app) and +8.7% (branch).</li>
+      <li>Branch channel 2025 AUC 0.747, as before.</li>
+      <li>A cause must explain why the failure is in one channel and starts in one month.</li>
+    </ul>
+    <div class="card c-amber flat"><h4>Model drift or a broken input?</h4><p class="small mb0">The guide's Model Drift (p. 66) and Concept Drift (p. 28) describe a changing world. This is Measurement Bias (p. 63): values recorded too low.</p></div>
+  </div>
+  <aside class="notes"><p>Every real investigation has a decoy: something else that changed at about the same time. The test is whether it explains the pattern. Retraining here would teach the model the broken unit and hide the fault.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
+</section>
+
+<section class="slide" data-label="Memo" id="cause-memo" data-lo="LO4" data-n="19" data-session="2">
+  <div class="kicker">Lab 4.2 · step 5</div>
+  <h2>The memo: one cause, three numbers, one action, one thing not to do</h2>
+  <table class="t small">
+    <tr><td><b>Cause</b></td><td>From March 2025 the app channel's bank inflow arrives about a thousand times too small: a unit change in the data feed.</td></tr>
+    <tr><td><b>Evidence</b></td><td>App from March: 46% predicted against 10% observed; PSI of bank inflow 8.3; bank inflow the top reason for 98% of the slice.</td></tr>
+    <tr><td><b>Action</b></td><td>Fix the feed to riyals, rescore March to June, add an input range check before scoring.</td></tr>
+    <tr><td><b>Not</b></td><td>Do not retrain on the 2025 batch.</td></tr>
+  </table>
+  <aside class="notes"><p>The stretch writes the range check: bounds at the reference period's 0.1th and 99.9th percentiles; it alerts on the first 40 March app applications and stays quiet in February. That check is part of condition C2 this afternoon.</p></aside>
+</section>
+
+<section class="slide" id="check-degradation" data-lo="LO4" data-n="20" data-session="2">
+  <div class="kicker">Checkpoint</div>
+  <h2>What would have caught the fault in its first week?</h2>
+  <div class="quiz" data-type="single" data-lo="LO4" data-id="check-degradation-q1">
+    <p class="lead">The feed broke on 1 March 2025. Outcomes of March applications mature in March 2026. Which monitor raises the alarm in March 2025?</p>
+    <div class="opts">
+      <div class="opt" data-ok data-k="A">Input range checks and top-reason shares, on the day of scoring</div>
+      <div class="opt" data-why="Needs outcomes that do not exist until a year later" data-k="B">Monthly AUC on scored applications, against the holdout AUC of 0.755</div>
+      <div class="opt" data-why="The loss intervals barely moved; this monitor misses this fault" data-k="C">Loss interval coverage on defaulted loans</div>
+      <div class="opt" data-why="Retraining on schedule would learn the broken unit rather than detect it" data-k="D">Retraining every quarter on recent applications</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Inputs and reasons exist on the day of scoring; outcome-based measures confirm a fault only once loans mature.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. Monitoring needs both kinds: input and reason monitors for speed, outcome monitors for truth.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-4-2" data-auto="lab" data-lab="4.2" data-label="Lab 4.2" data-n="21" data-session="2">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 4.2 · 25 min</div><h2>The cause of the decline</h2><p class="lead small">Score the 2025 batch, find that the decline sits in the app channel from March, trace it to bank inflow arriving a thousand times too small, reject the income rise as a decoy, and write a memo with the cause and the action.</p><a class="nb" href="../labs/D4_2_find_seeded_cause.ipynb">D4_2_find_seeded_cause.ipynb</a></div><ul class="checklist"><li>Score the batch by month and channel <span class="min">6 min</span></li><li>Feature stability in the failing slice <span class="min">5 min</span></li><li>Coverage and explanations in that slice <span class="min">5 min</span></li><li>Rule out the decoy <span class="min">4 min</span></li><li>Write the memo <span class="min">5 min</span></li><li class="stretch">✱ Stretch: Write the input check that would have stopped the batch on the first day</li></ul></div>
+  <aside class="notes"><p>Expected: app channel from March predicted about 46% against 9 to 11% observed; PSI of bank inflow 8.28; bank inflow the top reason for 98.4% of the slice against 21.6%; branch 2025 AUC 0.747. Common problem: computing PSI on the whole batch rather than the failing slice, which dilutes it (still large). Quick mode gives the same numbers. The lab takes about two minutes to run because of the Shapley values.</p></aside>
+</section>
+
+<!-- ======================= SESSION 3 ======================= -->
+<section class="slide section" id="s3" data-auto="section" data-session="3" data-n="22">
+  <div class="kicker">Session 3</div>
+  <h1>Checklists and model cards</h1>
+  <ul class="bullets outcomes"><li>Score a package against a reporting checklist item by item</li><li>Distinguish missing evidence from evidence of a problem</li><li>List what the developers must supply before a decision</li></ul>
+  <div class="sess-no">03</div>
+</section>
+
+<section class="slide" data-label="Why a list" id="why-a-checklist" data-lo="LO5" data-n="23" data-session="3">
+  <div class="kicker">Checklists</div>
+  <h2>A checklist turns "is it documented?" into twelve answerable items</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>Each item is <b>present</b>, <b>partial</b> or <b>missing</b>, with the file and field that decide it.</li>
+      <li>Two validators reach the same score; the developers know what to send.</li>
+      <li>The course list adapts REFORMS (reporting standards for science that uses machine learning) and model cards to a credit model.</li>
+    </ul>
+    <div class="card c-teal flat"><h4>Three parts</h4><p class="small mb0">Conceptual soundness (S1 to S5), outcomes (O1 to O5), monitoring (M1, M2): the three elements of validation in SR 11-7.</p></div>
+  </div>
+  <aside class="notes"><p>SR 11-7 (US Federal Reserve and OCC supervisory guidance on model risk management) names conceptual soundness, ongoing monitoring and outcomes analysis as the elements of validation; it is a widely used frame, not a Saudi requirement. REFORMS is Kapoor and others, Science Advances 2024. Model cards are Mitchell and others, 2019.</p><p>Sources: SR 11-7; REFORMS; Model Cards for Model Reporting.</p></aside>
+</section>
+
+<section class="slide" data-label="Items" id="checklist-items" data-lo="LO5" data-n="24" data-session="3">
+  <div class="kicker">The course checklist</div>
+  <h2>Twelve items, each with the evidence that would satisfy it</h2>
+  <table class="t small">
+    <tr><th>Soundness</th><th>Outcomes</th><th>Monitoring</th></tr>
+    <tr><td>S1 intended and excluded uses</td><td>O1 AUC on unseen rows</td><td>M1 what is watched, thresholds, owner</td></tr>
+    <tr><td>S2 target and its window</td><td>O2 calibration, proper score</td><td>M2 conditions of use, human review</td></tr>
+    <tr><td>S3 training data, sampling</td><td>O3 intervals or sets, coverage</td><td></td></tr>
+    <tr><td>S4 features, when known, exclusions</td><td>O4 results by subgroup</td><td></td></tr>
+    <tr><td>S5 recipe, seeds, versions</td><td>O5 explanation and its stability</td><td></td></tr>
+  </table>
+  <aside class="notes"><p>Each outcome item maps to a day of the course: O1 and O2 Day 1, O3 Day 2, O5 Day 3, O4 this morning. The checklist is in labs/data/checklist.json.</p></aside>
+</section>
+
+<section class="slide" data-label="Score" id="amana-scored" data-lo="LO5" data-n="25" data-session="3">
+  <div class="kicker">Lab 4.3</div>
+  <h2>Amana: two items present, five partial, nothing about monitoring</h2>
+  <table class="t">
+    <tr><th>Part</th><th class="num">Present</th><th class="num">Partial</th><th class="num">Missing</th></tr>
+    <tr><td>Soundness</td><td class="num">2</td><td class="num">3</td><td class="num">0</td></tr>
+    <tr><td>Outcomes</td><td class="num">0</td><td class="num">2</td><td class="num">3</td></tr>
+    <tr class="hl"><td>Monitoring</td><td class="num">0</td><td class="num">0</td><td class="num">2</td></tr>
+  </table>
+  <p class="small mt-s">Partial means the package answers part of the item, or answers it in a way you showed to be wrong.</p>
+  <aside class="notes"><p>The trainer's key: S2 and S3 present; S1, S4, S5, O1 and O5 partial; O2, O3, O4, M1 and M2 missing. Lab 4.3 accepts up to two differences, to be argued. O1 is the usual argument: there is a number, but on the wrong rows.</p></aside>
+</section>
+
+<section class="slide" data-label="Partial" id="partial-is-wrong" data-lo="LO5" data-n="26" data-session="3">
+  <div class="kicker">The hard calls</div>
+  <h2>A number in the evidence file is not evidence if it answers a different question</h2>
+  <div class="cols cols-2">
+    <div class="card c-amber"><h4>O1 · partial</h4><p class="small mb0">AUC 0.864 is in evidence.json, measured on rows the shipped model trained on (Lab 1.1).</p></div>
+    <div class="card c-coral"><h4>O2 · missing</h4><p class="small mb0">You computed calibration yourself. The package still lacks it; the report says who supplied the evidence.</p></div>
+  </div>
+  <aside class="notes"><p>The checklist scores the package, not the validation. Filling a gap yourself is useful and must be labelled, otherwise the developers never take ownership of it and the next version arrives with the same gap.</p></aside>
+</section>
+
+<section class="slide" data-label="Request" id="request-to-developers" data-lo="LO5" data-n="27" data-session="3">
+  <div class="kicker">Lab 4.3 · step 4</div>
+  <h2>The request names each item and what would satisfy it</h2>
+  <table class="t small">
+    <tr><td>S4</td><td>The reason for each exclusion and when each feature is known</td></tr>
+    <tr><td>S5</td><td>Library versions, so the model can be refitted exactly</td></tr>
+    <tr><td>O1</td><td>The shipped model's AUC on rows it never saw</td></tr>
+    <tr class="hl"><td>M1</td><td>Inputs and outcomes to monitor, thresholds and a named owner</td></tr>
+    <tr class="hl"><td>M2</td><td>Conditions of use and how officers review declined applicants</td></tr>
+  </table>
+  <aside class="notes"><p>Send it to Rasil Al-Nafisah's team with the checklist attached. Ask the room: which item blocks a decision? M1: a decision with conditions cannot be enforced without someone watching. M2 is accepted with a reason.</p></aside>
+</section>
+
+<section class="slide" data-label="Personal data" id="personal-data-in-package" data-lo="LO5" data-n="28" data-session="3">
+  <div class="kicker">Before you send it</div>
+  <h2>Validation evidence about people is personal data too</h2>
+  <ul class="bullets small">
+    <li>Subgroup tables use gender, age band and region of real applicants: Sadeem Al-Oraini, the data protection officer, signs off the report's annexes.</li>
+    <li>Report groups and rates, not rows; the stability panel uses application identifiers, never names.</li>
+    <li>The Personal Data Protection Law and its implementing regulation apply to the validator's copy as to the developers'.</li>
+  </ul>
+  <aside class="notes"><p>The course data are synthetic, so nothing here is personal; the habit is what the session teaches. Keep the reference to the law at this level: what the validator does, not legal advice. Questions about specific obligations go to the data protection officer.</p><p>Sources: Personal Data Protection Law and its Implementing Regulation (SDAIA).</p></aside>
+</section>
+
+<section class="slide" id="check-checklist" data-lo="LO5" data-n="29" data-session="3">
+  <div class="kicker">Checkpoint</div>
+  <h2>How do you score O5 for Amana?</h2>
+  <div class="quiz" data-type="single" data-lo="LO5" data-id="check-checklist-q1">
+    <p class="lead">metadata.json says officers see the three largest Shapley values. evidence.json says stability_checked: false. You tested stability yourself on Day 3. What is O5?</p>
+    <div class="opts">
+      <div class="opt" data-why="Scores the validator's work instead of the package" data-k="A">Present, because the stability panel from Day 3 now exists</div>
+      <div class="opt" data-why="Ignores that the method is stated, which is half of the item" data-k="B">Missing, because nothing about explanations is there</div>
+      <div class="opt" data-ok data-k="C">Partial: the method is stated, its stability is not checked by the developers</div>
+      <div class="opt" data-why="Treats an unstable result as grounds to drop the item rather than score it" data-k="D">Not applicable, because the reasons were unstable</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The checklist scores what the package supplies; the method is there and the stability evidence is not.</div>
+  </div>
+  <aside class="notes"><p>Answer: C.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-4-3" data-auto="lab" data-lab="4.3" data-label="Lab 4.3" data-n="30" data-session="3">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 4.3 · 25 min</div><h2>The package against a checklist</h2><p class="lead small">Score Amana against a 12-item course checklist drawn from REFORMS and model cards, mark each item present, partial or missing with the file that shows it, and turn the gaps into a request to the developers.</p><a class="nb" href="../labs/D4_3_score_model_package.ipynb">D4_3_score_model_package.ipynb</a></div><ul class="checklist"><li>Read the checklist <span class="min">4 min</span></li><li>Score each item with its evidence <span class="min">9 min</span></li><li>Count by part: soundness, outcomes, monitoring <span class="min">4 min</span></li><li>Write the request for missing evidence <span class="min">5 min</span></li><li>Which gap blocks a decision <span class="min">3 min</span></li><li class="stretch">✱ Stretch: Score one of the two capstone packages with the same checklist</li></ul></div>
+  <aside class="notes"><p>Expected: the trainer's key with at most two differences; by part, soundness 2 present and 3 partial, outcomes 2 partial and 3 missing, monitoring 2 missing; blocking gap M1. Common problem: scoring S4 present because features are listed; the item also asks when each is known and why each exclusion was made. The stretch reads the renewal package's evidence file: the same three gaps.</p></aside>
+</section>
+
+<!-- ======================= SESSION 4 ======================= -->
+<section class="slide section" id="s4" data-auto="section" data-session="4" data-n="31">
+  <div class="kicker">Session 4</div>
+  <h1>The fit-for-use decision</h1>
+  <ul class="bullets outcomes"><li>Rate findings by severity and link each to evidence</li><li>Draft a decision with conditions of use and human review</li><li>Choose the capstone package and plan its validation</li></ul>
+  <div class="sess-no">04</div>
+</section>
+
+<section class="slide" data-label="Three answers" id="three-decisions" data-lo="LO5" data-n="32" data-session="4">
+  <div class="kicker">The fit-for-use decision</div>
+  <h2>The committee needs one of three answers, and the conditions that go with it</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-green"><h4>Fit</h4><p class="small mb0">Use as documented. Rare for a first submission.</p></div>
+    <div class="card c-amber"><h4>Fit with conditions</h4><p class="small mb0">Use only while named conditions hold, each with an owner.</p></div>
+    <div class="card c-coral"><h4>Not fit</h4><p class="small mb0">Do not use. Say what would change the answer.</p></div>
+  </div>
+  <aside class="notes"><p>The decision is Dr. Sameera Al-Fadda's committee's; the validator drafts it with the evidence. SDAIA's National AI Risk Management Framework gives entities a method for identifying, assessing, treating and monitoring AI risks; conditions with owners and monitoring are how a validation report puts that into practice for one model.</p><p>Sources: National AI Risk Management Framework, executive summary (SDAIA); SDAIA AI Ethics Principles.</p></aside>
+</section>
+
+<section class="slide" data-label="Findings" id="week-findings" data-lo="LO5" data-n="33" data-session="4">
+  <div class="kicker">Lab 4.4 · step 1</div>
+  <h2>Eleven findings from the week; six are high</h2>
+  <table class="t small">
+    <tr><th>High</th><th>Finding</th></tr>
+    <tr><td>F2</td><td>Probabilities about four times too high; Platt on calib rows repairs them</td></tr>
+    <tr><td>F3, F4</td><td>Northern region and ages 18 to 24 under-predicted after repair</td></tr>
+    <tr><td>F8</td><td>Reasons shown to officers unstable over refits</td></tr>
+    <tr><td>F10</td><td>App channel bank inflow in the wrong unit from March 2025</td></tr>
+    <tr><td>F11</td><td>No monitoring, owner, conditions of use or human review</td></tr>
+  </table>
+  <aside class="notes"><p>The findings are in labs/data/findings.json, so the lab does not depend on earlier runs. The rule: high when the impact is high and the evidence supports it. F7 (the simulated income shift) has high stakes but is simulated, so it is rated low: a stress test is a reason to monitor, not a finding.</p></aside>
+</section>
+
+<section class="slide" data-label="Conditions" id="conditions-with-owners" data-lo="LO5" data-n="34" data-session="4">
+  <div class="kicker">Lab 4.4 · step 2</div>
+  <h2>Every condition says what must hold, who owns it and which findings it answers</h2>
+  <table class="t small">
+    <tr><th>Condition</th><th>Owner</th><th>Answers</th></tr>
+    <tr><td>C1 Use probabilities only after the Platt map</td><td>Credit analytics</td><td>F2</td></tr>
+    <tr><td>C2 No app scoring until the feed is fixed; rescore; range check</td><td>Data engineering</td><td>F10</td></tr>
+    <tr><td>C3 Northern and 18 to 24 go to an officer</td><td>Branch officers</td><td>F3, F4</td></tr>
+    <tr><td>C4 One grouped income reason; only stable reasons</td><td>Credit analytics</td><td>F8, F9</td></tr>
+    <tr><td>C5 Monthly monitoring; two breaches return it to validation</td><td>Model risk</td><td>F11, F5, F7</td></tr>
+  </table>
+  <aside class="notes"><p>The lab checks mechanically that every high finding is answered and every condition has an owner. Ask: who is Fuad Al-Rubayan in this table? The branch officers' lead: C3 lands on his team, so he must agree to it before the committee meets.</p></aside>
+</section>
+
+<section class="slide" data-label="Review" id="human-review-real" data-lo="LO5" data-n="35" data-session="4">
+  <div class="kicker">Human review</div>
+  <h2>Name which applicants an officer must see, and give the officer the evidence</h2>
+  <div class="cols cols-2">
+    <div class="card c-coral"><h4>A slogan</h4><p class="small mb0">"Borderline cases are reviewed by a human."</p></div>
+    <div class="card c-teal"><h4>A rule</h4><p class="small mb0">Every application from the Northern region, aged 18 to 24, or with all three grades in its 90% set.</p></div>
+  </div>
+  <div class="callout warn small mt-s"><b>Automation Bias</b> (guide p. 19): officers who see only a score defer to it. They need the grade set, stable reasons, authority to decide differently, and their overrides monitored.</div>
+  <aside class="notes"><p>The grade set from Day 2 earns its place here: an application whose 90% set holds all three grades is one the model cannot place. Ask the room how many applications the rule sends to officers: the North is 5% of holdout applicants and 18 to 24 is 12%, so about a sixth before the full sets are added; Fuad's team must be able to absorb it, and the report should state the share.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
+</section>
+
+<section class="slide" data-label="Not fit?" id="when-not-fit" data-lo="LO5" data-n="36" data-session="4">
+  <div class="kicker">Judgement</div>
+  <h2>"Fit with conditions" is only as good as its owners and its monitoring</h2>
+  <ul class="bullets">
+    <li>The model ranks well (AUC 0.755) and its probabilities are repaired: the harms found have conditions that remove them while causes are fixed.</li>
+    <li>If no one will own C2 or C5, the honest decision is <b>not fit</b>.</li>
+    <li>A condition without an owner is a wish; a review rule without a list of applicants is a slogan.</li>
+  </ul>
+  <aside class="notes"><p>Lab 4.4's stretch writes the two sentences for a committee that asks to approve without conditions. Reference: Northern and young applicants would keep being priced on risks 5 to 7 points lower than they are, and every app application since March is scored on a broken input.</p></aside>
+</section>
+
+<section class="slide" data-label="Capstone" id="capstone-packages" data-lo="LO5" data-n="37" data-session="4">
+  <div class="kicker">Lab 4.4 · steps 4 and 5</div>
+  <h2>Two packages wait for the capstone; both claim more than they deliver</h2>
+  <table class="t small">
+    <tr><th></th><th class="num">Claimed AUC</th><th class="num">Holdout AUC</th><th class="num">Mean raw prediction</th><th class="num">Default rate</th></tr>
+    <tr><td>Amana-R · top-up loans for repeat borrowers</td><td class="num">0.902</td><td class="num">0.711</td><td class="num">0.412</td><td class="num">0.089</td></tr>
+    <tr><td>Amana-F · seasonal farm loans</td><td class="num">0.892</td><td class="num">0.700</td><td class="num">0.425</td><td class="num">0.128</td></tr>
+  </table>
+  <p class="small mt-s">Each has applications, a later batch, three models, a card, metadata and evidence. Choose one, or a package agreed with your peer, and plan its first three checks.</p>
+  <aside class="notes"><p>Do not reveal the planted problems; the answer key has them. Hint only that each later batch tells a different story: one quiet, one loud. Pairs may validate the same package independently and compare.</p></aside>
+</section>
+
+<section class="slide" id="check-decision" data-lo="LO5" data-n="38" data-session="4">
+  <div class="kicker">Checkpoint</div>
+  <h2>Which condition is written well enough to enforce?</h2>
+  <div class="quiz" data-type="single" data-lo="LO5" data-id="check-decision-q1">
+    <p class="lead">Four drafts for the approval committee. Which one could an auditor check next year?</p>
+    <div class="opts">
+      <div class="opt" data-why="Names no group, no owner and no test: a slogan" data-k="A">Borderline applications receive careful human review by experienced officers in every branch</div>
+      <div class="opt" data-ok data-k="B">Model risk checks calibration by region and age monthly; two breaches mean revalidation</div>
+      <div class="opt" data-why="An intention with no measure, threshold or owner" data-k="C">The model will be monitored for fairness</div>
+      <div class="opt" data-why="Retraining is an action without a trigger or a check that it worked" data-k="D">The developers retrain the model every year</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> An enforceable condition names a measure, a frequency, a threshold, an action and an owner.</div>
+  </div>
+  <aside class="notes"><p>Answer: B.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-4-4" data-auto="lab" data-lab="4.4" data-label="Lab 4.4" data-n="39" data-session="4">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 4.4 · 25 min</div><h2>The decision and the capstone choice</h2><p class="lead small">Collect the week's findings, rate them, draft Amana's decision with conditions of use, human review and monitoring, test that every high finding has a condition, and choose the package for the capstone.</p><a class="nb" href="../labs/D4_4_draft_decision_conditions.ipynb">D4_4_draft_decision_conditions.ipynb</a></div><ul class="checklist"><li>Collect and rate the findings <span class="min">6 min</span></li><li>Draft the decision and its conditions <span class="min">8 min</span></li><li>Check every high finding has a condition <span class="min">4 min</span></li><li>Compare the capstone packages <span class="min">4 min</span></li><li>Choose one and plan it <span class="min">3 min</span></li><li class="stretch">✱ Stretch: Write the two sentences you would say to the approval committee if it asked to approve without conditions</li></ul></div>
+  <aside class="notes"><p>Expected: six high findings (F2, F3, F4, F8, F10, F11); the reference decision is fit with conditions with five owned conditions; first look: renewal claimed 0.902 against 0.711, farm 0.892 against 0.700; renewal's later batch is calibrated overall (0.081 against 0.080), farm's is under-predicted (0.140 against 0.173). "Not fit" is accepted when argued from the owners. Collect each participant's package choice before they leave.</p></aside>
+</section>
+
+<!-- ======================= CLOSE ======================= -->
+<section class="slide" data-label="Wrap-up" id="wrap-up" data-n="40" data-session="4">
+  <div class="kicker">Day 4 · three things to keep</div>
+  <h2>What a validation report gives the committee</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-teal"><h4>Supported gaps</h4><p class="small mb0">By group, with intervals, tagged with the guide and rated by a rule stated before looking.</p></div>
+    <div class="card c-coral"><h4>Causes, not symptoms</h4><p class="small mb0">Slice, then inputs, then reasons: a broken feed is not a degraded model.</p></div>
+    <div class="card c-purple"><h4>Owned conditions</h4><p class="small mb0">A decision the committee can enforce, with monitoring and real human review.</p></div>
+  </div>
+  <aside class="notes"><p>Each participant now has the four days' sections of a validation report on Amana. The capstone repeats the week, alone or in pairs, on Amana-R or Amana-F.</p></aside>
+</section>
+
+<section class="slide dark" id="next" data-label="Next" data-n="41" data-session="4">
+  <div class="kicker">Next</div>
+  <h2>Capstone: validate a package and defend the decision</h2>
+  <p class="lead">Bring the package you chose, your plan's first three checks, and the week's notebooks. Unfinished labs can be finished at home from their reference state.</p>
+  <aside class="notes"><p>Remind participants that the capstone runs on the same laptop or Colab setup; nothing new to install. Each talk is eight minutes with four minutes of questions from the committee.</p></aside>
+</section>
+</div>
+<script type="application/json" id="academy-data">{"v":1,"engine":"1.0.0","build":{"at":"2026-11-15T18:29:43Z","version":"2027.1.0","commit":"cc8abd5"},"course":{"id":"ds-305","code":"DS-305","title":"Uncertainty, Interpretability and Model Validation","track":"data-science","lang":"en","dir":"ltr","url":"https://sdaiaacademy.github.io/ds-305/","repo":"SDAIAAcademy/ds-305","home":"../index.html"},"deck":{"id":"day4","kind":"day","day":4,"label":"Day 4","title":"Validate and decide","prev":"day3.html","next":"capstone.html","md":"day4.md","alt":{}},"sessions":[{"n":1,"label":"Session 1","title":"Subgroup validation","slide":"s1","outcomes":["Tabulate calibration, coverage and error by subgroup in one table","Separate a gap from noise with an interval","Tag each gap with a bias type from the SDAIA AI Bias Reference Guide"],"minutes":50,"lab":{"id":"4.1","title":"Gaps by group, tagged","minutes":25,"href":"../labs/D4_1_tabulate_calibration_coverage.ipynb"}},{"n":2,"label":"Session 2","title":"Diagnosing degradation","slide":"s2","outcomes":["Find the slice and the month where performance fell","Check feature distributions, coverage and explanations in that slice","Write a memo that names one cause and one action"],"minutes":50,"lab":{"id":"4.2","title":"The cause of the decline","minutes":25,"href":"../labs/D4_2_find_seeded_cause.ipynb"}},{"n":3,"label":"Session 3","title":"Checklists and model cards","slide":"s3","outcomes":["Score a package against a reporting checklist item by item","Distinguish missing evidence from evidence of a problem","List what the developers must supply before a decision"],"minutes":50,"lab":{"id":"4.3","title":"The package against a checklist","minutes":25,"href":"../labs/D4_3_score_model_package.ipynb"}},{"n":4,"label":"Session 4","title":"The fit-for-use decision","slide":"s4","outcomes":["Rate findings by severity and link each to evidence","Draft a decision with conditions of use and human review","Choose the capstone package and plan its validation"],"minutes":50,"lab":{"id":"4.4","title":"The decision and the capstone choice","minutes":25,"href":"../labs/D4_4_draft_decision_conditions.ipynb"}}],"slides":[{"id":"title","n":1,"title":"Validate and decide","kind":"title","session":0,"hash":"e08f9c7c","md":"#### [day4#title] Validate and decide\n\n*SDAIA Academy · Uncertainty, Interpretability and Model Validation*\n\nDay 4: Turn the evidence into rated findings by subgroup, diagnose a decline, score the package against a checklist and decide\n\nData Science Track · 4 teaching days + capstone day · 4 sessions · 4 labs · DS-305","notes":"Recap in one sentence: probabilities repaired, intervals that fail for large loans, explanations that are unstable for correlated features and a proxy for age. Today the validator puts it together: one subgroup table, one diagnosed decline, one scored package and one decision for Dr. Sameera Al-Fadda's approval committee. The day ends with the choice of the capstone package.","minutes":null,"lo":[]},{"id":"agenda","n":2,"title":"Validate and decide","kind":"content","session":0,"hash":"d2b5a0d0","md":"#### [day4#agenda] Validate and decide\n\n*Today*\n\n- **Session 1 · Subgroup validation**: Calibration, coverage and error by subgroup are validation evidence, and each gap gets a cause and a bias type from the national guide\n- **Session 2 · Diagnosing degradation**: A decline is diagnosed from slices, coverage and explanations together, and the cause decides the action\n- **Session 3 · Checklists and model cards**: A reporting checklist turns \"is it documented?\" into items with evidence, and the missing evidence is a finding\n- **Session 4 · The fit-for-use decision**: A validation ends in a decision: fit, fit with conditions, or not fit, with conditions of use, human review and monitoring","notes":"","minutes":null,"lo":[]},{"id":"review-day3","n":3,"title":"Which explanation statement can go in the report?","kind":"quiz","session":0,"hash":"c86ea42b","md":"#### [day4#review-day3] Which explanation statement can go in the report?\n\n*Review of Day 3*\n\n**Question:** Over five refits, 8 of 10 applicants keep their top reason and 1 of 10 keeps all three. Bank inflow and declared income correlate at 0.84. Which sentence is supported?\n\n- A. Show officers one grouped income reason, and only reasons that survive refits\n- B. The three reasons are exact, so they can be shown as they are\n- C. Bank inflow is a stronger reason than declared income\n- D. The model must be retrained until all three reasons are stable across refits","notes":"Answer: A. Two minutes. This rule becomes condition C4 in the decision this afternoon.","minutes":null,"lo":["LO3"]},{"id":"s1","n":4,"title":"Subgroup validation","kind":"section","session":1,"hash":"17869eaf","md":"#### [day4#s1] Subgroup validation\n\n*Session 1*\n\n- Tabulate calibration, coverage and error by subgroup in one table\n- Separate a gap from noise with an interval\n- Tag each gap with a bias type from the SDAIA AI Bias Reference Guide","notes":"","minutes":null,"lo":["LO1","LO2","LO5"]},{"id":"one-audit-table","n":5,"title":"One table, every group the lender answers for, every measure with its uncertainty","kind":"content","session":1,"hash":"b0325a67","md":"#### [day4#one-audit-table] One table, every group the lender answers for, every measure with its uncertainty\n\n*Subgroup validation*\n\n| Column | Measures per group |\n| --- | --- |\n| region, age band, gender, channel | n, mean predicted, observed rate with a 95% interval, Brier, AUC |\n| the same groups, defaulters only | loss interval coverage and the number of defaults behind it |\n| loan size band | loss coverage, because Talib provisions by loan size |\n\n> **The validator's model.** Amana with the Platt repair from Day 1 and one conformal threshold of 8,134 SAR from Day 2.","notes":"Gender, age band and region are not features of Amana; they are kept in the validator's data to audit it. That is the point of excluding a column and still auditing by it. Ask: who decides which groups go in the table? The owners and the committee; the validator proposes and says why.","minutes":null,"lo":["LO5"]},{"id":"region-table","n":6,"title":"The Northern region defaults at 15.4% against 8.7% predicted","kind":"content","session":1,"hash":"a9a57e08","md":"#### [day4#region-table] The Northern region defaults at 15.4% against 8.7% predicted\n\n*Lab 4.1 · region*\n\n| Region | n | Predicted | Observed (95% interval) | AUC | Loss coverage |\n| --- | --- | --- | --- | --- | --- |\n| Central | 3,448 | 8.9% | 9.8% (8.9 to 10.9) | 0.775 | 90.0% |\n| Eastern | 1,951 | 9.2% | 9.0% (7.8 to 10.4) | 0.766 | 93.2% |\n| Northern | 508 | 8.7% | 15.4% (12.5 to 18.8) | 0.720 | 87.2% |\n| Southern | 1,386 | 9.2% | 9.7% (8.2 to 11.3) | 0.751 | 93.3% |\n| Western | 2,707 | 8.9% | 9.8% (8.8 to 11.0) | 0.740 | 91.0% |","notes":"From the Lab 4.1 run on the 10,000 holdout rows. The North's interval is wide (508 applicants) and still sits far above the prediction: the gap is supported. Its coverage of 87.2% rests on 78 defaults, so it is not flagged. Wilson intervals, as on Day 1.","minutes":null,"lo":["LO5"]},{"id":"flag-rules","n":7,"title":"Flag a gap only when an interval supports it","kind":"content","session":1,"hash":"1e77a139","md":"#### [day4#flag-rules] Flag a gap only when an interval supports it\n\n*From numbers to flags*\n\n- **Calibration.** Flag when the mean prediction lies outside the observed rate's 95% interval.\n- **Coverage.** Flag when loss coverage is below 85% on at least 50 defaults.\n\n| Flagged | Value |\n| --- | --- |\n| Northern, calibration | +6.7 points |\n| Age 18 to 24, calibration | +4.8 points |\n| Age 55+, coverage | 83.1% on 83 defaults |\n| Men; branch channel, calibration | +1.6; +1.0 points |\n| Loans above 25,000 SAR, coverage | 76.7% on 382 defaults |","notes":"The rules are the course's, stated before looking, which is the protection against hunting for gaps. With five regions, five age bands, two genders and two channels, some group will look odd by chance; the interval rule keeps the flags to what the data support. Ask: is the 50-default floor arbitrary? Yes, and the report says so.","minutes":null,"lo":["LO5"]},{"id":"bias-guide-tags","n":8,"title":"A tag names how the gap arose, which points to the remedy","kind":"content","session":1,"hash":"8bb4439d","md":"#### [day4#bias-guide-tags] A tag names how the gap arose, which points to the remedy\n\n*SDAIA AI Bias Reference Guide*\n\n| Gap | Tag | Guide | Mechanism in Amana |\n| --- | --- | --- | --- |\n| Northern | Aggregation Bias | p. 12 | 5% of rows, pooled with larger regions, fitted worst |\n| Age 18 to 24 | Age Bias | p. 11 | age excluded, its differences not accounted for |\n| Large loans | Evaluation Bias | p. 42 | 91% marginal coverage overstates how well they are covered |\n\n> **A tag is not a verdict.** It names a mechanism from the guide. Whether a gap is unfair is the committee's judgement, made with the evidence.","notes":"More than one tag is defensible: the North can also be Sample Size or Coverage Bias. Lab 4.1 accepts any of a short list and asks for the one-line reason. Page numbers are those of the Guide's English first edition (May 2026). Remedies are the owners' choice; fairness mitigation is DS-309's subject.\n\nSources: SDAIA AI Bias Reference Guide.","minutes":null,"lo":["LO5"]},{"id":"rating-rule","n":9,"title":"Rate by what the gap does to people and how firmly it is supported","kind":"content","session":1,"hash":"b2d7f518","md":"#### [day4#rating-rule] Rate by what the gap does to people and how firmly it is supported\n\n*Rating*\n\n1. **High** Affects approval or price, interval supports it, 2 points or more\n2. **Medium** Affects provisioning, or supported but small\n3. **Low** Neither\n\nTwo high findings from this table: the Northern region and applicants aged 18 to 24.","notes":"The rule is the course's, written so that two validators reach the same rating. Coverage gaps affect provisioning, so they are medium under it; a lender who prices on the loss interval would rate them higher, and the report should say which use applies.","minutes":null,"lo":["LO5"]},{"id":"small-cells","n":10,"title":"Crossing groups multiplies the cells and divides the evidence","kind":"content","session":1,"hash":"68666366","md":"#### [day4#small-cells] Crossing groups multiplies the cells and divides the evidence\n\n*Lab 4.1 · stretch*\n\n- **6 to 30** defaults per age band within the Northern region\n- **9 to 27** points: width of the observed rate's interval per cell\n\n- Young Northern applicants default at 39% in the sample, on 18 defaults.\n- The interval runs from 26% to 54%: a reason to watch, not a finding.\n- Report crossed cells with their counts and intervals, or not at all.","notes":"Intersectional audits are right in principle and hard in data. The honest move is to say what the counts allow, and to name the cell as one to monitor once more outcomes mature.","minutes":null,"lo":["LO5"]},{"id":"check-subgroup","n":11,"title":"How do you report the gap for men?","kind":"quiz","session":1,"hash":"076f5d21","md":"#### [day4#check-subgroup] How do you report the gap for men?\n\n*Checkpoint*\n\n**Question:** After recalibration, men default at 10.5% against 8.9% predicted, interval 9.6 to 11.4; women at 9.5% against 9.1%. Under the course rules, what goes in the report?\n\n- A. Nothing: the gap is within noise\n- B. A high finding of gender bias, since gender is a protected attribute\n- C. Evidence that the model discriminates against men\n- D. A medium finding: supported, 1.6 points, monitored by gender","notes":"Answer: D.","minutes":null,"lo":["LO5"]},{"id":"lab-4-1","n":12,"title":"Gaps by group, tagged","kind":"lab","session":1,"hash":"9dd539b9","md":"#### [day4#lab-4-1] Gaps by group, tagged\n\nLab 4.1 · 25 min\n\nBuild one audit table of calibration, loss-interval coverage and error by region, age band, gender and channel, flag the gaps an interval supports, and tag each with a bias type from the national guide and a reason.\n\n[D4_1_tabulate_calibration_coverage.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D4_1_tabulate_calibration_coverage.ipynb)\n\n- [ ] The audit table for one column (7 min)\n- [ ] All four columns (4 min)\n- [ ] Flag the gaps an interval supports (5 min)\n- [ ] Tag each gap with a bias type (6 min)\n- [ ] Rate each finding (3 min)\n- [ ] ✱ Stretch: Compute the same table for the age band within the Northern region and say what the counts allow","notes":"Expected: Northern +6.7 points and 18-24 +4.8 points rated high; 55+ coverage 83.1%, men +1.6, branch +1.0 and large loans 76.7% medium. Quick mode gives the same numbers. Common problems: computing coverage over all rows instead of defaulters only (non-defaulters have no loss); tagging with a type that is not in the guide. Anyone who missed Day 1 or 2 starts from the package: the lab rebuilds the Platt map and the threshold.","minutes":null,"lo":[]},{"id":"s2","n":13,"title":"Diagnosing degradation","kind":"section","session":2,"hash":"9a7ed719","md":"#### [day4#s2] Diagnosing degradation\n\n*Session 2*\n\n- Find the slice and the month where performance fell\n- Check feature distributions, coverage and explanations in that slice\n- Write a memo that names one cause and one action","notes":"","minutes":null,"lo":["LO4"]},{"id":"model-got-worse","n":14,"title":"Talib reports that Amana \"got worse\" in 2025","kind":"content","session":2,"hash":"f6866c96","md":"#### [day4#model-got-worse] Talib reports that Amana \"got worse\" in 2025\n\n*Six months in production*\n\n- **0.755 → 0.677** AUC, holdout 2023-24 to the 2025 batch\n- **17.6% vs 9.2%** mean predicted against observed default, 2025\n\n- **The tempting memo.** \"The model has degraded and must be retrained on recent data.\"","notes":"10,000 applications from January to June 2025, outcomes now known. Ask the room for the first thing they would compute. Steer to \"where and since when\" before \"why\".","minutes":null,"lo":["LO4"]},{"id":"where-and-since-when","n":15,"title":"Slice by month and channel: the failure is the app channel from March","kind":"content","session":2,"hash":"451853b7","md":"#### [day4#where-and-since-when] Slice by month and channel: the failure is the app channel from March\n\n*Lab 4.2 · step 1*\n\n| Month | App predicted | App observed | App AUC | Branch AUC |\n| --- | --- | --- | --- | --- |\n| 2025-01 | 9.9% | 10.1% | 0.728 | 0.740 |\n| 2025-02 | 9.8% | 9.9% | 0.723 | 0.770 |\n| 2025-03 | 46.6% | 11.0% | 0.680 | 0.766 |\n| 2025-04 to 06 | 46% | 9 to 11% | 0.53 to 0.68 | 0.69 to 0.77 |","notes":"From the Lab 4.2 run. The overall decline is an average of an unharmed branch channel and a broken slice. A drop that starts in one month in one channel points to a change in a process, not in the world.","minutes":null,"lo":["LO4"]},{"id":"psi-inputs","n":16,"title":"One input has moved: bank inflow, by a factor of a thousand","kind":"content","session":2,"hash":"c1077aab","md":"#### [day4#psi-inputs] One input has moved: bank inflow, by a factor of a thousand\n\n*Lab 4.2 · step 2*\n\n| Item | Value |\n| --- | --- |\n| bank_inflow | 8.28 |\n| declared_income | 0.037 |\n| loan_amount | 0.016 |\n| five others | below 0.011 |\n\n- Population stability index against the holdout's app applicants: below 0.1 little change, above 0.25 large.\n- Median app bank inflow: 8,065 SAR in January, **8.14** in March.","notes":"PSI is a binned divergence between two distributions, standard in credit monitoring. A PSI of 8 is not a shift in the population; it is a different unit. Ask: what in a lender's data pipeline changes on the first of a month? A new feed, a vendor, a form.","minutes":null,"lo":["LO4"]},{"id":"coverage-and-reasons","n":17,"title":"The explanations changed before anyone read the outcomes","kind":"content","session":2,"hash":"a4cb36f5","md":"#### [day4#coverage-and-reasons] The explanations changed before anyone read the outcomes\n\n*Lab 4.2 · step 3*\n\n| Slice | Bank inflow is the top reason | Loss coverage |\n| --- | --- | --- |\n| Holdout, app | 21.6% | 92.4% |\n| 2025, app from March | 98.4% | 94.8% |\n| 2025, branch | 15.9% | 88.1% |\n\n> **Use it.** Reasons are available on the day of scoring; outcomes take twelve months. A sudden change in the reasons officers see is an early alarm.","notes":"The loss intervals barely move: the loss model relies on bank inflow less, so this measure alone would have missed the fault. Different monitors see different failures.","minutes":null,"lo":["LO4"]},{"id":"rule-out-decoy","n":18,"title":"Incomes also rose, in both channels; the branch channel is unharmed","kind":"content","session":2,"hash":"3dbfa1bf","md":"#### [day4#rule-out-decoy] Incomes also rose, in both channels; the branch channel is unharmed\n\n*Lab 4.2 · step 4*\n\n- Median declared income +9.3% (app) and +8.7% (branch).\n- Branch channel 2025 AUC 0.747, as before.\n- A cause must explain why the failure is in one channel and starts in one month.\n\n- **Model drift or a broken input?** The guide's Model Drift (p. 66) and Concept Drift (p. 28) describe a changing world. This is Measurement Bias (p. 63): values recorded too low.","notes":"Every real investigation has a decoy: something else that changed at about the same time. The test is whether it explains the pattern. Retraining here would teach the model the broken unit and hide the fault.\n\nSources: SDAIA AI Bias Reference Guide.","minutes":null,"lo":["LO4"]},{"id":"cause-memo","n":19,"title":"The memo: one cause, three numbers, one action, one thing not to do","kind":"content","session":2,"hash":"fbb9683c","md":"#### [day4#cause-memo] The memo: one cause, three numbers, one action, one thing not to do\n\n*Lab 4.2 · step 5*\n\n| **Cause** | From March 2025 the app channel's bank inflow arrives about a thousand times too small: a unit change in the data feed. |\n| --- | --- |\n| **Evidence** | App from March: 46% predicted against 10% observed; PSI of bank inflow 8.3; bank inflow the top reason for 98% of the slice. |\n| **Action** | Fix the feed to riyals, rescore March to June, add an input range check before scoring. |\n| **Not** | Do not retrain on the 2025 batch. |","notes":"The stretch writes the range check: bounds at the reference period's 0.1th and 99.9th percentiles; it alerts on the first 40 March app applications and stays quiet in February. That check is part of condition C2 this afternoon.","minutes":null,"lo":["LO4"]},{"id":"check-degradation","n":20,"title":"What would have caught the fault in its first week?","kind":"quiz","session":2,"hash":"d678b574","md":"#### [day4#check-degradation] What would have caught the fault in its first week?\n\n*Checkpoint*\n\n**Question:** The feed broke on 1 March 2025. Outcomes of March applications mature in March 2026. Which monitor raises the alarm in March 2025?\n\n- A. Input range checks and top-reason shares, on the day of scoring\n- B. Monthly AUC on scored applications, against the holdout AUC of 0.755\n- C. Loss interval coverage on defaulted loans\n- D. Retraining every quarter on recent applications","notes":"Answer: A. Monitoring needs both kinds: input and reason monitors for speed, outcome monitors for truth.","minutes":null,"lo":["LO4"]},{"id":"lab-4-2","n":21,"title":"The cause of the decline","kind":"lab","session":2,"hash":"aba15b7f","md":"#### [day4#lab-4-2] The cause of the decline\n\nLab 4.2 · 25 min\n\nScore the 2025 batch, find that the decline sits in the app channel from March, trace it to bank inflow arriving a thousand times too small, reject the income rise as a decoy, and write a memo with the cause and the action.\n\n[D4_2_find_seeded_cause.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D4_2_find_seeded_cause.ipynb)\n\n- [ ] Score the batch by month and channel (6 min)\n- [ ] Feature stability in the failing slice (5 min)\n- [ ] Coverage and explanations in that slice (5 min)\n- [ ] Rule out the decoy (4 min)\n- [ ] Write the memo (5 min)\n- [ ] ✱ Stretch: Write the input check that would have stopped the batch on the first day","notes":"Expected: app channel from March predicted about 46% against 9 to 11% observed; PSI of bank inflow 8.28; bank inflow the top reason for 98.4% of the slice against 21.6%; branch 2025 AUC 0.747. Common problem: computing PSI on the whole batch rather than the failing slice, which dilutes it (still large). Quick mode gives the same numbers. The lab takes about two minutes to run because of the Shapley values.","minutes":null,"lo":[]},{"id":"s3","n":22,"title":"Checklists and model cards","kind":"section","session":3,"hash":"0a8eafed","md":"#### [day4#s3] Checklists and model cards\n\n*Session 3*\n\n- Score a package against a reporting checklist item by item\n- Distinguish missing evidence from evidence of a problem\n- List what the developers must supply before a decision","notes":"","minutes":null,"lo":["LO5"]},{"id":"why-a-checklist","n":23,"title":"A checklist turns \"is it documented?\" into twelve answerable items","kind":"content","session":3,"hash":"9361bd88","md":"#### [day4#why-a-checklist] A checklist turns \"is it documented?\" into twelve answerable items\n\n*Checklists*\n\n- Each item is **present**, **partial** or **missing**, with the file and field that decide it.\n- Two validators reach the same score; the developers know what to send.\n- The course list adapts REFORMS (reporting standards for science that uses machine learning) and model cards to a credit model.\n\n- **Three parts.** Conceptual soundness (S1 to S5), outcomes (O1 to O5), monitoring (M1, M2): the three elements of validation in SR 11-7.","notes":"SR 11-7 (US Federal Reserve and OCC supervisory guidance on model risk management) names conceptual soundness, ongoing monitoring and outcomes analysis as the elements of validation; it is a widely used frame, not a Saudi requirement. REFORMS is Kapoor and others, Science Advances 2024. Model cards are Mitchell and others, 2019.\n\nSources: SR 11-7; REFORMS; Model Cards for Model Reporting.","minutes":null,"lo":["LO5"]},{"id":"checklist-items","n":24,"title":"Twelve items, each with the evidence that would satisfy it","kind":"content","session":3,"hash":"20f9629a","md":"#### [day4#checklist-items] Twelve items, each with the evidence that would satisfy it\n\n*The course checklist*\n\n| Soundness | Outcomes | Monitoring |\n| --- | --- | --- |\n| S1 intended and excluded uses | O1 AUC on unseen rows | M1 what is watched, thresholds, owner |\n| S2 target and its window | O2 calibration, proper score | M2 conditions of use, human review |\n| S3 training data, sampling | O3 intervals or sets, coverage |  |\n| S4 features, when known, exclusions | O4 results by subgroup |  |\n| S5 recipe, seeds, versions | O5 explanation and its stability |  |","notes":"Each outcome item maps to a day of the course: O1 and O2 Day 1, O3 Day 2, O5 Day 3, O4 this morning. The checklist is in labs/data/checklist.json.","minutes":null,"lo":["LO5"]},{"id":"amana-scored","n":25,"title":"Amana: two items present, five partial, nothing about monitoring","kind":"content","session":3,"hash":"365b14e8","md":"#### [day4#amana-scored] Amana: two items present, five partial, nothing about monitoring\n\n*Lab 4.3*\n\n| Part | Present | Partial | Missing |\n| --- | --- | --- | --- |\n| Soundness | 2 | 3 | 0 |\n| Outcomes | 0 | 2 | 3 |\n| Monitoring | 0 | 0 | 2 |\n\nPartial means the package answers part of the item, or answers it in a way you showed to be wrong.","notes":"The trainer's key: S2 and S3 present; S1, S4, S5, O1 and O5 partial; O2, O3, O4, M1 and M2 missing. Lab 4.3 accepts up to two differences, to be argued. O1 is the usual argument: there is a number, but on the wrong rows.","minutes":null,"lo":["LO5"]},{"id":"partial-is-wrong","n":26,"title":"A number in the evidence file is not evidence if it answers a different question","kind":"content","session":3,"hash":"b76d6dad","md":"#### [day4#partial-is-wrong] A number in the evidence file is not evidence if it answers a different question\n\n*The hard calls*\n\n- **O1 · partial.** AUC 0.864 is in evidence.json, measured on rows the shipped model trained on (Lab 1.1).\n- **O2 · missing.** You computed calibration yourself. The package still lacks it; the report says who supplied the evidence.","notes":"The checklist scores the package, not the validation. Filling a gap yourself is useful and must be labelled, otherwise the developers never take ownership of it and the next version arrives with the same gap.","minutes":null,"lo":["LO5"]},{"id":"request-to-developers","n":27,"title":"The request names each item and what would satisfy it","kind":"content","session":3,"hash":"e20ae499","md":"#### [day4#request-to-developers] The request names each item and what would satisfy it\n\n*Lab 4.3 · step 4*\n\n| S4 | The reason for each exclusion and when each feature is known |\n| --- | --- |\n| S5 | Library versions, so the model can be refitted exactly |\n| O1 | The shipped model's AUC on rows it never saw |\n| M1 | Inputs and outcomes to monitor, thresholds and a named owner |\n| M2 | Conditions of use and how officers review declined applicants |","notes":"Send it to Rasil Al-Nafisah's team with the checklist attached. Ask the room: which item blocks a decision? M1: a decision with conditions cannot be enforced without someone watching. M2 is accepted with a reason.","minutes":null,"lo":["LO5"]},{"id":"personal-data-in-package","n":28,"title":"Validation evidence about people is personal data too","kind":"content","session":3,"hash":"5ff44810","md":"#### [day4#personal-data-in-package] Validation evidence about people is personal data too\n\n*Before you send it*\n\n- Subgroup tables use gender, age band and region of real applicants: Sadeem Al-Oraini, the data protection officer, signs off the report's annexes.\n- Report groups and rates, not rows; the stability panel uses application identifiers, never names.\n- The Personal Data Protection Law and its implementing regulation apply to the validator's copy as to the developers'.","notes":"The course data are synthetic, so nothing here is personal; the habit is what the session teaches. Keep the reference to the law at this level: what the validator does, not legal advice. Questions about specific obligations go to the data protection officer.\n\nSources: Personal Data Protection Law and its Implementing Regulation (SDAIA).","minutes":null,"lo":["LO5"]},{"id":"check-checklist","n":29,"title":"How do you score O5 for Amana?","kind":"quiz","session":3,"hash":"549726a6","md":"#### [day4#check-checklist] How do you score O5 for Amana?\n\n*Checkpoint*\n\n**Question:** metadata.json says officers see the three largest Shapley values. evidence.json says stability_checked: false. You tested stability yourself on Day 3. What is O5?\n\n- A. Present, because the stability panel from Day 3 now exists\n- B. Missing, because nothing about explanations is there\n- C. Partial: the method is stated, its stability is not checked by the developers\n- D. Not applicable, because the reasons were unstable","notes":"Answer: C.","minutes":null,"lo":["LO5"]},{"id":"lab-4-3","n":30,"title":"The package against a checklist","kind":"lab","session":3,"hash":"dcb3aa60","md":"#### [day4#lab-4-3] The package against a checklist\n\nLab 4.3 · 25 min\n\nScore Amana against a 12-item course checklist drawn from REFORMS and model cards, mark each item present, partial or missing with the file that shows it, and turn the gaps into a request to the developers.\n\n[D4_3_score_model_package.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D4_3_score_model_package.ipynb)\n\n- [ ] Read the checklist (4 min)\n- [ ] Score each item with its evidence (9 min)\n- [ ] Count by part: soundness, outcomes, monitoring (4 min)\n- [ ] Write the request for missing evidence (5 min)\n- [ ] Which gap blocks a decision (3 min)\n- [ ] ✱ Stretch: Score one of the two capstone packages with the same checklist","notes":"Expected: the trainer's key with at most two differences; by part, soundness 2 present and 3 partial, outcomes 2 partial and 3 missing, monitoring 2 missing; blocking gap M1. Common problem: scoring S4 present because features are listed; the item also asks when each is known and why each exclusion was made. The stretch reads the renewal package's evidence file: the same three gaps.","minutes":null,"lo":[]},{"id":"s4","n":31,"title":"The fit-for-use decision","kind":"section","session":4,"hash":"e7aa7079","md":"#### [day4#s4] The fit-for-use decision\n\n*Session 4*\n\n- Rate findings by severity and link each to evidence\n- Draft a decision with conditions of use and human review\n- Choose the capstone package and plan its validation","notes":"","minutes":null,"lo":["LO5"]},{"id":"three-decisions","n":32,"title":"The committee needs one of three answers, and the conditions that go with it","kind":"content","session":4,"hash":"7bf19240","md":"#### [day4#three-decisions] The committee needs one of three answers, and the conditions that go with it\n\n*The fit-for-use decision*\n\n- **Fit.** Use as documented. Rare for a first submission.\n- **Fit with conditions.** Use only while named conditions hold, each with an owner.\n- **Not fit.** Do not use. Say what would change the answer.","notes":"The decision is Dr. Sameera Al-Fadda's committee's; the validator drafts it with the evidence. SDAIA's National AI Risk Management Framework gives entities a method for identifying, assessing, treating and monitoring AI risks; conditions with owners and monitoring are how a validation report puts that into practice for one model.\n\nSources: National AI Risk Management Framework, executive summary (SDAIA); SDAIA AI Ethics Principles.","minutes":null,"lo":["LO5"]},{"id":"week-findings","n":33,"title":"Eleven findings from the week; six are high","kind":"content","session":4,"hash":"31e8c5d1","md":"#### [day4#week-findings] Eleven findings from the week; six are high\n\n*Lab 4.4 · step 1*\n\n| High | Finding |\n| --- | --- |\n| F2 | Probabilities about four times too high; Platt on calib rows repairs them |\n| F3, F4 | Northern region and ages 18 to 24 under-predicted after repair |\n| F8 | Reasons shown to officers unstable over refits |\n| F10 | App channel bank inflow in the wrong unit from March 2025 |\n| F11 | No monitoring, owner, conditions of use or human review |","notes":"The findings are in labs/data/findings.json, so the lab does not depend on earlier runs. The rule: high when the impact is high and the evidence supports it. F7 (the simulated income shift) has high stakes but is simulated, so it is rated low: a stress test is a reason to monitor, not a finding.","minutes":null,"lo":["LO5"]},{"id":"conditions-with-owners","n":34,"title":"Every condition says what must hold, who owns it and which findings it answers","kind":"content","session":4,"hash":"bda900c6","md":"#### [day4#conditions-with-owners] Every condition says what must hold, who owns it and which findings it answers\n\n*Lab 4.4 · step 2*\n\n| Condition | Owner | Answers |\n| --- | --- | --- |\n| C1 Use probabilities only after the Platt map | Credit analytics | F2 |\n| C2 No app scoring until the feed is fixed; rescore; range check | Data engineering | F10 |\n| C3 Northern and 18 to 24 go to an officer | Branch officers | F3, F4 |\n| C4 One grouped income reason; only stable reasons | Credit analytics | F8, F9 |\n| C5 Monthly monitoring; two breaches return it to validation | Model risk | F11, F5, F7 |","notes":"The lab checks mechanically that every high finding is answered and every condition has an owner. Ask: who is Fuad Al-Rubayan in this table? The branch officers' lead: C3 lands on his team, so he must agree to it before the committee meets.","minutes":null,"lo":["LO5"]},{"id":"human-review-real","n":35,"title":"Name which applicants an officer must see, and give the officer the evidence","kind":"content","session":4,"hash":"f91adead","md":"#### [day4#human-review-real] Name which applicants an officer must see, and give the officer the evidence\n\n*Human review*\n\n- **A slogan.** \"Borderline cases are reviewed by a human.\"\n- **A rule.** Every application from the Northern region, aged 18 to 24, or with all three grades in its 90% set.\n\n> **Automation Bias** (guide p. 19): officers who see only a score defer to it. They need the grade set, stable reasons, authority to decide differently, and their overrides monitored.","notes":"The grade set from Day 2 earns its place here: an application whose 90% set holds all three grades is one the model cannot place. Ask the room how many applications the rule sends to officers: the North is 5% of holdout applicants and 18 to 24 is 12%, so about a sixth before the full sets are added; Fuad's team must be able to absorb it, and the report should state the share.\n\nSources: SDAIA AI Bias Reference Guide.","minutes":null,"lo":["LO5"]},{"id":"when-not-fit","n":36,"title":"\"Fit with conditions\" is only as good as its owners and its monitoring","kind":"content","session":4,"hash":"e7ec8fe9","md":"#### [day4#when-not-fit] \"Fit with conditions\" is only as good as its owners and its monitoring\n\n*Judgement*\n\n- The model ranks well (AUC 0.755) and its probabilities are repaired: the harms found have conditions that remove them while causes are fixed.\n- If no one will own C2 or C5, the honest decision is **not fit**.\n- A condition without an owner is a wish; a review rule without a list of applicants is a slogan.","notes":"Lab 4.4's stretch writes the two sentences for a committee that asks to approve without conditions. Reference: Northern and young applicants would keep being priced on risks 5 to 7 points lower than they are, and every app application since March is scored on a broken input.","minutes":null,"lo":["LO5"]},{"id":"capstone-packages","n":37,"title":"Two packages wait for the capstone; both claim more than they deliver","kind":"content","session":4,"hash":"ccff0333","md":"#### [day4#capstone-packages] Two packages wait for the capstone; both claim more than they deliver\n\n*Lab 4.4 · steps 4 and 5*\n\n|  | Claimed AUC | Holdout AUC | Mean raw prediction | Default rate |\n| --- | --- | --- | --- | --- |\n| Amana-R · top-up loans for repeat borrowers | 0.902 | 0.711 | 0.412 | 0.089 |\n| Amana-F · seasonal farm loans | 0.892 | 0.700 | 0.425 | 0.128 |\n\nEach has applications, a later batch, three models, a card, metadata and evidence. Choose one, or a package agreed with your peer, and plan its first three checks.","notes":"Do not reveal the planted problems; the answer key has them. Hint only that each later batch tells a different story: one quiet, one loud. Pairs may validate the same package independently and compare.","minutes":null,"lo":["LO5"]},{"id":"check-decision","n":38,"title":"Which condition is written well enough to enforce?","kind":"quiz","session":4,"hash":"72c6c5e6","md":"#### [day4#check-decision] Which condition is written well enough to enforce?\n\n*Checkpoint*\n\n**Question:** Four drafts for the approval committee. Which one could an auditor check next year?\n\n- A. Borderline applications receive careful human review by experienced officers in every branch\n- B. Model risk checks calibration by region and age monthly; two breaches mean revalidation\n- C. The model will be monitored for fairness\n- D. The developers retrain the model every year","notes":"Answer: B.","minutes":null,"lo":["LO5"]},{"id":"lab-4-4","n":39,"title":"The decision and the capstone choice","kind":"lab","session":4,"hash":"4d9e30f6","md":"#### [day4#lab-4-4] The decision and the capstone choice\n\nLab 4.4 · 25 min\n\nCollect the week's findings, rate them, draft Amana's decision with conditions of use, human review and monitoring, test that every high finding has a condition, and choose the package for the capstone.\n\n[D4_4_draft_decision_conditions.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D4_4_draft_decision_conditions.ipynb)\n\n- [ ] Collect and rate the findings (6 min)\n- [ ] Draft the decision and its conditions (8 min)\n- [ ] Check every high finding has a condition (4 min)\n- [ ] Compare the capstone packages (4 min)\n- [ ] Choose one and plan it (3 min)\n- [ ] ✱ Stretch: Write the two sentences you would say to the approval committee if it asked to approve without conditions","notes":"Expected: six high findings (F2, F3, F4, F8, F10, F11); the reference decision is fit with conditions with five owned conditions; first look: renewal claimed 0.902 against 0.711, farm 0.892 against 0.700; renewal's later batch is calibrated overall (0.081 against 0.080), farm's is under-predicted (0.140 against 0.173). \"Not fit\" is accepted when argued from the owners. Collect each participant's package choice before they leave.","minutes":null,"lo":[]},{"id":"wrap-up","n":40,"title":"What a validation report gives the committee","kind":"content","session":4,"hash":"c72e504f","md":"#### [day4#wrap-up] What a validation report gives the committee\n\n*Day 4 · three things to keep*\n\n- **Supported gaps.** By group, with intervals, tagged with the guide and rated by a rule stated before looking.\n- **Causes, not symptoms.** Slice, then inputs, then reasons: a broken feed is not a degraded model.\n- **Owned conditions.** A decision the committee can enforce, with monitoring and real human review.","notes":"Each participant now has the four days' sections of a validation report on Amana. The capstone repeats the week, alone or in pairs, on Amana-R or Amana-F.","minutes":null,"lo":[]},{"id":"next","n":41,"title":"Capstone: validate a package and defend the decision","kind":"content","session":4,"hash":"881b8bc3","md":"#### [day4#next] Capstone: validate a package and defend the decision\n\n*Next*\n\nBring the package you chose, your plan's first three checks, and the week's notebooks. Unfinished labs can be finished at home from their reference state.","notes":"Remind participants that the capstone runs on the same laptop or Colab setup; nothing new to install. Each talk is eight minutes with four minutes of questions from the committee.","minutes":null,"lo":[]}],"activities":[{"id":"review-day3-q1","slide":"review-day3","type":"single","prompt":"Over five refits, 8 of 10 applicants keep their top reason and 1 of 10 keeps all three. Bank inflow and declared income correlate at 0.84. Which sentence is supported?","options":[{"key":"A","text":"Show officers one grouped income reason, and only reasons that survive refits"},{"key":"B","text":"The three reasons are exact, so they can be shown as they are"},{"key":"C","text":"Bank inflow is a stronger reason than declared income"},{"key":"D","text":"The model must be retrained until all three reasons are stable across refits"}],"correct":[0],"explanation":"The top reason is fairly stable and the rest are not; the two incomes trade credit between refits, so they are one reason told two ways.","misconceptions":["","Reads exact additivity as stability across equally valid models","Ranks members of a correlated pair, which no method here can separate","Takes instability of the second and third reasons as proof the model is wrong"],"lo":["LO3"]},{"id":"check-subgroup-q1","slide":"check-subgroup","type":"single","prompt":"After recalibration, men default at 10.5% against 8.9% predicted, interval 9.6 to 11.4; women at 9.5% against 9.1%. Under the course rules, what goes in the report?","options":[{"key":"A","text":"Nothing: the gap is within noise"},{"key":"B","text":"A high finding of gender bias, since gender is a protected attribute"},{"key":"C","text":"Evidence that the model discriminates against men"},{"key":"D","text":"A medium finding: supported, 1.6 points, monitored by gender"}],"correct":[3],"explanation":"The interval supports the gap, and the rule rates supported gaps under 2 points as medium; the report states it and asks for monitoring.","misconceptions":["Ignores that the prediction lies outside the interval: the gap is supported","Rates a small gap high only because the group is protected; the rule asks for size too","Turns a tag into a verdict the validator cannot give",""],"lo":["LO5"]},{"id":"check-degradation-q1","slide":"check-degradation","type":"single","prompt":"The feed broke on 1 March 2025. Outcomes of March applications mature in March 2026. Which monitor raises the alarm in March 2025?","options":[{"key":"A","text":"Input range checks and top-reason shares, on the day of scoring"},{"key":"B","text":"Monthly AUC on scored applications, against the holdout AUC of 0.755"},{"key":"C","text":"Loss interval coverage on defaulted loans"},{"key":"D","text":"Retraining every quarter on recent applications"}],"correct":[0],"explanation":"Inputs and reasons exist on the day of scoring; outcome-based measures confirm a fault only once loans mature.","misconceptions":["","Needs outcomes that do not exist until a year later","The loss intervals barely moved; this monitor misses this fault","Retraining on schedule would learn the broken unit rather than detect it"],"lo":["LO4"]},{"id":"check-checklist-q1","slide":"check-checklist","type":"single","prompt":"metadata.json says officers see the three largest Shapley values. evidence.json says stability_checked: false. You tested stability yourself on Day 3. What is O5?","options":[{"key":"A","text":"Present, because the stability panel from Day 3 now exists"},{"key":"B","text":"Missing, because nothing about explanations is there"},{"key":"C","text":"Partial: the method is stated, its stability is not checked by the developers"},{"key":"D","text":"Not applicable, because the reasons were unstable"}],"correct":[2],"explanation":"The checklist scores what the package supplies; the method is there and the stability evidence is not.","misconceptions":["Scores the validator's work instead of the package","Ignores that the method is stated, which is half of the item","","Treats an unstable result as grounds to drop the item rather than score it"],"lo":["LO5"]},{"id":"check-decision-q1","slide":"check-decision","type":"single","prompt":"Four drafts for the approval committee. Which one could an auditor check next year?","options":[{"key":"A","text":"Borderline applications receive careful human review by experienced officers in every branch"},{"key":"B","text":"Model risk checks calibration by region and age monthly; two breaches mean revalidation"},{"key":"C","text":"The model will be monitored for fairness"},{"key":"D","text":"The developers retrain the model every year"}],"correct":[1],"explanation":"An enforceable condition names a measure, a frequency, a threshold, an action and an owner.","misconceptions":["Names no group, no owner and no test: a slogan","","An intention with no measure, threshold or owner","Retraining is an action without a trigger or a check that it worked"],"lo":["LO5"]}],"ai":{"context":{"course":"../context/course.md","courseJs":"../context/course.js","day":"day4.md","llms":"../llms.txt"},"tasks":[],"tools":[]},"bridge":{"allowedOrigins":[]},"features":{},"strings":{}}</script>
+<script src="../_engine/academy.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+{
+ "package": "Amana-R top-up model",
+ "version": "1.0",
+ "owner": "Credit analytics team, Mizan Community Lending",
+ "target": "default within 12 months of disbursement (1) or not (0)",
+ "features": [
+  "years_in_business",
+  "household_size",
+  "prior_loans",
+  "prior_missed",
+  "declared_income",
+  "bank_inflow",
+  "loan_amount",
+  "term_months",
+  "business_type",
+  "channel"
+ ],
+ "categorical": {
+  "business_type": [
+   "retail",
+   "food",
+   "services",
+   "crafts",
+   "agriculture"
+  ],
+  "channel": [
+   "branch",
+   "app"
+  ]
+ },
+ "excluded_on_purpose": [
+  "gender",
+  "age_band",
+  "region",
+  "wallet_months"
+ ],
+ "training_rows": "applications 2023-01 to 2024-12, split == train",
+ "training_settings": {
+  "rebalanced": "non-defaults dropped at random to a 50/50 sample",
+  "library": "LightGBM",
+  "rounds": 300,
+  "learning_rate": 0.05,
+  "num_leaves": 31,
+  "min_data_in_leaf": 40,
+  "feature_fraction": 0.9,
+  "bagging_fraction": 0.9,
+  "bagging_freq": 1,
+  "lambda_l2": 1.0,
+  "seed": 305,
+  "deterministic": true,
+  "force_col_wise": true
+ },
+ "outputs": {
+  "model_default.txt": "probability of default",
+  "model_grade.txt": "probabilities of grades A, B, C",
+  "model_loss.txt": "loss in riyals if the loan defaults"
+ },
+ "reasons_shown_to_officers": "the three features with the largest positive Shapley values",
+ "monitoring": "none defined"
+}

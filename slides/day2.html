@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-ax="deck" data-track="data-science">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 2 · Intervals with guarantees · Uncertainty, Interpretability and Model Validation</title>
+<meta name="generator" content="SDAIA Academy engine 1.0.0">
+<link rel="icon" href="../_engine/icon.svg">
+<link rel="alternate" type="text/markdown" href="day2.md">
+<link rel="describedby" href="../llms.txt">
+<link rel="stylesheet" href="../_engine/academy.css">
+</head>
+<body>
+<div class="deck" data-course="Uncertainty, Interpretability and Model Validation" data-track="data-science" data-day="Day 2">
+<!-- ======================= OPENING ======================= -->
+<section class="slide title" id="title" data-auto="title" data-label="Welcome" data-n="1">
+  <div class="kicker">SDAIA Academy · Uncertainty, Interpretability and Model Validation</div>
+  <h1>Intervals with guarantees</h1>
+  <p class="lead mt">Day 2: Wrap the loss model and the grade model in conformal intervals and prediction sets, then test the guarantee by group and under shift</p>
+  <div class="meta"><span class="track">Data Science Track</span><span>4 teaching days + capstone day</span><span>4 sessions · 4 labs</span><span>DS-305</span></div>
+  <aside class="notes"><p>Open with yesterday's three findings: the in-sample AUC, the fourfold probabilities repaired by Platt, and the North and young applicants still under-predicted. Today moves from probabilities to intervals: how wrong can a prediction be, and for whom does the answer hold?</p></aside>
+</section>
+
+<section class="slide" id="agenda" data-auto="agenda" data-label="Agenda" data-n="2">
+  <div class="kicker">Today</div>
+  <h2>Intervals with guarantees</h2>
+  <div class="agenda"><div class="item"><div><b>Session 1 · Conformal intervals</b><small>Split conformal prediction turns any regression into intervals with 90% coverage, as long as the rows are exchangeable</small></div></div><div class="item"><div><b>Session 2 · Prediction sets</b><small>For the three risk grades, conformal prediction returns a set of grades, and the size of the set is the uncertainty</small></div></div><div class="item"><div><b>Session 3 · Coverage by group</b><small>The 90% is an average over everyone: large loans and the Northern region can sit far below it, and a group-conditional variant repairs that</small></div></div><div class="item"><div><b>Session 4 · Coverage under shift</b><small>When the population moves, the rows are no longer exchangeable and the guarantee quietly fails; a simulated shift measures how much</small></div></div></div>
+</section>
+
+<section class="slide" data-label="Review" id="review-day1" data-lo="LO1" data-n="3">
+  <div class="kicker">Review of Day 1</div>
+  <h2>Which statement about Amana after Platt scaling is right?</h2>
+  <div class="quiz" data-type="single" data-lo="LO1" data-id="review-day1-q1">
+    <p class="lead">Platt scaling was fitted on the calib rows. On the holdout, the Brier score fell from 0.199 to 0.081 and the mean prediction is 9.0% against 9.9% observed. Which statement holds?</p>
+    <div class="opts">
+      <div class="opt" data-why="Assumes recalibration improves ranking: a monotone map leaves the AUC where it was" data-k="A">The AUC rose with the Brier score</div>
+      <div class="opt" data-why="Treats average calibration as calibration in every group; the Northern region stays 6.7 points under-predicted" data-k="B">Every region is now calibrated, since the map was fitted on all of them</div>
+      <div class="opt" data-ok data-k="C">The ranking is unchanged and the average is repaired</div>
+      <div class="opt" data-why="Reads a map fitted on calib rows as a retrained model; the model itself was not touched" data-k="D">The developers' model was retrained</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Platt scaling is a monotone map after the model: it repairs what the score means on average and cannot reorder applicants or see a column the score lacks.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. Two minutes. If the room picks "every region", put the Northern row of Lab 1.4 back on the screen.</p></aside>
+</section>
+
+<!-- ======================= SESSION 1 ======================= -->
+<section class="slide section" id="s1" data-auto="section" data-session="1" data-n="4">
+  <div class="kicker">Session 1</div>
+  <h1>Conformal intervals</h1>
+  <ul class="bullets outcomes"><li>Compute the split conformal threshold with its finite-sample correction</li><li>Wrap a fitted regression in intervals and check coverage on new rows</li><li>State the one assumption the guarantee rests on</li></ul>
+  <div class="sess-no">01</div>
+</section>
+
+<section class="slide" data-label="One number" id="point-prediction-silent" data-lo="LO2" data-n="5" data-session="1">
+  <div class="kicker">The problem</div>
+  <h2>A loss prediction of 12,000 riyals says nothing about how wrong it can be</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>Amana's loss model predicts the riyals lost <b>if</b> a loan defaults.</li>
+      <li>Finance provisions on it; collections plan on it.</li>
+      <li>A point prediction is silent about its error: 12,000 could mean 11,000 to 13,000 or 2,000 to 30,000.</li>
+    </ul>
+    <div class="card c-teal flat"><h4>What the validator adds</h4><p class="small mb0">An interval around every prediction that contains the real loss 90% of the time, with the condition under which that holds.</p></div>
+  </div>
+  <aside class="notes"><p>Ask Talib's question: "If I provision for the predicted loss on 100 defaults, how many will cost more than I planned, and by how much?" A point prediction cannot answer it. The loss model is trained on defaulted loans only, so its holdout has 993 rows, not 10,000.</p></aside>
+</section>
+
+<section class="slide" data-label="Exchangeable" id="exchangeability" data-lo="LO2" data-n="6" data-session="1">
+  <div class="kicker">The one assumption</div>
+  <h2>Conformal prediction needs only one thing: new rows drawn like the calib rows</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li><b>Exchangeable</b>: the calib rows and the new row could be shuffled without changing their joint distribution. Independent draws from one population are exchangeable.</li>
+      <li>No assumption on the model, the shape of the errors or the features.</li>
+      <li>The guarantee breaks when the population moves: a new product, a new region, a shift in incomes.</li>
+    </ul>
+    <div class="callout warn small"><b>What goes wrong.</b> Quoting "90% guaranteed" for applicants who no longer look like the calib rows. Session 4 measures how much is lost.</div>
+  </div>
+  <aside class="notes"><p>This is the third row of yesterday's assumption table. Keep the definition informal: if you could not tell which row is the new one by looking at the joint distribution, the rows are exchangeable. Time order breaks it (later rows differ), and so does any selection of who applies.</p><p>Sources: Angelopoulos and Bates, A Gentle Introduction to Conformal Prediction.</p></aside>
+</section>
+
+<section class="slide" data-label="Split conformal" id="split-conformal-steps" data-lo="LO2" data-n="7" data-session="1">
+  <div class="kicker">Split conformal, in three steps</div>
+  <h2>Score the calib rows, take a quantile, widen every prediction by it</h2>
+  <div class="flow">
+    <div class="step c-teal"><b>1 · Score</b>On calib defaults, the error <code>|loss - prediction|</code></div>
+    <div class="arrow frag" data-frag="b">→</div>
+    <div class="step c-cyan frag" data-frag="b"><b>2 · Threshold</b>The <code>ceil((n+1)(1-α))</code>-th smallest score</div>
+    <div class="arrow frag" data-frag="c">→</div>
+    <div class="step c-coral frag" data-frag="c"><b>3 · Interval</b><code>prediction ± q</code>, clipped at zero</div>
+  </div>
+  <div class="callout tip mt frag"><b>No retraining.</b> The model is used as delivered; only its predictions on calib rows are needed.</div>
+  <aside class="notes"><p>Press once per step. Step 1: the score is how badly the model did; any score works, the absolute residual is the simplest. Step 2: with 895 calib defaults and alpha 0.1, the rank is ceil(896 x 0.9) = 807. Step 3: every holdout loan gets the same plus or minus q. The fact that the validator never opens the model is what makes this a validation tool.</p></aside>
+</section>
+
+<section class="slide" data-label="The plus one" id="finite-sample-correction" data-lo="LO2" data-n="8" data-session="1">
+  <div class="kicker">Why "n + 1"</div>
+  <h2>Counting the new loan turns "about 90%" into "at least 90%"</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 2.1 · step 2"><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">conformal_quantile</span>(<span class="hljs-params">scores, alpha=<span class="hljs-number">0.1</span></span>):
+    s = np.sort(scores)
+    k = ceil((<span class="hljs-built_in">len</span>(s) + <span class="hljs-number">1</span>) * (<span class="hljs-number">1</span> - alpha))
+    <span class="hljs-keyword">if</span> k &gt; <span class="hljs-built_in">len</span>(s):
+        <span class="hljs-keyword">return</span> inf          <span class="hljs-comment"># too few rows</span>
+    <span class="hljs-keyword">return</span> s[k - <span class="hljs-number">1</span>]</code></pre>
+    <ul class="bullets small">
+      <li>The new loan's score is equally likely to fall at any of the <b>n + 1</b> ranks.</li>
+      <li>So the chance it falls at or below rank k is k / (n + 1), at least 90%.</li>
+      <li>With 8 calib rows, 90% needs a ninth: the interval is infinite. Honest, and a warning about small groups.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The lab checks the infinite case: with 8 scores and alpha 0.1, k = 9 > 8. Return to it in Session 3: a group-conditional threshold for a group with few calib rows suffers the same way.</p></aside>
+</section>
+
+<section class="slide" data-label="Result" id="loss-interval-result" data-lo="LO2" data-n="9" data-session="1">
+  <div class="kicker">Lab 2.1 on the holdout</div>
+  <h2>Plus or minus 8,134 riyals covers 91% of real losses</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="stat"><div class="big">91.0%</div><div class="lbl">coverage on 993 holdout defaults, target 90%</div></div>
+    <div class="stat"><div class="big">8,134</div><div class="lbl">threshold q in riyals, from 895 calib defaults</div></div>
+    <div class="stat"><div class="big">15,667</div><div class="lbl">mean interval width in riyals; median loss 10,520</div></div>
+  </div>
+  <div class="callout note small mt"><b>Same answer from a library.</b> MAPIE's <code>SplitConformalRegressor</code> with <code>prefit=True</code> returns the same half-width, 8,134.</div>
+  <aside class="notes"><p>Numbers from the Lab 2.1 solution run. Point out the width: intervals wider than the median loss. That is honest about a hard target. The MAPIE cross-check matters for the capstone: participants may use either the course functions or the library, and must show they agree.</p><p>Sources: MAPIE documentation.</p></aside>
+</section>
+
+<section class="slide" data-label="On average" id="coverage-over-splits" data-lo="LO2" data-n="10" data-session="1">
+  <div class="kicker">What the 90% promises</div>
+  <h2>Coverage is a promise about the average over draws, not about one interval</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">0.900</div><div class="lbl">mean coverage over 100 random calib and test splits</div></div>
+      <div class="stat"><div class="big">0.867 to 0.935</div><div class="lbl">the range across those splits</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>One calib set can give 87% or 93% on one test set.</li>
+      <li>"This loan has a 90% chance to fall in its interval" is not the promise.</li>
+      <li>The promise is marginal: <b>over</b> loans and calib draws, on average.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The stretch of Lab 2.1, 100 splits of the 1,888 defaults outside the training rows. Do not let anyone leave with "each interval is 90% sure". The word marginal will carry the next two sessions.</p></aside>
+</section>
+
+<section class="slide" id="check-conformal-promise" data-lo="LO2" data-n="11" data-session="1">
+  <div class="kicker">Checkpoint</div>
+  <h2>What does the 90% interval promise?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2" data-id="check-conformal-promise-q1">
+    <p class="lead">Split conformal on 895 calib defaults gives Amana's loss model intervals of plus or minus 8,134 riyals. A provisioning analyst asks what the "90%" means. What do you tell her?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reads a marginal guarantee as a statement about each loan" data-k="A">Each loan has a 90% chance of a loss inside its own interval</div>
+      <div class="opt" data-why="Assumes the guarantee survives any population; it needs new loans drawn like the calib loans" data-k="B">Nine in ten losses fall inside, whoever applies to Mizan next year</div>
+      <div class="opt" data-why="Confuses coverage with accuracy of the point prediction, which conformal does not change" data-k="C">The loss model is now 90% accurate</div>
+      <div class="opt" data-ok data-k="D">Over new loans like the calib loans, at least 90% fall inside</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Conformal coverage is marginal and rests on exchangeability: it holds on average over loans drawn like the calib loans.</div>
+  </div>
+  <aside class="notes"><p>Answer: D. Option B is the dangerous one, and Session 4 shows it failing.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-2-1" data-auto="lab" data-lab="2.1" data-label="Lab 2.1" data-n="12" data-session="1">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 2.1 · 25 min</div><h2>Loss intervals with 90% coverage</h2><p class="lead small">Wrap Amana's loss model in split conformal intervals from the calib defaults, check 90% coverage and width on the holdout defaults, and confirm the same numbers with MAPIE.</p><a class="nb" href="../labs/D2_1_wrap_loss_regression.ipynb">D2_1_wrap_loss_regression.ipynb</a></div><ul class="checklist"><li>Score the calib defaults: absolute residuals <span class="min">4 min</span></li><li>Write the conformal threshold <span class="min">6 min</span></li><li>Intervals for the holdout defaults <span class="min">4 min</span></li><li>Coverage and mean width <span class="min">5 min</span></li><li>The same with MAPIE <span class="min">6 min</span></li><li class="stretch">✱ Stretch: Repeat over 100 random calib and test splits and plot the coverage you get</li></ul></div>
+  <aside class="notes"><p>Expected: q 8,134 SAR, coverage 91.0%, mean width 15,667 SAR; MAPIE gives the same half-width. Common problems: forgetting the + 1 in the rank (coverage a little under target), and passing MAPIE a raw LightGBM booster (it needs the scikit-learn wrapper in the notebook). If MAPIE fails to install in Colab, the safety net continues with the course function.</p></aside>
+</section>
+
+<!-- ======================= SESSION 2 ======================= -->
+<section class="slide section" id="s2" data-auto="section" data-session="2" data-n="13">
+  <div class="kicker">Session 2</div>
+  <h1>Prediction sets</h1>
+  <ul class="bullets outcomes"><li>Build LAC prediction sets from calibrated scores</li><li>Build adaptive (APS) sets and compare their sizes</li><li>Read a set of size one, two or three as a decision</li></ul>
+  <div class="sess-no">02</div>
+</section>
+
+<section class="slide" data-label="Top grade" id="top-grade-hides" data-lo="LO2" data-n="14" data-session="2">
+  <div class="kicker">Classification</div>
+  <h2>An officer who sees only the top grade cannot see the model's doubt</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>Amana's grade model gives three probabilities: on time (A), late but repaid (B), default (C).</li>
+      <li>The top grade is right for <b>74.4%</b> of holdout applicants.</li>
+      <li>For some it is a near-certainty; for others three grades are close. The top grade looks the same.</li>
+    </ul>
+    <div class="card c-teal flat"><h4>A prediction set</h4><p class="small mb0">The grades the model cannot rule out, chosen so the true grade is in the set 90% of the time. Its size is the doubt.</p></div>
+  </div>
+  <aside class="notes"><p>Grades in the holdout: A 72%, B 18%, C 10%. Ask: would Fuad's officers treat an applicant whose set is {A} the same as one whose set is {A, B, C}? They should not, and today they cannot tell them apart.</p></aside>
+</section>
+
+<section class="slide" data-label="LAC" id="lac-sets" data-lo="LO2" data-n="15" data-session="2">
+  <div class="kicker">The simplest sets</div>
+  <h2>LAC keeps every grade whose probability clears one bar</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 2.2 · step 1"><code class="language-python">score = <span class="hljs-number">1</span> - P_cal[i, true_grade]     <span class="hljs-comment"># calib rows</span>
+q = conformal_quantile(score, <span class="hljs-number">0.1</span>)    <span class="hljs-comment"># 0.834</span>
+in_set = P_hold &gt;= <span class="hljs-number">1</span> - q              <span class="hljs-comment"># 0.166</span></code></pre>
+    <ul class="bullets small">
+      <li>Score: one minus the probability of the true grade.</li>
+      <li>On Amana: a grade enters the set if its probability is at least <b>0.166</b>.</li>
+      <li>Smallest sets on average; can be empty.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>LAC stands for least ambiguous set-valued classifier. It is MAPIE's default for classification ("lac"). Its sets are the smallest that keep the marginal guarantee, which is why it spends its errors on the hard cases.</p><p>Sources: Angelopoulos and Bates; MAPIE documentation.</p></aside>
+</section>
+
+<section class="slide" data-label="APS" id="aps-sets" data-lo="LO2" data-n="16" data-session="2">
+  <div class="kicker">Adaptive sets</div>
+  <h2>APS adds grades from most to least likely until their total reaches the threshold</h2>
+  <div class="flow">
+    <div class="step c-teal"><b>Sort</b>grades by probability</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>Accumulate</b>add the next grade's probability</div>
+    <div class="arrow">→</div>
+    <div class="step c-coral"><b>Stop</b>when the total passes q (with a random share of the last grade)</div>
+  </div>
+  <ul class="bullets small mt">
+    <li>Unsure applicants, whose probabilities are spread, get larger sets.</li>
+    <li>The randomisation makes coverage exact rather than conservative.</li>
+  </ul>
+  <aside class="notes"><p>APS is from Romano, Sesia and Candes. The course helper implements the randomised version with a fixed seed so runs repeat. Without randomisation APS over-covers, sometimes badly with three classes: the threshold can land at 1 and every set holds all three grades.</p><p>Sources: Romano, Sesia and Candes, Classification with Valid and Adaptive Coverage.</p></aside>
+</section>
+
+<section class="slide" data-label="Results" id="set-results" data-lo="LO2" data-n="17" data-session="2">
+  <div class="kicker">Lab 2.2 on the holdout</div>
+  <h2>Both cover 90%; APS gives fewer one-grade sets</h2>
+  <table class="t">
+    <tr><th>Method</th><th class="num">Coverage</th><th class="num">Mean size</th><th class="num">Size 1</th><th class="num">Size 2</th><th class="num">Size 3</th></tr>
+    <tr><td>LAC</td><td class="num">89.2%</td><td class="num">1.56</td><td class="num">56.7%</td><td class="num">30.6%</td><td class="num">12.7%</td></tr>
+    <tr><td>APS</td><td class="num">90.3%</td><td class="num">1.67</td><td class="num">43.1%</td><td class="num">46.4%</td><td class="num">10.5%</td></tr>
+  </table>
+  <p class="small mt-s">No empty sets with either method on this holdout.</p>
+  <aside class="notes"><p>From the Lab 2.2 solution run. Read the table as a cost: APS gives up 14 points of single-grade sets for adaptivity. The stretch shows the cost of the level: mean APS size 1.33 at 80%, 1.67 at 90%, 2.03 at 95%.</p></aside>
+</section>
+
+<section class="slide" data-label="By grade" id="coverage-by-true-grade" data-lo="LO2" data-n="18" data-session="2">
+  <div class="kicker">What the average hides</div>
+  <h2>The sets miss the true grade of more than half the defaulters</h2>
+  <div class="bars">
+    <div class="row"><span>A · on time</span><div class="bar c-teal" style="--w:99%"></div><span class="val">99.8% / 99.4%</span></div>
+    <div class="row"><span>B · late</span><div class="bar c-amber" style="--w:75%"></div><span class="val">70.7% / 79.6%</span></div>
+    <div class="row"><span>C · default</span><div class="bar c-coral" style="--w:44%"></div><span class="val">44.9% / 43.0%</span></div>
+  </div>
+  <p class="small mt-s">Coverage by true grade, LAC / APS. Marginal 90% is reached by over-covering the 72% who pay on time.</p>
+  <aside class="notes"><p>This is the most important slide of the session. Neither method promises coverage within a grade. If the decision is about defaulters, the guarantee that matters is class-conditional: one threshold per true grade, computed from calib rows of that grade. Participants meet the same idea for groups of applicants in Session 3.</p></aside>
+</section>
+
+<section class="slide" data-label="Doubt" id="set-size-as-doubt" data-lo="LO2" data-n="19" data-session="2">
+  <div class="kicker">Reading set size</div>
+  <h2>Applicants whose set holds all three grades default three times as often</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">1,046</div><div class="lbl">holdout applicants (10.5%) with the set {A, B, C}</div></div>
+      <div class="stat"><div class="big">24.8% vs 8.2%</div><div class="lbl">their default rate, against everyone else's</div></div>
+    </div>
+    <div class="card c-coral flat"><h4>A use for the set</h4><p class="small mb0">A set of three grades could route an application to Fuad's officers for review instead of an automatic decision. Day 4 turns this into a condition of use.</p></div>
+  </div>
+  <aside class="notes"><p>From Lab 2.2 step 5. The set size flags exactly the applicants a human should look at. That is a concrete, testable human-review rule, much better than "officers review borderline cases".</p></aside>
+</section>
+
+<section class="slide" id="check-set-size" data-lo="LO2" data-n="20" data-session="2">
+  <div class="kicker">Checkpoint</div>
+  <h2>What does a set of size one tell the officer?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2" data-id="check-set-size-q1">
+    <p class="lead">An applicant's 90% APS set is {A}. The officer asks whether the model is certain this applicant will repay on time. What is the right answer?</p>
+    <div class="opts">
+      <div class="opt" data-ok data-k="A">No: across applicants, about one in ten sets misses the true grade</div>
+      <div class="opt" data-why="Reads a set of one as certainty; the guarantee is about the share of sets that contain the truth" data-k="B">Yes: only one grade could be the true one</div>
+      <div class="opt" data-why="Confuses the set level with the probability of the grade inside it" data-k="C">Yes, with exactly 90% probability for this applicant</div>
+      <div class="opt" data-why="Thinks small sets are a sign of error; they are a sign the model separates this applicant well" data-k="D">No: a set of one means the model failed to find enough grades to include</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The 90% is the share of sets, over applicants, that hold the true grade; any single set can be wrong, and a small set says the model is relatively sure, not certain.</div>
+  </div>
+  <aside class="notes"><p>Answer: A. Link back to the by-grade slide: the misses are concentrated among defaulters.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-2-2" data-auto="lab" data-lab="2.2" data-label="Lab 2.2" data-n="21" data-session="2">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 2.2 · 25 min</div><h2>Sets for three risk grades</h2><p class="lead small">Build LAC and adaptive prediction sets for grades A, B and C from the grade model, check 90% coverage on the holdout, and measure how set sizes differ by method and by true grade.</p><a class="nb" href="../labs/D2_2_build_prediction_sets.ipynb">D2_2_build_prediction_sets.ipynb</a></div><ul class="checklist"><li>Write the LAC score and its sets <span class="min">7 min</span></li><li>Coverage and set sizes <span class="min">4 min</span></li><li>Adaptive sets (APS) from the helper <span class="min">5 min</span></li><li>Coverage and size by true grade <span class="min">5 min</span></li><li>Which applicants get all three grades <span class="min">4 min</span></li><li class="stretch">✱ Stretch: Make sets at 80% and 95% and plot the mean set size against the level</li></ul></div>
+  <aside class="notes"><p>Expected: LAC threshold 0.834 (grades with probability at least 0.166), coverage 89.2%, mean size 1.56; APS coverage 90.3%, mean size 1.67; defaulters covered 44.9% (LAC) and 43.0% (APS); 1,046 applicants with all three grades, default rate 24.8% against 8.2%. Common problem: indexing the probability of the true grade with a column label instead of the integer grade index.</p></aside>
+</section>
+
+<!-- ======================= SESSION 3 ======================= -->
+<section class="slide section" id="s3" data-auto="section" data-session="3" data-n="22">
+  <div class="kicker">Session 3</div>
+  <h1>Coverage by group</h1>
+  <ul class="bullets outcomes"><li>Measure coverage and width by subgroup</li><li>Explain why marginal coverage says nothing about a group</li><li>Apply group-conditional (Mondrian) conformal and read its cost in width</li></ul>
+  <div class="sess-no">03</div>
+</section>
+
+<section class="slide" data-label="Marginal" id="marginal-not-conditional" data-lo="LO2" data-n="23" data-session="3">
+  <div class="kicker">Marginal and conditional</div>
+  <h2>90% for everyone together can be 77% for the loans that matter</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li><b>Marginal</b> coverage: over all loans, 90%. This is what split conformal guarantees.</li>
+      <li><b>Conditional</b> coverage: within a group (large loans, a region), 90%. Not guaranteed.</li>
+      <li>One width for all loans is too wide for loans whose losses vary little and too narrow for those that vary a lot.</li>
+    </ul>
+    <div class="card c-teal flat"><h4>The question at Mizan</h4><p class="small mb0">Talib provisions large loans separately. He needs their intervals to hold, not the average.</p></div>
+  </div>
+  <aside class="notes"><p>Ask the room to predict which loans the single width under-covers before showing the table. Most will say large loans; ask why. Losses are a share of the loan, so their spread grows with the loan. The data generator plants exactly that, and adds extra spread in the North.</p></aside>
+</section>
+
+<section class="slide" data-label="By group" id="coverage-by-loan-size" data-lo="LO2" data-n="24" data-session="3">
+  <div class="kicker">Lab 2.3 · one threshold for all</div>
+  <h2>Large loans are covered 77% of the time, the others 100%</h2>
+  <table class="t">
+    <tr><th>Loan size</th><th class="num">Holdout defaults</th><th class="num">Coverage</th><th class="num">Mean width (SAR)</th></tr>
+    <tr class="hl"><td>Large, above 25,000</td><td class="num">382</td><td class="num">76.7%</td><td class="num">16,268</td></tr>
+    <tr><td>Medium, 10,000 to 25,000</td><td class="num">532</td><td class="num">100%</td><td class="num">15,737</td></tr>
+    <tr><td>Small, up to 10,000</td><td class="num">79</td><td class="num">100%</td><td class="num">12,286</td></tr>
+  </table>
+  <p class="small mt-s">By region, the Northern region is lowest: 87.2% on 78 defaults, too few to call it a finding on its own.</p>
+  <aside class="notes"><p>From Lab 2.3 step 1. First reading AI-off. The overall 91% is an average of near-certainty and three in four. Small loans' widths are smaller only because the interval is clipped at zero.</p></aside>
+</section>
+
+<section class="slide" data-label="Mondrian" id="group-conditional-conformal" data-lo="LO2" data-n="25" data-session="3">
+  <div class="kicker">The repair</div>
+  <h2>One threshold per group gives each group its own guarantee</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 2.3 · step 2"><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">group_thresholds</span>(<span class="hljs-params">s, groups, alpha=<span class="hljs-number">0.1</span></span>):
+    <span class="hljs-keyword">return</span> {g: conformal_quantile(
+                   s[groups == g], alpha)
+            <span class="hljs-keyword">for</span> g <span class="hljs-keyword">in</span> <span class="hljs-built_in">sorted</span>(<span class="hljs-built_in">set</span>(groups))}</code></pre>
+    <ul class="bullets small">
+      <li>Called <b>group-conditional</b> or <b>Mondrian</b> conformal.</li>
+      <li>Thresholds: large 13,256, medium 4,332, small 1,536 riyals.</li>
+      <li>Each group needs enough calib rows: 79 small-loan defaults give a threshold from 79 scores.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The groups must be defined before looking at the holdout and known for a new applicant (loan size is known at application). Calib defaults per band: medium 476, large 340, small 79. With finer groups (band by region by age) the cells empty out and thresholds become infinite.</p></aside>
+</section>
+
+<section class="slide" data-label="Who pays" id="who-pays-in-width" data-lo="LO2" data-n="26" data-session="3">
+  <div class="kicker">Lab 2.3 · before and after</div>
+  <h2>Large loans get wider intervals; small loans get narrower ones</h2>
+  <table class="t">
+    <tr><th>Loan size</th><th class="num">Coverage before</th><th class="num">after</th><th class="num">Width before</th><th class="num">after</th></tr>
+    <tr class="hl"><td>Large</td><td class="num">76.7%</td><td class="num">90.6%</td><td class="num">16,268</td><td class="num">26,422</td></tr>
+    <tr><td>Medium</td><td class="num">100%</td><td class="num">92.5%</td><td class="num">15,737</td><td class="num">8,665</td></tr>
+    <tr><td>Small</td><td class="num">100%</td><td class="num">86.1%</td><td class="num">12,286</td><td class="num">3,072</td></tr>
+  </table>
+  <p class="small mt-s">Overall coverage stays at 91.2%. Small loans' 86.1% is on 79 defaults: within chance of 90%.</p>
+  <aside class="notes"><p>The repair does not create coverage; it moves it to where it was missing. For the report: the cost is 1.6 times wider intervals on large loans. The stretch tries a normalised score (error divided by the predicted loss): large loans reach 86.1%, better than one width, not as good as per-band thresholds.</p></aside>
+</section>
+
+<section class="slide" data-label="The finding" id="coverage-finding" data-lo="LO2 LO5" data-n="27" data-session="3">
+  <div class="kicker">What the report says</div>
+  <h2>A coverage finding names the group, the number and the cost of the repair</h2>
+  <div class="callout tip"><b>Finding.</b> The loss intervals cover 91% of defaults overall but only 77% of loans above 25,000 SAR (382 holdout defaults). One threshold per loan-size band restores 91% for large loans, with intervals 1.6 times wider.</div>
+  <div class="cols cols-3 gap-s mt">
+    <div class="card c-teal flat"><h4>What</h4><p class="small mb0">Under-coverage of large loans</p></div>
+    <div class="card c-cyan flat"><h4>Evidence</h4><p class="small mb0">382 holdout defaults, coverage table</p></div>
+    <div class="card c-coral flat"><h4>Recommendation</h4><p class="small mb0">Per-band thresholds, recomputed when the loan mix changes</p></div>
+  </div>
+  <aside class="notes"><p>The sentence is the output of Lab 2.3 step 5, generated from the numbers. Insist on this shape all week: what, how much, for whom, the repair and its cost.</p></aside>
+</section>
+
+<section class="slide" id="check-group-coverage" data-lo="LO2" data-n="28" data-session="3">
+  <div class="kicker">Checkpoint</div>
+  <h2>Why did one threshold under-cover large loans?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2" data-id="check-group-coverage-q1">
+    <p class="lead">Split conformal with one threshold reaches 91% coverage overall on Amana's loss intervals, 77% on large loans and 100% on medium and small loans. What explains it?</p>
+    <div class="opts">
+      <div class="opt" data-why="Assumes conformal guarantees every group; it guarantees the average only" data-k="A">The conformal threshold was computed wrongly</div>
+      <div class="opt" data-ok data-k="B">Losses on large loans vary more, and one width averages over groups</div>
+      <div class="opt" data-why="Confuses a group's share of the data with its spread of errors" data-k="C">Large loans are too rare in the calib rows</div>
+      <div class="opt" data-why="Reads under-coverage as a bias in the point prediction rather than in the width" data-k="D">The loss model under-predicts large losses, so their intervals sit too low</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Split conformal promises marginal coverage. With errors that grow with loan size, one width is too narrow for large loans and too wide for the rest.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. Large loans are 38% of the holdout defaults (382 of 993), not rare. If the room picks D, show that the intervals are symmetric: the misses are on both sides.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-2-3" data-auto="lab" data-lab="2.3" data-label="Lab 2.3" data-n="29" data-session="3">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 2.3 · 25 min</div><h2>Coverage by group, then per group</h2><p class="lead small">Measure the loss intervals' coverage by loan size and region, find the large loans near 77%, then compute one threshold per loan-size band and show every band back near 90% with wider intervals where they are needed.</p><a class="nb" href="../labs/D2_3_measure_subgroup_coverage.ipynb">D2_3_measure_subgroup_coverage.ipynb</a></div><ul class="checklist"><li>Coverage and width by loan size and region <span class="min">6 min</span></li><li>Write group-conditional thresholds <span class="min">7 min</span></li><li>Coverage by group again <span class="min">5 min</span></li><li>Width by group: who pays for the repair <span class="min">4 min</span></li><li>Write one finding for the report <span class="min">3 min</span></li><li class="stretch">✱ Stretch: Scale the residuals by the predicted loss and compare with the group-conditional repair</li></ul></div>
+  <aside class="notes"><p>Expected: before, large 76.7% (382), medium and small 100%; thresholds large 13,256, medium 4,332, small 1,536; after, large 90.6%, medium 92.5%, small 86.1%; overall 91.2%. The first reading of the coverage table is AI-off. Common problem: computing thresholds per band on the holdout rather than the calib rows.</p></aside>
+</section>
+
+<!-- ======================= SESSION 4 ======================= -->
+<section class="slide section" id="s4" data-auto="section" data-session="4" data-n="30">
+  <div class="kicker">Session 4</div>
+  <h1>Coverage under shift</h1>
+  <ul class="bullets outcomes"><li>Simulate a covariate shift by reweighting a held-out sample</li><li>Measure the coverage lost for intervals and for sets</li><li>Explain why the guarantee needs exchangeability and what restores it</li></ul>
+  <div class="sess-no">04</div>
+</section>
+
+<section class="slide" data-label="Shift" id="when-population-moves" data-lo="LO2 LO4" data-n="31" data-session="4">
+  <div class="kicker">Coverage under shift</div>
+  <h2>When applicants change, the interval does not know</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>A conformal threshold is a fact about the <b>calib rows</b>.</li>
+      <li>If next year's applicants earn more, borrow more or come from a new region, the rows are no longer exchangeable.</li>
+      <li>The interval keeps its width and quietly loses coverage.</li>
+    </ul>
+    <div class="card c-coral flat"><h4>At Mizan</h4><p class="small mb0">A planned campaign for salaried applicants with higher incomes. Higher incomes mean larger loans.</p></div>
+  </div>
+  <aside class="notes"><p>Covariate shift: the mix of applicants changes, the relation between features and losses does not. It is the gentlest shift, and it still breaks the guarantee where it moves the errors. Day 4 shows a harsher kind, a broken data feed.</p></aside>
+</section>
+
+<section class="slide" data-label="Simulate" id="simulating-a-shift" data-lo="LO2" data-n="32" data-session="4">
+  <div class="kicker">A shift you control</div>
+  <h2>Tilt the holdout towards higher incomes and measure what is lost</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 2.4 · step 1"><code class="language-python">z = standardise(log(declared_income))
+w = exp(strength * z)
+shifted = hold.iloc[rng.choice(n, n, p=w / w.<span class="hljs-built_in">sum</span>())]</code></pre>
+    <ul class="bullets small">
+      <li>Strength 0: the holdout as it is.</li>
+      <li>Strength 1: median declared income of defaulters from 9,400 to 16,100 riyals.</li>
+      <li>The truth of every resampled row is known, so coverage can be measured exactly.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>Simulation by reweighting is the validator's stress test: no new data needed, and the shift is chosen to match a plausible business change. Name the business change in the report, so the stress has a meaning.</p></aside>
+</section>
+
+<section class="slide" data-label="Coverage lost" id="coverage-lost-under-shift" data-lo="LO2" data-n="33" data-session="4">
+  <div class="kicker">Lab 2.4</div>
+  <h2>A strong income shift costs the loss intervals 14 points; the grade sets lose 1</h2>
+  <table class="t">
+    <tr><th>Shift strength</th><th class="num">Loss interval coverage</th><th class="num">Large-loan share</th><th class="num">Grade set coverage</th></tr>
+    <tr><td>0 (holdout)</td><td class="num">91.0%</td><td class="num">38.5%</td><td class="num">89.2%</td></tr>
+    <tr><td>0.5</td><td class="num">88.4%</td><td class="num">47.5%</td><td class="num">89.3%</td></tr>
+    <tr><td>1.0</td><td class="num">83.2%</td><td class="num">58.1%</td><td class="num">88.7%</td></tr>
+    <tr class="hl"><td>1.5</td><td class="num">77.1%</td><td class="num">69.4%</td><td class="num">88.0%</td></tr>
+  </table>
+  <p class="small mt-s">The loss intervals' mean width moves by less than 5% across the four rows.</p>
+  <aside class="notes"><p>From the Lab 2.4 solution run. Why the difference: the loss errors grow with loan size, which grows with income; the grade model's errors do not depend much on income. A shift breaks a guarantee only where it moves the errors. Within large loans at strength 1, coverage is 71.1%, below the 76.7% of the unshifted holdout: richer borrowers take the largest loans.</p></aside>
+</section>
+
+<section class="slide" data-label="Restoring" id="weighted-conformal" data-lo="LO2" data-n="34" data-session="4">
+  <div class="kicker">When the shift is known</div>
+  <h2>Weighting the calib scores by the shift restores the coverage</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">83.2%</div><div class="lbl">plain split conformal at strength 1</div></div>
+      <div class="stat"><div class="big">93.6%</div><div class="lbl">weighted conformal with the true weights</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>Each calib score counts as much as its row is more likely after the shift.</li>
+      <li>Needs the weights: in a simulation you know them; with real applicants you estimate them.</li>
+      <li>The guarantee then rests on that estimate.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The stretch of Lab 2.4. Weighted conformal prediction is from Tibshirani, Barber, Candes and Ramdas. Present it as an option for the developers when a planned change is known in advance, not as the validator's default.</p><p>Sources: Tibshirani and others, Conformal Prediction Under Covariate Shift.</p></aside>
+</section>
+
+<section class="slide" data-label="Monitoring" id="monitoring-rule" data-lo="LO2 LO4" data-n="35" data-session="4">
+  <div class="kicker">From a stress test to a condition</div>
+  <h2>The result becomes a monitoring rule with a trigger and an action</h2>
+  <table class="t small">
+    <tr><th>Watch</th><td>Monthly: the share of new loans above 25,000 riyals and the median declared income</td></tr>
+    <tr><th>Trigger</th><td>Large-loan share above 48% (holdout: 38%)</td></tr>
+    <tr><th>Action</th><td>Recompute the per-band thresholds on recent defaults, or stop quoting the 90%</td></tr>
+  </table>
+  <div class="callout warn small mt-s"><b>What goes wrong.</b> Monitoring coverage itself: losses are known only months after a default. Watch the inputs that predict the loss of coverage.</div>
+  <aside class="notes"><p>Lab 2.4 step 5. The trigger is set where the simulation showed coverage falling below 88%. Point out the delay: a loan defaults within 12 months and its loss is known later still. Input monitoring is the early warning; outcome monitoring confirms.</p></aside>
+</section>
+
+<section class="slide" id="check-shift" data-lo="LO2" data-n="36" data-session="4">
+  <div class="kicker">Checkpoint</div>
+  <h2>Why did the grade sets survive the shift that broke the loss intervals?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2" data-id="check-shift-q1">
+    <p class="lead">Under the same income shift, loss interval coverage falls from 91% to 77% while grade set coverage falls from 89% to 88%. Which explanation is right?</p>
+    <div class="opts">
+      <div class="opt" data-why="Assumes set methods have a stronger guarantee; both rest on exchangeability" data-k="A">Prediction sets keep their guarantee under shift; intervals for amounts do not</div>
+      <div class="opt" data-why="Confuses sample size with robustness; both were judged on large samples" data-k="B">The grade model was calibrated on more rows</div>
+      <div class="opt" data-ok data-k="C">Loss errors grow with income through loan size; grade errors barely do</div>
+      <div class="opt" data-why="Assumes the shift changed the outcome; it only changed who applies" data-k="D">Richer applicants default less, so the sets are easier</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> A covariate shift breaks coverage where it moves the distribution of the errors. Loss errors depend on loan size, which rises with income.</div>
+  </div>
+  <aside class="notes"><p>Answer: C.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-2-4" data-auto="lab" data-lab="2.4" data-label="Lab 2.4" data-n="37" data-session="4">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 2.4 · 25 min</div><h2>An income shift, measured</h2><p class="lead small">Tilt the holdout towards higher declared incomes at three strengths, measure the coverage the loss intervals and the grade sets lose, and see that the cost falls on the large loans.</p><a class="nb" href="../labs/D2_4_simulate_income_shift.ipynb">D2_4_simulate_income_shift.ipynb</a></div><ul class="checklist"><li>Write the shifted sample <span class="min">5 min</span></li><li>Loss interval coverage at three strengths <span class="min">7 min</span></li><li>Grade set coverage at three strengths <span class="min">5 min</span></li><li>Which loans lose coverage <span class="min">5 min</span></li><li>A monitoring rule from the result <span class="min">3 min</span></li><li class="stretch">✱ Stretch: Reweight the calib scores by the known shift and restore the coverage (weighted conformal)</li></ul></div>
+  <aside class="notes"><p>Expected: loss coverage 91.0, 88.4, 83.2, 77.1% at strengths 0, 0.5, 1, 1.5; grade set coverage 89.2, 89.3, 88.7, 88.0%; weighted conformal at strength 1: 93.6%. Common problem: recomputing the threshold on the shifted sample, which hides the loss. The threshold stays the one from the calib rows.</p></aside>
+</section>
+
+<!-- ======================= CLOSE ======================= -->
+<section class="slide" data-label="Wrap-up" id="wrap-up" data-n="38" data-session="4">
+  <div class="kicker">Day 2 · three things to keep</div>
+  <h2>What today showed about Amana's intervals and sets</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-teal"><h4>The guarantee is marginal</h4><p class="small mb0">91% overall; 77% for large loans; defaulters' grade covered 45% of the time.</p></div>
+    <div class="card c-cyan"><h4>Groups need their own threshold</h4><p class="small mb0">Per-band thresholds restore 91% for large loans, at 1.6 times the width.</p></div>
+    <div class="card c-coral"><h4>Shift breaks it silently</h4><p class="small mb0">A strong income shift: 77% coverage, same width. Watch the loan mix.</p></div>
+  </div>
+  <aside class="notes"><p>Each participant writes the coverage table of the report: target against achieved, with widths and set sizes, overall, by group and under shift. That is the evidence of outcome LO2.</p></aside>
+</section>
+
+<section class="slide dark" data-label="Next" id="next" data-n="39" data-session="4">
+  <div class="kicker">Tomorrow</div>
+  <h2>Day 3: what drives the predictions</h2>
+  <ul class="bullets">
+    <li>Officers see three reasons with every application. Are they right, and are they stable?</li>
+    <li>Permutation importance, effect plots and Shapley values, on two income features that move together.</li>
+    <li>Prepare: one question about the reasons a credit model should be allowed to give.</li>
+  </ul>
+  <aside class="notes"><p>Close on claim 6 of the model card: "the reasons shown to officers are the causes of an applicant's risk". Tomorrow tests what the reasons are, if not causes.</p></aside>
+</section>
+</div>
+<script type="application/json" id="academy-data">{"v":1,"engine":"1.0.0","build":{"at":"2026-11-15T18:29:43Z","version":"2027.1.0","commit":"cc8abd5"},"course":{"id":"ds-305","code":"DS-305","title":"Uncertainty, Interpretability and Model Validation","track":"data-science","lang":"en","dir":"ltr","url":"https://sdaiaacademy.github.io/ds-305/","repo":"SDAIAAcademy/ds-305","home":"../index.html"},"deck":{"id":"day2","kind":"day","day":2,"label":"Day 2","title":"Intervals with guarantees","prev":"day1.html","next":"day3.html","md":"day2.md","alt":{}},"sessions":[{"n":1,"label":"Session 1","title":"Conformal intervals","slide":"s1","outcomes":["Compute the split conformal threshold with its finite-sample correction","Wrap a fitted regression in intervals and check coverage on new rows","State the one assumption the guarantee rests on"],"minutes":50,"lab":{"id":"2.1","title":"Loss intervals with 90% coverage","minutes":25,"href":"../labs/D2_1_wrap_loss_regression.ipynb"}},{"n":2,"label":"Session 2","title":"Prediction sets","slide":"s2","outcomes":["Build LAC prediction sets from calibrated scores","Build adaptive (APS) sets and compare their sizes","Read a set of size one, two or three as a decision"],"minutes":50,"lab":{"id":"2.2","title":"Sets for three risk grades","minutes":25,"href":"../labs/D2_2_build_prediction_sets.ipynb"}},{"n":3,"label":"Session 3","title":"Coverage by group","slide":"s3","outcomes":["Measure coverage and width by subgroup","Explain why marginal coverage says nothing about a group","Apply group-conditional (Mondrian) conformal and read its cost in width"],"minutes":50,"lab":{"id":"2.3","title":"Coverage by group, then per group","minutes":25,"href":"../labs/D2_3_measure_subgroup_coverage.ipynb"}},{"n":4,"label":"Session 4","title":"Coverage under shift","slide":"s4","outcomes":["Simulate a covariate shift by reweighting a held-out sample","Measure the coverage lost for intervals and for sets","Explain why the guarantee needs exchangeability and what restores it"],"minutes":50,"lab":{"id":"2.4","title":"An income shift, measured","minutes":25,"href":"../labs/D2_4_simulate_income_shift.ipynb"}}],"slides":[{"id":"title","n":1,"title":"Intervals with guarantees","kind":"title","session":0,"hash":"a48c9575","md":"#### [day2#title] Intervals with guarantees\n\n*SDAIA Academy · Uncertainty, Interpretability and Model Validation*\n\nDay 2: Wrap the loss model and the grade model in conformal intervals and prediction sets, then test the guarantee by group and under shift\n\nData Science Track · 4 teaching days + capstone day · 4 sessions · 4 labs · DS-305","notes":"Open with yesterday's three findings: the in-sample AUC, the fourfold probabilities repaired by Platt, and the North and young applicants still under-predicted. Today moves from probabilities to intervals: how wrong can a prediction be, and for whom does the answer hold?","minutes":null,"lo":[]},{"id":"agenda","n":2,"title":"Intervals with guarantees","kind":"content","session":0,"hash":"6ffc7c16","md":"#### [day2#agenda] Intervals with guarantees\n\n*Today*\n\n- **Session 1 · Conformal intervals**: Split conformal prediction turns any regression into intervals with 90% coverage, as long as the rows are exchangeable\n- **Session 2 · Prediction sets**: For the three risk grades, conformal prediction returns a set of grades, and the size of the set is the uncertainty\n- **Session 3 · Coverage by group**: The 90% is an average over everyone: large loans and the Northern region can sit far below it, and a group-conditional variant repairs that\n- **Session 4 · Coverage under shift**: When the population moves, the rows are no longer exchangeable and the guarantee quietly fails; a simulated shift measures how much","notes":"","minutes":null,"lo":[]},{"id":"review-day1","n":3,"title":"Which statement about Amana after Platt scaling is right?","kind":"quiz","session":0,"hash":"301405f6","md":"#### [day2#review-day1] Which statement about Amana after Platt scaling is right?\n\n*Review of Day 1*\n\n**Question:** Platt scaling was fitted on the calib rows. On the holdout, the Brier score fell from 0.199 to 0.081 and the mean prediction is 9.0% against 9.9% observed. Which statement holds?\n\n- A. The AUC rose with the Brier score\n- B. Every region is now calibrated, since the map was fitted on all of them\n- C. The ranking is unchanged and the average is repaired\n- D. The developers' model was retrained","notes":"Answer: C. Two minutes. If the room picks \"every region\", put the Northern row of Lab 1.4 back on the screen.","minutes":null,"lo":["LO1"]},{"id":"s1","n":4,"title":"Conformal intervals","kind":"section","session":1,"hash":"c924d9a6","md":"#### [day2#s1] Conformal intervals\n\n*Session 1*\n\n- Compute the split conformal threshold with its finite-sample correction\n- Wrap a fitted regression in intervals and check coverage on new rows\n- State the one assumption the guarantee rests on","notes":"","minutes":null,"lo":["LO2"]},{"id":"point-prediction-silent","n":5,"title":"A loss prediction of 12,000 riyals says nothing about how wrong it can be","kind":"content","session":1,"hash":"da1cba9b","md":"#### [day2#point-prediction-silent] A loss prediction of 12,000 riyals says nothing about how wrong it can be\n\n*The problem*\n\n- Amana's loss model predicts the riyals lost **if** a loan defaults.\n- Finance provisions on it; collections plan on it.\n- A point prediction is silent about its error: 12,000 could mean 11,000 to 13,000 or 2,000 to 30,000.\n\n- **What the validator adds.** An interval around every prediction that contains the real loss 90% of the time, with the condition under which that holds.","notes":"Ask Talib's question: \"If I provision for the predicted loss on 100 defaults, how many will cost more than I planned, and by how much?\" A point prediction cannot answer it. The loss model is trained on defaulted loans only, so its holdout has 993 rows, not 10,000.","minutes":null,"lo":["LO2"]},{"id":"exchangeability","n":6,"title":"Conformal prediction needs only one thing: new rows drawn like the calib rows","kind":"content","session":1,"hash":"d12089c2","md":"#### [day2#exchangeability] Conformal prediction needs only one thing: new rows drawn like the calib rows\n\n*The one assumption*\n\n- **Exchangeable**: the calib rows and the new row could be shuffled without changing their joint distribution. Independent draws from one population are exchangeable.\n- No assumption on the model, the shape of the errors or the features.\n- The guarantee breaks when the population moves: a new product, a new region, a shift in incomes.\n\n> **What goes wrong.** Quoting \"90% guaranteed\" for applicants who no longer look like the calib rows. Session 4 measures how much is lost.","notes":"This is the third row of yesterday's assumption table. Keep the definition informal: if you could not tell which row is the new one by looking at the joint distribution, the rows are exchangeable. Time order breaks it (later rows differ), and so does any selection of who applies.\n\nSources: Angelopoulos and Bates, A Gentle Introduction to Conformal Prediction.","minutes":null,"lo":["LO2"]},{"id":"split-conformal-steps","n":7,"title":"Score the calib rows, take a quantile, widen every prediction by it","kind":"content","session":1,"hash":"4cc1a533","md":"#### [day2#split-conformal-steps] Score the calib rows, take a quantile, widen every prediction by it\n\n*Split conformal, in three steps*\n\n1. **1 · Score** On calib defaults, the error `|loss - prediction|`\n2. **2 · Threshold** The `ceil((n+1)(1-α))`-th smallest score\n3. **3 · Interval** `prediction ± q`, clipped at zero\n\n> **No retraining.** The model is used as delivered; only its predictions on calib rows are needed.","notes":"Press once per step. Step 1: the score is how badly the model did; any score works, the absolute residual is the simplest. Step 2: with 895 calib defaults and alpha 0.1, the rank is ceil(896 x 0.9) = 807. Step 3: every holdout loan gets the same plus or minus q. The fact that the validator never opens the model is what makes this a validation tool.","minutes":null,"lo":["LO2"]},{"id":"finite-sample-correction","n":8,"title":"Counting the new loan turns \"about 90%\" into \"at least 90%\"","kind":"content","session":1,"hash":"1ce9412a","md":"#### [day2#finite-sample-correction] Counting the new loan turns \"about 90%\" into \"at least 90%\"\n\n*Why \"n + 1\"*\n\n```python\n# file: Lab 2.1 · step 2\ndef conformal_quantile(scores, alpha=0.1):\n    s = np.sort(scores)\n    k = ceil((len(s) + 1) * (1 - alpha))\n    if k > len(s):\n        return inf          # too few rows\n    return s[k - 1]\n```\n\n- The new loan's score is equally likely to fall at any of the **n + 1** ranks.\n- So the chance it falls at or below rank k is k / (n + 1), at least 90%.\n- With 8 calib rows, 90% needs a ninth: the interval is infinite. Honest, and a warning about small groups.","notes":"The lab checks the infinite case: with 8 scores and alpha 0.1, k = 9 > 8. Return to it in Session 3: a group-conditional threshold for a group with few calib rows suffers the same way.","minutes":null,"lo":["LO2"]},{"id":"loss-interval-result","n":9,"title":"Plus or minus 8,134 riyals covers 91% of real losses","kind":"content","session":1,"hash":"f755eccb","md":"#### [day2#loss-interval-result] Plus or minus 8,134 riyals covers 91% of real losses\n\n*Lab 2.1 on the holdout*\n\n- **91.0%** coverage on 993 holdout defaults, target 90%\n- **8,134** threshold q in riyals, from 895 calib defaults\n- **15,667** mean interval width in riyals; median loss 10,520\n\n> **Same answer from a library.** MAPIE's `SplitConformalRegressor` with `prefit=True` returns the same half-width, 8,134.","notes":"Numbers from the Lab 2.1 solution run. Point out the width: intervals wider than the median loss. That is honest about a hard target. The MAPIE cross-check matters for the capstone: participants may use either the course functions or the library, and must show they agree.\n\nSources: MAPIE documentation.","minutes":null,"lo":["LO2"]},{"id":"coverage-over-splits","n":10,"title":"Coverage is a promise about the average over draws, not about one interval","kind":"content","session":1,"hash":"c546e16a","md":"#### [day2#coverage-over-splits] Coverage is a promise about the average over draws, not about one interval\n\n*What the 90% promises*\n\n- **0.900** mean coverage over 100 random calib and test splits\n- **0.867 to 0.935** the range across those splits\n\n- One calib set can give 87% or 93% on one test set.\n- \"This loan has a 90% chance to fall in its interval\" is not the promise.\n- The promise is marginal: **over** loans and calib draws, on average.","notes":"The stretch of Lab 2.1, 100 splits of the 1,888 defaults outside the training rows. Do not let anyone leave with \"each interval is 90% sure\". The word marginal will carry the next two sessions.","minutes":null,"lo":["LO2"]},{"id":"check-conformal-promise","n":11,"title":"What does the 90% interval promise?","kind":"quiz","session":1,"hash":"a7717932","md":"#### [day2#check-conformal-promise] What does the 90% interval promise?\n\n*Checkpoint*\n\n**Question:** Split conformal on 895 calib defaults gives Amana's loss model intervals of plus or minus 8,134 riyals. A provisioning analyst asks what the \"90%\" means. What do you tell her?\n\n- A. Each loan has a 90% chance of a loss inside its own interval\n- B. Nine in ten losses fall inside, whoever applies to Mizan next year\n- C. The loss model is now 90% accurate\n- D. Over new loans like the calib loans, at least 90% fall inside","notes":"Answer: D. Option B is the dangerous one, and Session 4 shows it failing.","minutes":null,"lo":["LO2"]},{"id":"lab-2-1","n":12,"title":"Loss intervals with 90% coverage","kind":"lab","session":1,"hash":"aecdc5c9","md":"#### [day2#lab-2-1] Loss intervals with 90% coverage\n\nLab 2.1 · 25 min\n\nWrap Amana's loss model in split conformal intervals from the calib defaults, check 90% coverage and width on the holdout defaults, and confirm the same numbers with MAPIE.\n\n[D2_1_wrap_loss_regression.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D2_1_wrap_loss_regression.ipynb)\n\n- [ ] Score the calib defaults: absolute residuals (4 min)\n- [ ] Write the conformal threshold (6 min)\n- [ ] Intervals for the holdout defaults (4 min)\n- [ ] Coverage and mean width (5 min)\n- [ ] The same with MAPIE (6 min)\n- [ ] ✱ Stretch: Repeat over 100 random calib and test splits and plot the coverage you get","notes":"Expected: q 8,134 SAR, coverage 91.0%, mean width 15,667 SAR; MAPIE gives the same half-width. Common problems: forgetting the + 1 in the rank (coverage a little under target), and passing MAPIE a raw LightGBM booster (it needs the scikit-learn wrapper in the notebook). If MAPIE fails to install in Colab, the safety net continues with the course function.","minutes":null,"lo":[]},{"id":"s2","n":13,"title":"Prediction sets","kind":"section","session":2,"hash":"57305144","md":"#### [day2#s2] Prediction sets\n\n*Session 2*\n\n- Build LAC prediction sets from calibrated scores\n- Build adaptive (APS) sets and compare their sizes\n- Read a set of size one, two or three as a decision","notes":"","minutes":null,"lo":["LO2"]},{"id":"top-grade-hides","n":14,"title":"An officer who sees only the top grade cannot see the model's doubt","kind":"content","session":2,"hash":"0fc68d72","md":"#### [day2#top-grade-hides] An officer who sees only the top grade cannot see the model's doubt\n\n*Classification*\n\n- Amana's grade model gives three probabilities: on time (A), late but repaid (B), default (C).\n- The top grade is right for **74.4%** of holdout applicants.\n- For some it is a near-certainty; for others three grades are close. The top grade looks the same.\n\n- **A prediction set.** The grades the model cannot rule out, chosen so the true grade is in the set 90% of the time. Its size is the doubt.","notes":"Grades in the holdout: A 72%, B 18%, C 10%. Ask: would Fuad's officers treat an applicant whose set is {A} the same as one whose set is {A, B, C}? They should not, and today they cannot tell them apart.","minutes":null,"lo":["LO2"]},{"id":"lac-sets","n":15,"title":"LAC keeps every grade whose probability clears one bar","kind":"content","session":2,"hash":"6385394c","md":"#### [day2#lac-sets] LAC keeps every grade whose probability clears one bar\n\n*The simplest sets*\n\n```python\n# file: Lab 2.2 · step 1\nscore = 1 - P_cal[i, true_grade]     # calib rows\nq = conformal_quantile(score, 0.1)    # 0.834\nin_set = P_hold >= 1 - q              # 0.166\n```\n\n- Score: one minus the probability of the true grade.\n- On Amana: a grade enters the set if its probability is at least **0.166**.\n- Smallest sets on average; can be empty.","notes":"LAC stands for least ambiguous set-valued classifier. It is MAPIE's default for classification (\"lac\"). Its sets are the smallest that keep the marginal guarantee, which is why it spends its errors on the hard cases.\n\nSources: Angelopoulos and Bates; MAPIE documentation.","minutes":null,"lo":["LO2"]},{"id":"aps-sets","n":16,"title":"APS adds grades from most to least likely until their total reaches the threshold","kind":"content","session":2,"hash":"67be93e5","md":"#### [day2#aps-sets] APS adds grades from most to least likely until their total reaches the threshold\n\n*Adaptive sets*\n\n1. **Sort** grades by probability\n2. **Accumulate** add the next grade's probability\n3. **Stop** when the total passes q (with a random share of the last grade)\n\n- Unsure applicants, whose probabilities are spread, get larger sets.\n- The randomisation makes coverage exact rather than conservative.","notes":"APS is from Romano, Sesia and Candes. The course helper implements the randomised version with a fixed seed so runs repeat. Without randomisation APS over-covers, sometimes badly with three classes: the threshold can land at 1 and every set holds all three grades.\n\nSources: Romano, Sesia and Candes, Classification with Valid and Adaptive Coverage.","minutes":null,"lo":["LO2"]},{"id":"set-results","n":17,"title":"Both cover 90%; APS gives fewer one-grade sets","kind":"content","session":2,"hash":"95c355b9","md":"#### [day2#set-results] Both cover 90%; APS gives fewer one-grade sets\n\n*Lab 2.2 on the holdout*\n\n| Method | Coverage | Mean size | Size 1 | Size 2 | Size 3 |\n| --- | --- | --- | --- | --- | --- |\n| LAC | 89.2% | 1.56 | 56.7% | 30.6% | 12.7% |\n| APS | 90.3% | 1.67 | 43.1% | 46.4% | 10.5% |\n\nNo empty sets with either method on this holdout.","notes":"From the Lab 2.2 solution run. Read the table as a cost: APS gives up 14 points of single-grade sets for adaptivity. The stretch shows the cost of the level: mean APS size 1.33 at 80%, 1.67 at 90%, 2.03 at 95%.","minutes":null,"lo":["LO2"]},{"id":"coverage-by-true-grade","n":18,"title":"The sets miss the true grade of more than half the defaulters","kind":"content","session":2,"hash":"a5e497a1","md":"#### [day2#coverage-by-true-grade] The sets miss the true grade of more than half the defaulters\n\n*What the average hides*\n\n| Item | Value |\n| --- | --- |\n| A · on time | 99.8% / 99.4% |\n| B · late | 70.7% / 79.6% |\n| C · default | 44.9% / 43.0% |\n\nCoverage by true grade, LAC / APS. Marginal 90% is reached by over-covering the 72% who pay on time.","notes":"This is the most important slide of the session. Neither method promises coverage within a grade. If the decision is about defaulters, the guarantee that matters is class-conditional: one threshold per true grade, computed from calib rows of that grade. Participants meet the same idea for groups of applicants in Session 3.","minutes":null,"lo":["LO2"]},{"id":"set-size-as-doubt","n":19,"title":"Applicants whose set holds all three grades default three times as often","kind":"content","session":2,"hash":"6a7cf3e5","md":"#### [day2#set-size-as-doubt] Applicants whose set holds all three grades default three times as often\n\n*Reading set size*\n\n- **1,046** holdout applicants (10.5%) with the set {A, B, C}\n- **24.8% vs 8.2%** their default rate, against everyone else's\n\n- **A use for the set.** A set of three grades could route an application to Fuad's officers for review instead of an automatic decision. Day 4 turns this into a condition of use.","notes":"From Lab 2.2 step 5. The set size flags exactly the applicants a human should look at. That is a concrete, testable human-review rule, much better than \"officers review borderline cases\".","minutes":null,"lo":["LO2"]},{"id":"check-set-size","n":20,"title":"What does a set of size one tell the officer?","kind":"quiz","session":2,"hash":"0e1886f8","md":"#### [day2#check-set-size] What does a set of size one tell the officer?\n\n*Checkpoint*\n\n**Question:** An applicant's 90% APS set is {A}. The officer asks whether the model is certain this applicant will repay on time. What is the right answer?\n\n- A. No: across applicants, about one in ten sets misses the true grade\n- B. Yes: only one grade could be the true one\n- C. Yes, with exactly 90% probability for this applicant\n- D. No: a set of one means the model failed to find enough grades to include","notes":"Answer: A. Link back to the by-grade slide: the misses are concentrated among defaulters.","minutes":null,"lo":["LO2"]},{"id":"lab-2-2","n":21,"title":"Sets for three risk grades","kind":"lab","session":2,"hash":"ae932c52","md":"#### [day2#lab-2-2] Sets for three risk grades\n\nLab 2.2 · 25 min\n\nBuild LAC and adaptive prediction sets for grades A, B and C from the grade model, check 90% coverage on the holdout, and measure how set sizes differ by method and by true grade.\n\n[D2_2_build_prediction_sets.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D2_2_build_prediction_sets.ipynb)\n\n- [ ] Write the LAC score and its sets (7 min)\n- [ ] Coverage and set sizes (4 min)\n- [ ] Adaptive sets (APS) from the helper (5 min)\n- [ ] Coverage and size by true grade (5 min)\n- [ ] Which applicants get all three grades (4 min)\n- [ ] ✱ Stretch: Make sets at 80% and 95% and plot the mean set size against the level","notes":"Expected: LAC threshold 0.834 (grades with probability at least 0.166), coverage 89.2%, mean size 1.56; APS coverage 90.3%, mean size 1.67; defaulters covered 44.9% (LAC) and 43.0% (APS); 1,046 applicants with all three grades, default rate 24.8% against 8.2%. Common problem: indexing the probability of the true grade with a column label instead of the integer grade index.","minutes":null,"lo":[]},{"id":"s3","n":22,"title":"Coverage by group","kind":"section","session":3,"hash":"074b792d","md":"#### [day2#s3] Coverage by group\n\n*Session 3*\n\n- Measure coverage and width by subgroup\n- Explain why marginal coverage says nothing about a group\n- Apply group-conditional (Mondrian) conformal and read its cost in width","notes":"","minutes":null,"lo":["LO2"]},{"id":"marginal-not-conditional","n":23,"title":"90% for everyone together can be 77% for the loans that matter","kind":"content","session":3,"hash":"fa11a9bb","md":"#### [day2#marginal-not-conditional] 90% for everyone together can be 77% for the loans that matter\n\n*Marginal and conditional*\n\n- **Marginal** coverage: over all loans, 90%. This is what split conformal guarantees.\n- **Conditional** coverage: within a group (large loans, a region), 90%. Not guaranteed.\n- One width for all loans is too wide for loans whose losses vary little and too narrow for those that vary a lot.\n\n- **The question at Mizan.** Talib provisions large loans separately. He needs their intervals to hold, not the average.","notes":"Ask the room to predict which loans the single width under-covers before showing the table. Most will say large loans; ask why. Losses are a share of the loan, so their spread grows with the loan. The data generator plants exactly that, and adds extra spread in the North.","minutes":null,"lo":["LO2"]},{"id":"coverage-by-loan-size","n":24,"title":"Large loans are covered 77% of the time, the others 100%","kind":"content","session":3,"hash":"e9041cf6","md":"#### [day2#coverage-by-loan-size] Large loans are covered 77% of the time, the others 100%\n\n*Lab 2.3 · one threshold for all*\n\n| Loan size | Holdout defaults | Coverage | Mean width (SAR) |\n| --- | --- | --- | --- |\n| Large, above 25,000 | 382 | 76.7% | 16,268 |\n| Medium, 10,000 to 25,000 | 532 | 100% | 15,737 |\n| Small, up to 10,000 | 79 | 100% | 12,286 |\n\nBy region, the Northern region is lowest: 87.2% on 78 defaults, too few to call it a finding on its own.","notes":"From Lab 2.3 step 1. First reading AI-off. The overall 91% is an average of near-certainty and three in four. Small loans' widths are smaller only because the interval is clipped at zero.","minutes":null,"lo":["LO2"]},{"id":"group-conditional-conformal","n":25,"title":"One threshold per group gives each group its own guarantee","kind":"content","session":3,"hash":"c0345d0b","md":"#### [day2#group-conditional-conformal] One threshold per group gives each group its own guarantee\n\n*The repair*\n\n```python\n# file: Lab 2.3 · step 2\ndef group_thresholds(s, groups, alpha=0.1):\n    return {g: conformal_quantile(\n                   s[groups == g], alpha)\n            for g in sorted(set(groups))}\n```\n\n- Called **group-conditional** or **Mondrian** conformal.\n- Thresholds: large 13,256, medium 4,332, small 1,536 riyals.\n- Each group needs enough calib rows: 79 small-loan defaults give a threshold from 79 scores.","notes":"The groups must be defined before looking at the holdout and known for a new applicant (loan size is known at application). Calib defaults per band: medium 476, large 340, small 79. With finer groups (band by region by age) the cells empty out and thresholds become infinite.","minutes":null,"lo":["LO2"]},{"id":"who-pays-in-width","n":26,"title":"Large loans get wider intervals; small loans get narrower ones","kind":"content","session":3,"hash":"bf8159d8","md":"#### [day2#who-pays-in-width] Large loans get wider intervals; small loans get narrower ones\n\n*Lab 2.3 · before and after*\n\n| Loan size | Coverage before | after | Width before | after |\n| --- | --- | --- | --- | --- |\n| Large | 76.7% | 90.6% | 16,268 | 26,422 |\n| Medium | 100% | 92.5% | 15,737 | 8,665 |\n| Small | 100% | 86.1% | 12,286 | 3,072 |\n\nOverall coverage stays at 91.2%. Small loans' 86.1% is on 79 defaults: within chance of 90%.","notes":"The repair does not create coverage; it moves it to where it was missing. For the report: the cost is 1.6 times wider intervals on large loans. The stretch tries a normalised score (error divided by the predicted loss): large loans reach 86.1%, better than one width, not as good as per-band thresholds.","minutes":null,"lo":["LO2"]},{"id":"coverage-finding","n":27,"title":"A coverage finding names the group, the number and the cost of the repair","kind":"content","session":3,"hash":"6cfecc69","md":"#### [day2#coverage-finding] A coverage finding names the group, the number and the cost of the repair\n\n*What the report says*\n\n> **Finding.** The loss intervals cover 91% of defaults overall but only 77% of loans above 25,000 SAR (382 holdout defaults). One threshold per loan-size band restores 91% for large loans, with intervals 1.6 times wider.\n\n- **What.** Under-coverage of large loans\n- **Evidence.** 382 holdout defaults, coverage table\n- **Recommendation.** Per-band thresholds, recomputed when the loan mix changes","notes":"The sentence is the output of Lab 2.3 step 5, generated from the numbers. Insist on this shape all week: what, how much, for whom, the repair and its cost.","minutes":null,"lo":["LO2","LO5"]},{"id":"check-group-coverage","n":28,"title":"Why did one threshold under-cover large loans?","kind":"quiz","session":3,"hash":"550dfe62","md":"#### [day2#check-group-coverage] Why did one threshold under-cover large loans?\n\n*Checkpoint*\n\n**Question:** Split conformal with one threshold reaches 91% coverage overall on Amana's loss intervals, 77% on large loans and 100% on medium and small loans. What explains it?\n\n- A. The conformal threshold was computed wrongly\n- B. Losses on large loans vary more, and one width averages over groups\n- C. Large loans are too rare in the calib rows\n- D. The loss model under-predicts large losses, so their intervals sit too low","notes":"Answer: B. Large loans are 38% of the holdout defaults (382 of 993), not rare. If the room picks D, show that the intervals are symmetric: the misses are on both sides.","minutes":null,"lo":["LO2"]},{"id":"lab-2-3","n":29,"title":"Coverage by group, then per group","kind":"lab","session":3,"hash":"2066e95a","md":"#### [day2#lab-2-3] Coverage by group, then per group\n\nLab 2.3 · 25 min\n\nMeasure the loss intervals' coverage by loan size and region, find the large loans near 77%, then compute one threshold per loan-size band and show every band back near 90% with wider intervals where they are needed.\n\n[D2_3_measure_subgroup_coverage.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D2_3_measure_subgroup_coverage.ipynb)\n\n- [ ] Coverage and width by loan size and region (6 min)\n- [ ] Write group-conditional thresholds (7 min)\n- [ ] Coverage by group again (5 min)\n- [ ] Width by group: who pays for the repair (4 min)\n- [ ] Write one finding for the report (3 min)\n- [ ] ✱ Stretch: Scale the residuals by the predicted loss and compare with the group-conditional repair","notes":"Expected: before, large 76.7% (382), medium and small 100%; thresholds large 13,256, medium 4,332, small 1,536; after, large 90.6%, medium 92.5%, small 86.1%; overall 91.2%. The first reading of the coverage table is AI-off. Common problem: computing thresholds per band on the holdout rather than the calib rows.","minutes":null,"lo":[]},{"id":"s4","n":30,"title":"Coverage under shift","kind":"section","session":4,"hash":"2b1f4a91","md":"#### [day2#s4] Coverage under shift\n\n*Session 4*\n\n- Simulate a covariate shift by reweighting a held-out sample\n- Measure the coverage lost for intervals and for sets\n- Explain why the guarantee needs exchangeability and what restores it","notes":"","minutes":null,"lo":["LO2","LO4"]},{"id":"when-population-moves","n":31,"title":"When applicants change, the interval does not know","kind":"content","session":4,"hash":"e09403f2","md":"#### [day2#when-population-moves] When applicants change, the interval does not know\n\n*Coverage under shift*\n\n- A conformal threshold is a fact about the **calib rows**.\n- If next year's applicants earn more, borrow more or come from a new region, the rows are no longer exchangeable.\n- The interval keeps its width and quietly loses coverage.\n\n- **At Mizan.** A planned campaign for salaried applicants with higher incomes. Higher incomes mean larger loans.","notes":"Covariate shift: the mix of applicants changes, the relation between features and losses does not. It is the gentlest shift, and it still breaks the guarantee where it moves the errors. Day 4 shows a harsher kind, a broken data feed.","minutes":null,"lo":["LO2","LO4"]},{"id":"simulating-a-shift","n":32,"title":"Tilt the holdout towards higher incomes and measure what is lost","kind":"content","session":4,"hash":"f0474988","md":"#### [day2#simulating-a-shift] Tilt the holdout towards higher incomes and measure what is lost\n\n*A shift you control*\n\n```python\n# file: Lab 2.4 · step 1\nz = standardise(log(declared_income))\nw = exp(strength * z)\nshifted = hold.iloc[rng.choice(n, n, p=w / w.sum())]\n```\n\n- Strength 0: the holdout as it is.\n- Strength 1: median declared income of defaulters from 9,400 to 16,100 riyals.\n- The truth of every resampled row is known, so coverage can be measured exactly.","notes":"Simulation by reweighting is the validator's stress test: no new data needed, and the shift is chosen to match a plausible business change. Name the business change in the report, so the stress has a meaning.","minutes":null,"lo":["LO2"]},{"id":"coverage-lost-under-shift","n":33,"title":"A strong income shift costs the loss intervals 14 points; the grade sets lose 1","kind":"content","session":4,"hash":"06d00f19","md":"#### [day2#coverage-lost-under-shift] A strong income shift costs the loss intervals 14 points; the grade sets lose 1\n\n*Lab 2.4*\n\n| Shift strength | Loss interval coverage | Large-loan share | Grade set coverage |\n| --- | --- | --- | --- |\n| 0 (holdout) | 91.0% | 38.5% | 89.2% |\n| 0.5 | 88.4% | 47.5% | 89.3% |\n| 1.0 | 83.2% | 58.1% | 88.7% |\n| 1.5 | 77.1% | 69.4% | 88.0% |\n\nThe loss intervals' mean width moves by less than 5% across the four rows.","notes":"From the Lab 2.4 solution run. Why the difference: the loss errors grow with loan size, which grows with income; the grade model's errors do not depend much on income. A shift breaks a guarantee only where it moves the errors. Within large loans at strength 1, coverage is 71.1%, below the 76.7% of the unshifted holdout: richer borrowers take the largest loans.","minutes":null,"lo":["LO2"]},{"id":"weighted-conformal","n":34,"title":"Weighting the calib scores by the shift restores the coverage","kind":"content","session":4,"hash":"ef2776fa","md":"#### [day2#weighted-conformal] Weighting the calib scores by the shift restores the coverage\n\n*When the shift is known*\n\n- **83.2%** plain split conformal at strength 1\n- **93.6%** weighted conformal with the true weights\n\n- Each calib score counts as much as its row is more likely after the shift.\n- Needs the weights: in a simulation you know them; with real applicants you estimate them.\n- The guarantee then rests on that estimate.","notes":"The stretch of Lab 2.4. Weighted conformal prediction is from Tibshirani, Barber, Candes and Ramdas. Present it as an option for the developers when a planned change is known in advance, not as the validator's default.\n\nSources: Tibshirani and others, Conformal Prediction Under Covariate Shift.","minutes":null,"lo":["LO2"]},{"id":"monitoring-rule","n":35,"title":"The result becomes a monitoring rule with a trigger and an action","kind":"content","session":4,"hash":"33dd9641","md":"#### [day2#monitoring-rule] The result becomes a monitoring rule with a trigger and an action\n\n*From a stress test to a condition*\n\n| Watch | Monthly: the share of new loans above 25,000 riyals and the median declared income |\n| --- | --- |\n| Trigger | Large-loan share above 48% (holdout: 38%) |\n| Action | Recompute the per-band thresholds on recent defaults, or stop quoting the 90% |\n\n> **What goes wrong.** Monitoring coverage itself: losses are known only months after a default. Watch the inputs that predict the loss of coverage.","notes":"Lab 2.4 step 5. The trigger is set where the simulation showed coverage falling below 88%. Point out the delay: a loan defaults within 12 months and its loss is known later still. Input monitoring is the early warning; outcome monitoring confirms.","minutes":null,"lo":["LO2","LO4"]},{"id":"check-shift","n":36,"title":"Why did the grade sets survive the shift that broke the loss intervals?","kind":"quiz","session":4,"hash":"a29e6e04","md":"#### [day2#check-shift] Why did the grade sets survive the shift that broke the loss intervals?\n\n*Checkpoint*\n\n**Question:** Under the same income shift, loss interval coverage falls from 91% to 77% while grade set coverage falls from 89% to 88%. Which explanation is right?\n\n- A. Prediction sets keep their guarantee under shift; intervals for amounts do not\n- B. The grade model was calibrated on more rows\n- C. Loss errors grow with income through loan size; grade errors barely do\n- D. Richer applicants default less, so the sets are easier","notes":"Answer: C.","minutes":null,"lo":["LO2"]},{"id":"lab-2-4","n":37,"title":"An income shift, measured","kind":"lab","session":4,"hash":"b978e294","md":"#### [day2#lab-2-4] An income shift, measured\n\nLab 2.4 · 25 min\n\nTilt the holdout towards higher declared incomes at three strengths, measure the coverage the loss intervals and the grade sets lose, and see that the cost falls on the large loans.\n\n[D2_4_simulate_income_shift.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D2_4_simulate_income_shift.ipynb)\n\n- [ ] Write the shifted sample (5 min)\n- [ ] Loss interval coverage at three strengths (7 min)\n- [ ] Grade set coverage at three strengths (5 min)\n- [ ] Which loans lose coverage (5 min)\n- [ ] A monitoring rule from the result (3 min)\n- [ ] ✱ Stretch: Reweight the calib scores by the known shift and restore the coverage (weighted conformal)","notes":"Expected: loss coverage 91.0, 88.4, 83.2, 77.1% at strengths 0, 0.5, 1, 1.5; grade set coverage 89.2, 89.3, 88.7, 88.0%; weighted conformal at strength 1: 93.6%. Common problem: recomputing the threshold on the shifted sample, which hides the loss. The threshold stays the one from the calib rows.","minutes":null,"lo":[]},{"id":"wrap-up","n":38,"title":"What today showed about Amana's intervals and sets","kind":"content","session":4,"hash":"2f14e609","md":"#### [day2#wrap-up] What today showed about Amana's intervals and sets\n\n*Day 2 · three things to keep*\n\n- **The guarantee is marginal.** 91% overall; 77% for large loans; defaulters' grade covered 45% of the time.\n- **Groups need their own threshold.** Per-band thresholds restore 91% for large loans, at 1.6 times the width.\n- **Shift breaks it silently.** A strong income shift: 77% coverage, same width. Watch the loan mix.","notes":"Each participant writes the coverage table of the report: target against achieved, with widths and set sizes, overall, by group and under shift. That is the evidence of outcome LO2.","minutes":null,"lo":[]},{"id":"next","n":39,"title":"Day 3: what drives the predictions","kind":"content","session":4,"hash":"0ee9768c","md":"#### [day2#next] Day 3: what drives the predictions\n\n*Tomorrow*\n\n- Officers see three reasons with every application. Are they right, and are they stable?\n- Permutation importance, effect plots and Shapley values, on two income features that move together.\n- Prepare: one question about the reasons a credit model should be allowed to give.","notes":"Close on claim 6 of the model card: \"the reasons shown to officers are the causes of an applicant's risk\". Tomorrow tests what the reasons are, if not causes.","minutes":null,"lo":[]}],"activities":[{"id":"review-day1-q1","slide":"review-day1","type":"single","prompt":"Platt scaling was fitted on the calib rows. On the holdout, the Brier score fell from 0.199 to 0.081 and the mean prediction is 9.0% against 9.9% observed. Which statement holds?","options":[{"key":"A","text":"The AUC rose with the Brier score"},{"key":"B","text":"Every region is now calibrated, since the map was fitted on all of them"},{"key":"C","text":"The ranking is unchanged and the average is repaired"},{"key":"D","text":"The developers' model was retrained"}],"correct":[2],"explanation":"Platt scaling is a monotone map after the model: it repairs what the score means on average and cannot reorder applicants or see a column the score lacks.","misconceptions":["Assumes recalibration improves ranking: a monotone map leaves the AUC where it was","Treats average calibration as calibration in every group; the Northern region stays 6.7 points under-predicted","","Reads a map fitted on calib rows as a retrained model; the model itself was not touched"],"lo":["LO1"]},{"id":"check-conformal-promise-q1","slide":"check-conformal-promise","type":"single","prompt":"Split conformal on 895 calib defaults gives Amana's loss model intervals of plus or minus 8,134 riyals. A provisioning analyst asks what the \"90%\" means. What do you tell her?","options":[{"key":"A","text":"Each loan has a 90% chance of a loss inside its own interval"},{"key":"B","text":"Nine in ten losses fall inside, whoever applies to Mizan next year"},{"key":"C","text":"The loss model is now 90% accurate"},{"key":"D","text":"Over new loans like the calib loans, at least 90% fall inside"}],"correct":[3],"explanation":"Conformal coverage is marginal and rests on exchangeability: it holds on average over loans drawn like the calib loans.","misconceptions":["Reads a marginal guarantee as a statement about each loan","Assumes the guarantee survives any population; it needs new loans drawn like the calib loans","Confuses coverage with accuracy of the point prediction, which conformal does not change",""],"lo":["LO2"]},{"id":"check-set-size-q1","slide":"check-set-size","type":"single","prompt":"An applicant's 90% APS set is {A}. The officer asks whether the model is certain this applicant will repay on time. What is the right answer?","options":[{"key":"A","text":"No: across applicants, about one in ten sets misses the true grade"},{"key":"B","text":"Yes: only one grade could be the true one"},{"key":"C","text":"Yes, with exactly 90% probability for this applicant"},{"key":"D","text":"No: a set of one means the model failed to find enough grades to include"}],"correct":[0],"explanation":"The 90% is the share of sets, over applicants, that hold the true grade; any single set can be wrong, and a small set says the model is relatively sure, not certain.","misconceptions":["","Reads a set of one as certainty; the guarantee is about the share of sets that contain the truth","Confuses the set level with the probability of the grade inside it","Thinks small sets are a sign of error; they are a sign the model separates this applicant well"],"lo":["LO2"]},{"id":"check-group-coverage-q1","slide":"check-group-coverage","type":"single","prompt":"Split conformal with one threshold reaches 91% coverage overall on Amana's loss intervals, 77% on large loans and 100% on medium and small loans. What explains it?","options":[{"key":"A","text":"The conformal threshold was computed wrongly"},{"key":"B","text":"Losses on large loans vary more, and one width averages over groups"},{"key":"C","text":"Large loans are too rare in the calib rows"},{"key":"D","text":"The loss model under-predicts large losses, so their intervals sit too low"}],"correct":[1],"explanation":"Split conformal promises marginal coverage. With errors that grow with loan size, one width is too narrow for large loans and too wide for the rest.","misconceptions":["Assumes conformal guarantees every group; it guarantees the average only","","Confuses a group's share of the data with its spread of errors","Reads under-coverage as a bias in the point prediction rather than in the width"],"lo":["LO2"]},{"id":"check-shift-q1","slide":"check-shift","type":"single","prompt":"Under the same income shift, loss interval coverage falls from 91% to 77% while grade set coverage falls from 89% to 88%. Which explanation is right?","options":[{"key":"A","text":"Prediction sets keep their guarantee under shift; intervals for amounts do not"},{"key":"B","text":"The grade model was calibrated on more rows"},{"key":"C","text":"Loss errors grow with income through loan size; grade errors barely do"},{"key":"D","text":"Richer applicants default less, so the sets are easier"}],"correct":[2],"explanation":"A covariate shift breaks coverage where it moves the distribution of the errors. Loss errors depend on loan size, which rises with income.","misconceptions":["Assumes set methods have a stronger guarantee; both rest on exchangeability","Confuses sample size with robustness; both were judged on large samples","","Assumes the shift changed the outcome; it only changed who applies"],"lo":["LO2"]}],"ai":{"context":{"course":"../context/course.md","courseJs":"../context/course.js","day":"day2.md","llms":"../llms.txt"},"tasks":[],"tools":[]},"bridge":{"allowedOrigins":[]},"features":{},"strings":{}}</script>
+<script src="../_engine/academy.js"></script>
+</body>
+</html>

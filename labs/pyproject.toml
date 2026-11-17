@@ -1,0 +1,17 @@
+[project]
+name = "ds-305-labs"
+version = "2027.1.0"
+description = "Lab notebooks for the SDAIA Academy course Uncertainty, Interpretability and Model Validation"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "matplotlib>=3.9",
+    "scikit-learn>=1.6",
+    "lightgbm>=4.5",
+    "mapie>=1.0",
+    "jupyterlab>=4.4",
+]
+
+[tool.uv]
+package = false

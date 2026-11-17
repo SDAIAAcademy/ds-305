@@ -1,0 +1,2 @@
+# Colab already ships numpy, pandas, matplotlib, scikit-learn and lightgbm.
+mapie>=1.0

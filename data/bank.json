@@ -1,0 +1,1693 @@
+{
+  "format": "academy-bank",
+  "version": 1,
+  "course": {
+    "id": "ds-305",
+    "code": "DS-305",
+    "title": "Uncertainty, Interpretability and Model Validation",
+    "lang": "en",
+    "version": "2027.1.0"
+  },
+  "questions": [
+    {
+      "id": "check-supported-claim-q1",
+      "type": "single",
+      "prompt": "Amana's card says \"performance is consistent across all customer groups\". The evidence file has an overall AUC and no subgroup results. You have not yet computed anything by group. What is the verdict today?",
+      "options": [
+        "Supported, since no gap has been found",
+        "Unsupported, since the package has no evidence for it",
+        "Untestable, since groups were not measured",
+        "No verdict until the subgroup tables of Lab 1.4 exist and are read"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "A claim is supported by evidence. The package has none for groups, and the holdout could test it, so it is unsupported now and testable later.",
+      "misconceptions": [
+        "Treats the absence of contrary evidence as support: nothing was measured, so nothing supports it",
+        "",
+        "Confuses not yet tested with impossible to test: the holdout has the group columns, so it can be tested",
+        "Assumes a validator may wait: the verdict is recorded on what the package holds, then the test is run"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 1,
+      "session": 1,
+      "slide": "check-supported-claim",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-proper-score-q1",
+      "type": "single",
+      "prompt": "A second team's model has AUC 0.78 on your holdout and accuracy 90% at a threshold of 0.5. Its mean predicted default probability is 0.31; the default rate is 0.09. Which result tells the committee the probabilities cannot be read as rates?",
+      "options": [
+        "The AUC of 0.78, which is high for a credit model",
+        "The accuracy of 90%",
+        "The model's training loss, reported by the developers at the end of fitting",
+        "A reliability diagram and a Brier score against the base rate"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Calibration is shown by comparing predicted with observed rates; a proper score against the base-rate forecast puts a number on the cost.",
+      "misconceptions": [
+        "Treats ranking as calibration: AUC is unchanged when every score is multiplied by a constant",
+        "Uses a score that is not proper: accuracy at 0.5 ignores how far the probabilities are from the truth",
+        "Reads fit on rows the model has seen as calibration on new applicants",
+        ""
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 2,
+      "slide": "check-proper-score",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-recalibration-rows-q1",
+      "type": "single",
+      "prompt": "You recommend Platt scaling for Amana. You have the 30,000 training rows, 10,000 calib rows and 10,000 holdout rows. Where do you fit the map, and where do you report its effect?",
+      "options": [
+        "Fit on the calib rows, report on the holdout",
+        "Fit on the training rows, report on the holdout",
+        "Fit and report on the holdout",
+        "Fit and report on the calib rows"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "The map must learn from rows the model did not train on, and its effect must be judged on rows the map did not see.",
+      "misconceptions": [
+        "",
+        "Assumes more rows always help: the model is overconfident on rows it trained on, so the map learns the wrong correction",
+        "Fits and judges on the same rows, which flatters the map as the isotonic example showed",
+        "Thinks the calib rows are enough on their own: the effect must be shown on rows the map did not see"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 3,
+      "slide": "check-recalibration-rows",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-group-gap-q1",
+      "type": "single",
+      "prompt": "After recalibration, the Southern region shows 9.2% predicted and 9.7% observed (interval 8.2 to 11.3). The Northern region shows 8.7% predicted and 15.4% observed (interval 12.5 to 18.8). What do you report?",
+      "options": [
+        "Neither: the model was recalibrated",
+        "Both, as under-predicted regions",
+        "The Northern gap, with its interval",
+        "Neither: the Northern group is too small"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "The Northern prediction lies outside its 95% interval; the Southern one lies inside, so its gap cannot be told from noise.",
+      "misconceptions": [
+        "Assumes recalibration repairs every group: the map only sees the score, not the region",
+        "Treats any difference as a finding: the Southern prediction lies inside its interval, so chance explains it",
+        "",
+        "Assumes a small group cannot carry a finding: 508 rows are enough when the prediction falls well outside the interval"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 4,
+      "slide": "check-group-gap",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "review-day1-q1",
+      "type": "single",
+      "prompt": "Platt scaling was fitted on the calib rows. On the holdout, the Brier score fell from 0.199 to 0.081 and the mean prediction is 9.0% against 9.9% observed. Which statement holds?",
+      "options": [
+        "The AUC rose with the Brier score",
+        "Every region is now calibrated, since the map was fitted on all of them",
+        "The ranking is unchanged and the average is repaired",
+        "The developers' model was retrained"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Platt scaling is a monotone map after the model: it repairs what the score means on average and cannot reorder applicants or see a column the score lacks.",
+      "misconceptions": [
+        "Assumes recalibration improves ranking: a monotone map leaves the AUC where it was",
+        "Treats average calibration as calibration in every group; the Northern region stays 6.7 points under-predicted",
+        "",
+        "Reads a map fitted on calib rows as a retrained model; the model itself was not touched"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 2,
+      "slide": "review-day1",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-conformal-promise-q1",
+      "type": "single",
+      "prompt": "Split conformal on 895 calib defaults gives Amana's loss model intervals of plus or minus 8,134 riyals. A provisioning analyst asks what the \"90%\" means. What do you tell her?",
+      "options": [
+        "Each loan has a 90% chance of a loss inside its own interval",
+        "Nine in ten losses fall inside, whoever applies to Mizan next year",
+        "The loss model is now 90% accurate",
+        "Over new loans like the calib loans, at least 90% fall inside"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Conformal coverage is marginal and rests on exchangeability: it holds on average over loans drawn like the calib loans.",
+      "misconceptions": [
+        "Reads a marginal guarantee as a statement about each loan",
+        "Assumes the guarantee survives any population; it needs new loans drawn like the calib loans",
+        "Confuses coverage with accuracy of the point prediction, which conformal does not change",
+        ""
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 2,
+      "session": 1,
+      "slide": "check-conformal-promise",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-set-size-q1",
+      "type": "single",
+      "prompt": "An applicant's 90% APS set is {A}. The officer asks whether the model is certain this applicant will repay on time. What is the right answer?",
+      "options": [
+        "No: across applicants, about one in ten sets misses the true grade",
+        "Yes: only one grade could be the true one",
+        "Yes, with exactly 90% probability for this applicant",
+        "No: a set of one means the model failed to find enough grades to include"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "The 90% is the share of sets, over applicants, that hold the true grade; any single set can be wrong, and a small set says the model is relatively sure, not certain.",
+      "misconceptions": [
+        "",
+        "Reads a set of one as certainty; the guarantee is about the share of sets that contain the truth",
+        "Confuses the set level with the probability of the grade inside it",
+        "Thinks small sets are a sign of error; they are a sign the model separates this applicant well"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 2,
+      "session": 2,
+      "slide": "check-set-size",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-group-coverage-q1",
+      "type": "single",
+      "prompt": "Split conformal with one threshold reaches 91% coverage overall on Amana's loss intervals, 77% on large loans and 100% on medium and small loans. What explains it?",
+      "options": [
+        "The conformal threshold was computed wrongly",
+        "Losses on large loans vary more, and one width averages over groups",
+        "Large loans are too rare in the calib rows",
+        "The loss model under-predicts large losses, so their intervals sit too low"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Split conformal promises marginal coverage. With errors that grow with loan size, one width is too narrow for large loans and too wide for the rest.",
+      "misconceptions": [
+        "Assumes conformal guarantees every group; it guarantees the average only",
+        "",
+        "Confuses a group's share of the data with its spread of errors",
+        "Reads under-coverage as a bias in the point prediction rather than in the width"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 2,
+      "session": 3,
+      "slide": "check-group-coverage",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-shift-q1",
+      "type": "single",
+      "prompt": "Under the same income shift, loss interval coverage falls from 91% to 77% while grade set coverage falls from 89% to 88%. Which explanation is right?",
+      "options": [
+        "Prediction sets keep their guarantee under shift; intervals for amounts do not",
+        "The grade model was calibrated on more rows",
+        "Loss errors grow with income through loan size; grade errors barely do",
+        "Richer applicants default less, so the sets are easier"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "A covariate shift breaks coverage where it moves the distribution of the errors. Loss errors depend on loan size, which rises with income.",
+      "misconceptions": [
+        "Assumes set methods have a stronger guarantee; both rest on exchangeability",
+        "Confuses sample size with robustness; both were judged on large samples",
+        "",
+        "Assumes the shift changed the outcome; it only changed who applies"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 2,
+      "session": 4,
+      "slide": "check-shift",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "review-day2-q1",
+      "type": "single",
+      "prompt": "Split conformal intervals for Amana's loss model cover 91% of holdout defaults, 77% of large loans, and 77% of all defaults after a strong simulated income shift. Which sentence can go in the report?",
+      "options": [
+        "Every loan's interval holds 90% of the time",
+        "Coverage holds overall, not for large loans or a richer population",
+        "The loss model must be retrained before any of its intervals can be used",
+        "Under a shift the intervals widen to keep 90%"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The guarantee is marginal and rests on exchangeability; the group table and the stress test show where it stops.",
+      "misconceptions": [
+        "Reads marginal coverage as a promise for every group",
+        "",
+        "Treats under-coverage as a modelling fault; the wrapper, not the model, sets the width",
+        "Thinks a fixed width adapts to a new population; the threshold only knows the calib rows"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 3,
+      "slide": "review-day2",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-permutation-q1",
+      "type": "single",
+      "prompt": "Shuffled alone, bank inflow raises the log loss by 0.068 and declared income by 0.046. Shuffled together, by 0.034. The two correlate at 0.84. Which reading is right?",
+      "options": [
+        "Bank inflow is the more important of the two",
+        "Income accounts for 0.114 of the log loss",
+        "Income matters; the single numbers measure reactions to impossible pairs",
+        "Together they matter little, so income can be dropped from the next version"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Shuffling one feature of a correlated pair creates rows outside the data; the grouped shuffle keeps realistic pairs and is the number to report.",
+      "misconceptions": [
+        "Ranks members of a correlated pair, which the single shuffles cannot separate",
+        "Adds importances as if they were independent shares of one total",
+        "",
+        "Reads a smaller grouped number as evidence that income is irrelevant"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 1,
+      "slide": "check-permutation",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-effect-plots-q1",
+      "type": "single",
+      "prompt": "PD for declared income rises 1.6 times as much as ALE between 9,000 and 19,000 riyals. Declared income and bank inflow correlate at 0.84, and overstating income is a risk signal in the model. What explains the gap?",
+      "options": [
+        "PD pairs high declared incomes with inflows real applicants do not have",
+        "ALE uses too few applicants in each bin, so its curve is flattened by noise",
+        "The model overreacts to declared income",
+        "PD is not centred and ALE is"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Partial dependence evaluates the model on combinations outside the data; with a correlated, interacting pair those combinations look like overstatement.",
+      "misconceptions": [
+        "",
+        "Blames sample size; the gap comes from which rows are evaluated, not how many",
+        "Assumes the model is wrong; it reacts correctly to rows that do not occur",
+        "Confuses centring with the shape: both curves are centred"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 2,
+      "slide": "check-effect-plots",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-shapley-q1",
+      "type": "single",
+      "prompt": "For every applicant, the base value plus the Shapley values of the ten features equals the model's raw score exactly. A colleague says this proves the reasons shown to officers are reliable. What do you answer?",
+      "options": [
+        "Yes: an exact decomposition cannot change",
+        "Complete accounting for this model, not survival across a refit",
+        "Yes: each value is the feature's causal effect",
+        "No: Shapley values stop adding up once two features are strongly correlated"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Additivity is a property of one model's prediction. A refit is a different model, and the split between correlated features can change.",
+      "misconceptions": [
+        "Reads exact accounting as stability across equally valid models",
+        "",
+        "Reads additivity as a causal property of the features",
+        "Thinks additivity fails with correlated features; it holds, the split between them is what moves"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 3,
+      "slide": "check-shapley",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-proxy-q1",
+      "type": "single",
+      "prompt": "Wallet months correlates with age band at -0.44, is a top reason for 47% of applicants over 55 against 21% under 25, and narrows the age gap. What can you conclude?",
+      "options": [
+        "Wallet history causes default, so the feature is legitimate to use",
+        "The correlation is too weak to matter",
+        "Age is not in the model, so there is no age effect",
+        "It carries age information and would deliver age-linked reasons"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "The link with age, the pattern of reasons and the narrowed gap show it carrying age; a causal role cannot be settled here, and the caution does not need one.",
+      "misconceptions": [
+        "Claims a causal conclusion the observational data cannot support",
+        "Treats a modest correlation as no relation; the pattern of reasons by age shows the link at work",
+        "Thinks excluding age from the features settles the question",
+        ""
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 4,
+      "slide": "check-proxy",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "review-day3-q1",
+      "type": "single",
+      "prompt": "Over five refits, 8 of 10 applicants keep their top reason and 1 of 10 keeps all three. Bank inflow and declared income correlate at 0.84. Which sentence is supported?",
+      "options": [
+        "Show officers one grouped income reason, and only reasons that survive refits",
+        "The three reasons are exact, so they can be shown as they are",
+        "Bank inflow is a stronger reason than declared income",
+        "The model must be retrained until all three reasons are stable across refits"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "The top reason is fairly stable and the rest are not; the two incomes trade credit between refits, so they are one reason told two ways.",
+      "misconceptions": [
+        "",
+        "Reads exact additivity as stability across equally valid models",
+        "Ranks members of a correlated pair, which no method here can separate",
+        "Takes instability of the second and third reasons as proof the model is wrong"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 4,
+      "slide": "review-day3",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-subgroup-q1",
+      "type": "single",
+      "prompt": "After recalibration, men default at 10.5% against 8.9% predicted, interval 9.6 to 11.4; women at 9.5% against 9.1%. Under the course rules, what goes in the report?",
+      "options": [
+        "Nothing: the gap is within noise",
+        "A high finding of gender bias, since gender is a protected attribute",
+        "Evidence that the model discriminates against men",
+        "A medium finding: supported, 1.6 points, monitored by gender"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "The interval supports the gap, and the rule rates supported gaps under 2 points as medium; the report states it and asks for monitoring.",
+      "misconceptions": [
+        "Ignores that the prediction lies outside the interval: the gap is supported",
+        "Rates a small gap high only because the group is protected; the rule asks for size too",
+        "Turns a tag into a verdict the validator cannot give",
+        ""
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 1,
+      "slide": "check-subgroup",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-degradation-q1",
+      "type": "single",
+      "prompt": "The feed broke on 1 March 2025. Outcomes of March applications mature in March 2026. Which monitor raises the alarm in March 2025?",
+      "options": [
+        "Input range checks and top-reason shares, on the day of scoring",
+        "Monthly AUC on scored applications, against the holdout AUC of 0.755",
+        "Loss interval coverage on defaulted loans",
+        "Retraining every quarter on recent applications"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Inputs and reasons exist on the day of scoring; outcome-based measures confirm a fault only once loans mature.",
+      "misconceptions": [
+        "",
+        "Needs outcomes that do not exist until a year later",
+        "The loss intervals barely moved; this monitor misses this fault",
+        "Retraining on schedule would learn the broken unit rather than detect it"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 4,
+      "session": 2,
+      "slide": "check-degradation",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-checklist-q1",
+      "type": "single",
+      "prompt": "metadata.json says officers see the three largest Shapley values. evidence.json says stability_checked: false. You tested stability yourself on Day 3. What is O5?",
+      "options": [
+        "Present, because the stability panel from Day 3 now exists",
+        "Missing, because nothing about explanations is there",
+        "Partial: the method is stated, its stability is not checked by the developers",
+        "Not applicable, because the reasons were unstable"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "The checklist scores what the package supplies; the method is there and the stability evidence is not.",
+      "misconceptions": [
+        "Scores the validator's work instead of the package",
+        "Ignores that the method is stated, which is half of the item",
+        "",
+        "Treats an unstable result as grounds to drop the item rather than score it"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 3,
+      "slide": "check-checklist",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "check-decision-q1",
+      "type": "single",
+      "prompt": "Four drafts for the approval committee. Which one could an auditor check next year?",
+      "options": [
+        "Borderline applications receive careful human review by experienced officers in every branch",
+        "Model risk checks calibration by region and age monthly; two breaches mean revalidation",
+        "The model will be monitored for fairness",
+        "The developers retrain the model every year"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "An enforceable condition names a measure, a frequency, a threshold, an action and an owner.",
+      "misconceptions": [
+        "Names no group, no owner and no test: a slogan",
+        "",
+        "An intention with no measure, threshold or owner",
+        "Retraining is an action without a trigger or a check that it worked"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 4,
+      "slide": "check-decision",
+      "pool": "checkpoint",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d1-claim-in-sample",
+      "type": "single",
+      "prompt": "A model card reports AUC 0.86 \"on 4,000 held-out rows\". The metadata shows the shipped model was retrained on all rows, those 4,000 included. On your untouched holdout it scores 0.76. What is the verdict on the card's claim?",
+      "options": [
+        "Supported, because the developers did hold the rows out when they measured",
+        "Unsupported, because the number belongs to rows the shipped model has seen",
+        "Untestable, because the 4,000 rows cannot be recovered",
+        "Supported within sampling error of the holdout"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The claim is about new applicants; the only evidence for it is a holdout the shipped model never saw, and that gives 0.76.",
+      "misconceptions": [
+        "Treats the honest first measurement as evidence for a different, retrained model",
+        "",
+        "Confuses losing the developers' rows with being unable to test: the validator's holdout tests the claim",
+        "Ignores the size of the gap: 0.86 against 0.76 on 10,000 rows is far beyond sampling error"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 1,
+      "session": 1,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d1-untestable-to-test",
+      "type": "single",
+      "prompt": "A card says the model \"will remain accurate for three years\". What should the validation report do with this claim?",
+      "options": [
+        "Mark it supported, since the holdout AUC is high today and should hold",
+        "Remove it from the card without comment, since nobody can check it",
+        "Mark it untestable and rewrite it as a monitoring condition",
+        "Mark it unsupported and reject the model until the developers prove it"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "No data from the next three years exists; a validator turns such a promise into a condition that can be checked as data arrives.",
+      "misconceptions": [
+        "Projects a present measurement into a future nobody has observed",
+        "Drops the developers' promise instead of turning it into something checkable",
+        "",
+        "Treats an untestable promise as evidence of a fault"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 1,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d1-proper-score",
+      "type": "single",
+      "prompt": "Two forecasters say 0.51 and 0.95 for the same applicant, who then defaults. Which score tells them apart and rewards reporting the probability you believe?",
+      "options": [
+        "Accuracy at a threshold of 0.5",
+        "The AUC over the whole holdout",
+        "The share of applicants above 0.5",
+        "The Brier score"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "The Brier score is a proper scoring rule: it scores the distance between the probability and the outcome, so 0.95 scores better than 0.51 here.",
+      "misconceptions": [
+        "Accuracy only asks which side of 0.5 a forecast is on, so both forecasts score the same",
+        "AUC measures ranking across applicants and is unchanged by rescaling probabilities",
+        "Counts decisions, not the quality of probabilities",
+        ""
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 2,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d1-base-rate",
+      "type": "single",
+      "prompt": "On a holdout with a 10% default rate, a model has AUC 0.75 and Brier 0.20. Giving everyone 10% scores Brier 0.09. What does this show?",
+      "options": [
+        "Its probabilities are worse than a constant, though it ranks well",
+        "The base-rate forecast is the better model and should replace it in production",
+        "The Brier score is unreliable when the AUC of a model is this high",
+        "The holdout is too small to compare the two forecasts fairly"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A proper score below the base rate means the stated probabilities do harm as probabilities; the AUC shows the ranking is still informative.",
+      "misconceptions": [
+        "",
+        "Confuses the probability scale with usefulness: the model still ranks, and recalibration can repair its scale",
+        "Assumes the two measures must agree; they measure different properties",
+        "Ten thousand rows make a difference of 0.11 in Brier score far larger than sampling noise"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 2,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d1-rebalanced",
+      "type": "single",
+      "prompt": "Every bin of a reliability diagram lies well below the diagonal, by roughly the same factor in odds. The metadata says the training set was rebalanced to 50/50. What is the most likely cause?",
+      "options": [
+        "The model overfitted its training rows and lost its calibration there",
+        "The model learned odds for a population where half default",
+        "The holdout has more defaults than the training data had",
+        "Too few bins were used to draw the diagram"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Rebalancing shifts the model's odds to the training prevalence; applied where about 10% default, every probability is inflated.",
+      "misconceptions": [
+        "Overfitting usually makes the extremes too extreme, not every bin too high by a constant factor",
+        "",
+        "The curve shows the opposite: fewer defaults than predicted",
+        "The number of bins changes the resolution of the picture, not where the points lie"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 2,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d1-calib-rows",
+      "type": "single",
+      "prompt": "You fit isotonic regression on the holdout and report its calibration error on the same holdout: 0.002. Fitted on calib rows instead, the holdout error is 0.012. Which number goes in the report?",
+      "options": [
+        "0.002, because it uses the larger, cleaner set of rows for both steps",
+        "The average of the two, to balance the two estimates",
+        "0.012, because the map has not seen the rows it is judged on",
+        "Neither: isotonic regression cannot be evaluated"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "A map fitted and judged on the same rows follows their noise; only rows it has not seen show what applicants will get.",
+      "misconceptions": [
+        "Fits and judges on the same rows, which flatters a flexible map",
+        "Mixing an honest and a flattered number does not make an honest one",
+        "",
+        "Any recalibration map can be judged on rows it did not see"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 3,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d1-platt-auc",
+      "type": "single",
+      "prompt": "After Platt scaling, the Brier score drops from 0.199 to 0.081. What happens to the AUC?",
+      "options": [
+        "It rises, because the probabilities are now right",
+        "It falls, because the scores were compressed",
+        "It must be recomputed on new training rows",
+        "It stays exactly the same"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Platt scaling is a monotone map of the score, so no pair of applicants changes order and the AUC is unchanged.",
+      "misconceptions": [
+        "Confuses calibration with discrimination",
+        "A monotone map keeps the order of every pair of applicants",
+        "Nothing was retrained; the map sits after the model",
+        ""
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 3,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d1-group-interval",
+      "type": "single",
+      "prompt": "After recalibration a group of 300 applicants shows 9% predicted and 11% observed, with a 95% interval of 7.9% to 15.0% for the observed rate. What do you write?",
+      "options": [
+        "A finding: the group is under-predicted by 2 points",
+        "No finding: the prediction lies inside the interval",
+        "Recalibrate again on this group of 300 applicants only",
+        "A finding, because small groups always hide gaps larger than they show"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "A subgroup gap is reported as a finding when the prediction falls outside the interval of the observed rate.",
+      "misconceptions": [
+        "Treats any gap as a finding without checking whether chance explains it",
+        "",
+        "Fits a repair to 300 rows on the strength of a gap that may be noise",
+        "Assumes the direction of the unknown; small groups give wide intervals, not larger gaps"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 4,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d1-excluded-column",
+      "type": "single",
+      "prompt": "A credit model excludes age band on purpose. After recalibration, applicants aged 18 to 24 default 5 points more often than predicted, outside the interval. Why did the recalibration not fix it?",
+      "options": [
+        "The map sees only the score, which does not carry age",
+        "The map was fitted on too few rows to reach the young band",
+        "Age band should have been kept in the holdout as well",
+        "Isotonic regression, being more flexible, would have fixed it"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A map of the score cannot separate applicants who have the same score but different risk; excluding a column removes it from the input, not from the outcome.",
+      "misconceptions": [
+        "",
+        "With 10,000 calib rows the average is repaired; the gap is within a group, not overall",
+        "It is in the holdout, which is how the gap was found",
+        "Any map of the score alone gives two applicants with the same score the same probability, whatever their age"
+      ],
+      "lo": [
+        "LO1"
+      ],
+      "day": 1,
+      "session": 4,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d2-rank",
+      "type": "single",
+      "prompt": "You have 99 calibration scores and want 90% intervals. Which sorted score is the split conformal threshold?",
+      "options": [
+        "The 89th smallest",
+        "The 90th smallest",
+        "The 99th smallest, to be safe",
+        "The mean plus 1.645 standard deviations"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The rank is ceil((n + 1)(1 - alpha)) = ceil(100 x 0.9) = 90.",
+      "misconceptions": [
+        "Uses 90% of n and forgets to count the new point",
+        "",
+        "Takes the maximum, which over-covers and widens every interval for no guarantee gained",
+        "Assumes normal errors, which split conformal does not need"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 2,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d2-exchangeable",
+      "type": "single",
+      "prompt": "Which situation breaks the assumption that split conformal coverage rests on?",
+      "options": [
+        "The loss model is a boosted tree rather than a linear model",
+        "The errors are skewed rather than normal",
+        "Calib rows from 2023, new loans from a year a new product launched",
+        "The calibration set has 900 rows rather than the 9,000 that were planned"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Coverage needs new rows exchangeable with the calibration rows; a changed population breaks that.",
+      "misconceptions": [
+        "Conformal coverage makes no assumption about the model",
+        "No assumption on the shape of the errors is needed",
+        "",
+        "A smaller set gives a noisier threshold, but the guarantee still holds on average"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 2,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d2-lac-aps",
+      "type": "single",
+      "prompt": "On the same holdout, LAC sets cover 89% with mean size 1.56 and APS sets cover 90% with mean size 1.67. Which statement is right?",
+      "options": [
+        "APS is worse because its sets are larger on average",
+        "LAC is invalid because it is below 90%",
+        "Both keep the marginal guarantee; they differ in where larger sets go",
+        "APS guarantees 90% coverage within each grade, while LAC only overall"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Both are valid marginally. LAC gives the smallest sets on average; APS makes sets adapt to the spread of the probabilities.",
+      "misconceptions": [
+        "Judges set methods on size alone; APS trades size for sets that grow where the model is unsure",
+        "A point under target on one holdout is within sampling variation of a valid method",
+        "",
+        "Neither method promises coverage within a grade; that needs a threshold per grade"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 2,
+      "session": 2,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d2-by-grade",
+      "type": "single",
+      "prompt": "Prediction sets for three grades cover 90% of applicants but the true grade of only 44% of defaulters. The committee cares most about defaulters. What do you recommend?",
+      "options": [
+        "Raise the target to 99% for everyone",
+        "Report the 90% as it stands and note that it holds on average over all grades",
+        "A threshold per true grade, from the calib rows of that grade",
+        "Drop the sets and use the top grade"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Class-conditional thresholds give each grade its own coverage guarantee, which is what a decision about defaulters needs.",
+      "misconceptions": [
+        "Inflates every set to buy coverage for one grade, without a guarantee for that grade",
+        "States the guarantee but hides that it fails where the decision matters",
+        "",
+        "Removes the only statement of doubt the officers would have"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 2,
+      "session": 2,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d2-mondrian-cost",
+      "type": "single",
+      "prompt": "One threshold per loan-size band lifts large-loan coverage from 77% to 91%. Overall coverage stays at 91%. What did the repair cost?",
+      "options": [
+        "Nothing: coverage rose for large loans and fell for no other group",
+        "Wider large-loan intervals; lower, near-target coverage for the rest",
+        "A retrained loss model",
+        "The marginal guarantee, which no longer holds once groups are split"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The repair moves coverage to the group that lacked it: large loans' intervals widened 1.6 times, the others narrowed.",
+      "misconceptions": [
+        "Overlooks that coverage moved between groups and widths changed",
+        "",
+        "Conformal thresholds need no retraining",
+        "Group-conditional thresholds still give at least the target coverage overall"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 2,
+      "session": 3,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d2-tiny-group",
+      "type": "single",
+      "prompt": "You want a 90% threshold for a group with 6 calibration defaults. What does split conformal give?",
+      "options": [
+        "A threshold from the 6th score, the largest one available",
+        "An infinite interval, because 90% needs a 7th score",
+        "The overall threshold, automatically",
+        "A narrower interval than for large groups"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "With n scores the rank ceil((n + 1)(1 - alpha)) can exceed n; then the only honest interval is unbounded.",
+      "misconceptions": [
+        "Forgets that ceil(7 x 0.9) = 7 exceeds the 6 scores available",
+        "",
+        "No method substitutes the overall threshold without being told to",
+        "Fewer scores cannot give a tighter guarantee"
+      ],
+      "lo": [
+        "LO2"
+      ],
+      "day": 2,
+      "session": 3,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d2-shift-width",
+      "type": "single",
+      "prompt": "After applicants shift towards higher incomes, loss interval coverage falls from 91% to 77%, and the interval width barely changes. Why did the width not warn anyone?",
+      "options": [
+        "The threshold comes from the calib rows, not the new population",
+        "The shift was too small to matter",
+        "Conformal intervals always widen under shift, so they did warn",
+        "The loss model was retrained on the shifted data and hid the change"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A conformal interval is a fact about its calibration rows; when new rows differ, coverage falls without any change in width.",
+      "misconceptions": [
+        "",
+        "A fall of 14 points is large; the width simply cannot reflect it",
+        "They widen only if recomputed on new data",
+        "Nothing was retrained in the stress test"
+      ],
+      "lo": [
+        "LO2",
+        "LO4"
+      ],
+      "day": 2,
+      "session": 4,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d2-monitor",
+      "type": "single",
+      "prompt": "Losses are known months after a default. Which monitoring rule gives the earliest warning that the loss intervals are losing coverage?",
+      "options": [
+        "Monthly coverage of the intervals on new defaults, against the 90% target",
+        "The share of new loans above 25,000 riyals, against the holdout share",
+        "The AUC of the default model",
+        "The mean predicted loss"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Coverage was lost because large loans, whose losses vary most, became more common; their share is known at application.",
+      "misconceptions": [
+        "Correct in the end, but it waits for losses that arrive months late",
+        "",
+        "Measures the default model's ranking, not the loss intervals",
+        "Can stay flat while the mix of loan sizes moves"
+      ],
+      "lo": [
+        "LO2",
+        "LO4"
+      ],
+      "day": 2,
+      "session": 4,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d3-holdout-importance",
+      "type": "single",
+      "prompt": "Why is permutation importance for a validation report computed on the holdout rather than on the training rows?",
+      "options": [
+        "The holdout is larger, so its importances are less noisy",
+        "On training rows, overfitted features look more important than they are",
+        "Permutation importance cannot be computed on the rows a model was trained on",
+        "The holdout has no correlated features"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Importance on held-out rows measures what the model needs for new applicants, not what it memorised.",
+      "misconceptions": [
+        "Size is not the reason; the training rows are larger here",
+        "",
+        "It can; it answers a different, less useful question there",
+        "Correlation between features is the same in both"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 1,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d3-grouped",
+      "type": "single",
+      "prompt": "Two features correlate at 0.9. Shuffled alone, each shows a large importance; shuffled together, their joint importance is smaller than either. What should the report say?",
+      "options": [
+        "Report both single numbers and rank the two features by them",
+        "Drop the feature with the smaller number",
+        "One grouped importance for the pair, with no ranking within it",
+        "Add the two single numbers to get the importance of the pair"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Shuffling one member of a correlated pair creates rows outside the data; the grouped shuffle keeps realistic pairs.",
+      "misconceptions": [
+        "Ranks members of a correlated pair, which the single shuffles cannot separate",
+        "Treats a single-shuffle number as the feature's own value to the model",
+        "",
+        "Assumes the single shuffles measure separate shares of one total"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 1,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d3-pd-ale",
+      "type": "single",
+      "prompt": "For a feature strongly correlated with another, partial dependence and accumulated local effects disagree at the ends of the range. Which one describes the model on realistic applicants?",
+      "options": [
+        "Partial dependence, because it uses every applicant at every value of the grid",
+        "Accumulated local effects, which move each applicant within their bin",
+        "Neither: effect plots are invalid with correlated features",
+        "Both equally: they answer the same question"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "ALE uses only small, local changes inside the data, so it avoids the impossible combinations that partial dependence averages over.",
+      "misconceptions": [
+        "Using every applicant at every value is exactly what creates combinations outside the data",
+        "",
+        "ALE was designed for this case",
+        "They answer different questions: a counterfactual for everyone, and a local change between similar applicants"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 2,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d3-outside-share",
+      "type": "single",
+      "prompt": "At the top of the grid, 53% of the rows behind a partial dependence point pair a high declared income with a bank inflow no real applicant has. What do you do with this number?",
+      "options": [
+        "Remove those rows and redraw partial dependence from the rest",
+        "Report it under the plot as the share of rows outside the data",
+        "Ignore it: the model still produces a prediction for those rows",
+        "Use it to rescale the curve by 0.47"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The share makes the extrapolation checkable: a reader sees how much of the curve rests on rows outside the data.",
+      "misconceptions": [
+        "Partial dependence by definition evaluates every row at the grid value; removing rows changes the method silently",
+        "",
+        "A prediction for a row the model never saw tells nothing about real applicants",
+        "There is no such correction; the share is a warning, not a factor"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 2,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d3-additive",
+      "type": "single",
+      "prompt": "Shapley values of a tree model add up exactly to each prediction. Which statement follows?",
+      "options": [
+        "It accounts completely for this model's prediction",
+        "The explanation is the same for any refit of the model",
+        "Each value is the causal effect of its feature on default",
+        "Correlated features get equal shares"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Additivity guarantees a complete account of one prediction by one model; stability and causality must be tested separately.",
+      "misconceptions": [
+        "",
+        "Additivity is about one model; a refit can split the credit differently",
+        "Additivity is an accounting property, not a causal one",
+        "Nothing forces equal shares; the split between correlated features is what moves between refits"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 3,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d3-stability-rule",
+      "type": "single",
+      "prompt": "An applicant's top reason is bank inflow in three of five equally valid refits and declared income in two. What should the officer be shown?",
+      "options": [
+        "Bank inflow, the majority reason in three of the five refits",
+        "Declared income, the reason in the shipped model",
+        "Both incomes as one reason, income, or no single main reason",
+        "All ten features with their values"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "The two incomes trade credit between refits; grouping them, or stating that there is no stable main reason, is the honest explanation.",
+      "misconceptions": [
+        "Shows an accident of training as if it were a stable reason",
+        "Depends on which refit happened to ship",
+        "",
+        "Swaps an unstable reason for an unreadable one"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 3,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d3-proxy",
+      "type": "single",
+      "prompt": "A proposed feature raises AUC by 0.004, correlates with age band at -0.44, and becomes a top reason for 47% of applicants over 55 against 21% of those under 25. Age is excluded from the model. What do you recommend?",
+      "options": [
+        "Accept it: the model still uses no age column, so claim 3 stays true",
+        "Accept it and show it as a reason, since it is not age",
+        "Reject the whole model",
+        "Do not add it for 0.004; if added, never show it as a reason"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "The feature carries age information and would deliver age-linked reasons; its small gain does not justify that.",
+      "misconceptions": [
+        "Checks the feature list instead of what the feature carries",
+        "Delivers age-linked reasons under another name",
+        "Over-reacts: the finding is about one proposed feature",
+        ""
+      ],
+      "lo": [
+        "LO3",
+        "LO5"
+      ],
+      "day": 3,
+      "session": 4,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d3-proxy-evidence",
+      "type": "single",
+      "prompt": "Adding a feature narrows the calibration gap of the oldest age band from 1.2 to 0.8 points. What does this suggest?",
+      "options": [
+        "The feature carries some of the age information the model lacked",
+        "The feature fixes an age bias and should be kept for that reason",
+        "The gap was noise all along",
+        "Calibration by age is unaffected by the features a model uses"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A permitted feature that reduces an age-band gap is bringing age information back, which is the mark of a proxy.",
+      "misconceptions": [
+        "",
+        "Reads a proxy's effect as a fair repair",
+        "A consistent narrowing in the direction of the age effect is not noise",
+        "Calibration within a group changes when the model gains information about that group"
+      ],
+      "lo": [
+        "LO3"
+      ],
+      "day": 3,
+      "session": 4,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-flag-rule",
+      "type": "single",
+      "prompt": "A region of 508 applicants is predicted to default at 8.7% and defaults at 15.4%, with a 95% interval of 12.5% to 18.8%. A second region of 1,951 is predicted 9.2% and defaults at 9.0% (7.8% to 10.4%). Which gaps does the report flag?",
+      "options": [
+        "The first only: its prediction lies outside the observed interval",
+        "Both: every difference between predicted and observed is a gap",
+        "Neither: 508 applicants are too few for any finding",
+        "The second only: it is the larger group"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A calibration gap is flagged when the mean prediction falls outside the interval of the observed rate; the interval reflects the group size.",
+      "misconceptions": [
+        "",
+        "Ignores sampling noise: the second prediction lies inside its interval",
+        "Forgets that the interval already accounts for the group size, and it excludes the prediction",
+        "Confuses group size with the size of the gap"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 4,
+      "session": 1,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-crossed-cells",
+      "type": "single",
+      "prompt": "Within one region, applicants aged 18 to 24 default at 39% on 18 defaults, interval 26% to 54%, against 12.7% predicted. Other age bands in the region rest on 6 to 30 defaults. How should the report treat the crossed table?",
+      "options": [
+        "Rate every cell outside its interval as a high finding for the committee",
+        "Drop it: crossed groups are never reported",
+        "Average the cells to get one regional gap",
+        "Give counts and intervals; name the young cell one to monitor"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Crossing groups divides the evidence; small cells support a watch list, stated with their counts and intervals, not ratings.",
+      "misconceptions": [
+        "Treats cells of a handful of defaults as firm evidence and multiplies chance findings",
+        "Hides a signal that deserves monitoring",
+        "Throws away the crossed view without saying what the counts allow",
+        ""
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 4,
+      "session": 1,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-slice-first",
+      "type": "single",
+      "prompt": "A model's AUC falls from 0.755 to 0.677 on a later batch. By month and channel, one channel is unharmed throughout; the other predicts 46% against 10% observed from one month onwards. What does the pattern point to?",
+      "options": [
+        "A change in a process feeding that channel from that month",
+        "A gradual change in borrowers' behaviour across the market",
+        "Overfitting that has finally shown itself",
+        "Too few defaults to tell"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A failure confined to one channel and starting in one month is the signature of a pipeline or process change, not of drift in the world.",
+      "misconceptions": [
+        "",
+        "A market change would not stop at one channel or start on one date",
+        "Overfitting was present from the start and would affect both channels",
+        "Thousands of applications per channel make the gap far larger than noise"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 4,
+      "session": 2,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-psi",
+      "type": "single",
+      "prompt": "In the failing slice, the population stability index of bank inflow is 8.3 and of every other feature below 0.04. The median bank inflow is 8,240 SAR in February and 8.14 in March. What is the most likely cause?",
+      "options": [
+        "Applicants' bank inflows fell sharply in March across the channel",
+        "The model needs more trees to handle the new values",
+        "Declared incomes rose, which moved the model",
+        "The feed began reporting bank inflow in thousands"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "A factor of a thousand in one input, from one date, in one channel is a unit change in the data feed: Measurement Bias in the guide.",
+      "misconceptions": [
+        "A thousandfold fall overnight in one channel is not a change in people",
+        "Treats a broken input as a modelling weakness",
+        "Declared income barely moved (PSI 0.037)",
+        ""
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 4,
+      "session": 2,
+      "level": "understand",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-reasons-alarm",
+      "type": "single",
+      "prompt": "Outcomes take twelve months to mature. Which measure, computed on the day of scoring, would have warned of a broken input in its first week?",
+      "options": [
+        "The share of applicants whose top reason is each feature",
+        "Monthly AUC of scored applications, against the holdout AUC of 0.755",
+        "Calibration by region on matured loans",
+        "The default rate of the portfolio"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Reasons and inputs exist at scoring time. A sudden jump, here bank inflow from 22% to 98% of top reasons, is an early alarm.",
+      "misconceptions": [
+        "",
+        "Needs outcomes that do not exist yet",
+        "Also needs outcomes; it confirms faults months later",
+        "Moves only when loans mature, and mixes every cause together"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 4,
+      "session": 2,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-not-retrain",
+      "type": "single",
+      "prompt": "The cause of a decline is a unit change in one channel's bank inflow feed. A manager proposes retraining on the last six months. What is wrong with the proposal?",
+      "options": [
+        "Six months is too little data to retrain a credit model of this size",
+        "Retraining needs the developers, not the validator",
+        "Nothing: retraining fixes any decline",
+        "It would learn the broken unit; fix the feed and rescore instead"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Retraining on corrupted inputs adapts the model to the corruption. The remedy is the feed, the rescoring of affected applications and an input check.",
+      "misconceptions": [
+        "Misses the real problem; any amount of the broken data teaches the wrong unit",
+        "True of roles, but not the reason the action is wrong",
+        "Treats every decline as model drift",
+        ""
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 4,
+      "session": 2,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-checklist-partial",
+      "type": "single",
+      "prompt": "A package's evidence file reports AUC 0.864, measured on rows the shipped model was trained on. How is the checklist item \"discrimination is measured on rows the shipped model never saw\" scored?",
+      "options": [
+        "Partial: a measurement exists but answers a different question",
+        "Present: the evidence file has an AUC, which is what the item asks for",
+        "Missing: the number is wrong",
+        "Not applicable to a credit model"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Partial means the package answers part of the item, or answers it in a way shown to be wrong.",
+      "misconceptions": [
+        "",
+        "Scores the presence of a number, not whether it answers the item",
+        "Ignores that the package does report discrimination, on the wrong rows",
+        "The item applies to any model claimed to work on new applicants"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 3,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-checklist-validator-filled",
+      "type": "single",
+      "prompt": "You computed calibration and subgroup tables yourself during validation. The package contains neither. How do they appear in the report?",
+      "options": [
+        "As present, since the evidence now exists in the validation",
+        "They are left out, since the developers did not supply them",
+        "As the developers' results, to keep the report short",
+        "As missing from the package, with the validator's results labelled"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "The checklist scores the package; the report gives the validator's evidence, says who supplied it, and asks the developers to own it.",
+      "misconceptions": [
+        "Scores the validation instead of the package and lets the gap recur in the next version",
+        "Discards evidence the committee needs",
+        "Misattributes the work and hides the package's gap",
+        ""
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 3,
+      "level": "analyze",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-blocking-gap",
+      "type": "single",
+      "prompt": "A package scores: soundness 2 present and 3 partial; outcomes 2 partial and 3 missing; monitoring 2 missing. Which gap prevents a \"fit with conditions\" decision from being enforced?",
+      "options": [
+        "No owner, inputs, outcomes or thresholds to monitor",
+        "The missing library versions, so no exact refit is possible",
+        "The missing subgroup results",
+        "The partial statement of intended use"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Conditions are enforced by monitoring with an owner and thresholds; without it, no condition can be checked.",
+      "misconceptions": [
+        "",
+        "Hinders exact refits, but does not stop conditions being enforced",
+        "The validator can supply them; they do not make conditions enforceable",
+        "A gap to fix, but conditions can still be written around it"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 3,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-condition-quality",
+      "type": "single",
+      "prompt": "Which draft condition could an auditor check a year later?",
+      "options": [
+        "High-risk applications receive careful review by experienced officers in every branch",
+        "The model is monitored for bias",
+        "The developers retrain the model every year on all new data",
+        "Model risk checks calibration by region and age monthly; two breaches mean revalidation"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "An enforceable condition names a measure, a frequency, a threshold, an action and an owner.",
+      "misconceptions": [
+        "Names no group, measure, threshold or owner",
+        "An intention without a measure or an owner",
+        "An action without a trigger or a test that it worked",
+        ""
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 4,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-human-review",
+      "type": "single",
+      "prompt": "Which human-review rule guards best against officers simply accepting the score?",
+      "options": [
+        "Named groups and full grade sets, with stable reasons and power to differ",
+        "Officers review borderline scores",
+        "Officers sign every decision the model makes, so none is fully automatic",
+        "Officers review a random 5% of applications, chosen fresh each month"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Automation Bias, in the guide, is deference to a system's output; review works when it targets known failures and gives officers evidence and authority.",
+      "misconceptions": [
+        "",
+        "Does not say which applicants, and gives officers nothing beyond the score",
+        "A signature on every score invites automation bias rather than review",
+        "Random review misses the groups where the model is known to fail"
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 4,
+      "level": "apply",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-not-fit",
+      "type": "single",
+      "prompt": "A model ranks well and its probabilities can be repaired, but it has two high calibration gaps by group and a broken input feed. No team agrees to own monitoring. What should the validator recommend?",
+      "options": [
+        "Fit, because the model ranks well",
+        "Fit with conditions, leaving the owner of monitoring to be decided later",
+        "Fit with conditions, owned by the validator",
+        "Not fit, stating what would change the decision"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Conditions only make a model fit when someone owns them; without an owner the honest decision is not fit, with what would change it.",
+      "misconceptions": [
+        "Ignores high findings that harm applicants now",
+        "A condition without an owner is a wish, not a control",
+        "The validator must stay independent of operating the model",
+        ""
+      ],
+      "lo": [
+        "LO5"
+      ],
+      "day": 4,
+      "session": 4,
+      "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    }
+  ]
+}

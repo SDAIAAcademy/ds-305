@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-ax="deck" data-track="data-science">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 3 · What drives the predictions · Uncertainty, Interpretability and Model Validation</title>
+<meta name="generator" content="SDAIA Academy engine 1.0.0">
+<link rel="icon" href="../_engine/icon.svg">
+<link rel="alternate" type="text/markdown" href="day3.md">
+<link rel="describedby" href="../llms.txt">
+<link rel="stylesheet" href="../_engine/academy.css">
+</head>
+<body>
+<div class="deck" data-course="Uncertainty, Interpretability and Model Validation" data-track="data-science" data-day="Day 3">
+<!-- ======================= OPENING ======================= -->
+<section class="slide title" id="title" data-auto="title" data-label="Welcome" data-n="1">
+  <div class="kicker">SDAIA Academy · Uncertainty, Interpretability and Model Validation</div>
+  <h1>What drives the predictions</h1>
+  <p class="lead mt">Day 3: Explain the default model three ways, test how stable each explanation is, and find where explanations mislead</p>
+  <div class="meta"><span class="track">Data Science Track</span><span>4 teaching days + capstone day</span><span>4 sessions · 4 labs</span><span>DS-305</span></div>
+  <aside class="notes"><p>Recap in one sentence: probabilities repaired, intervals that hold on average and fail for large loans and under shift. Today: the reasons. Every application at Mizan is shown to an officer with three reasons. The model card says they are the causes of risk. By the end of the day participants can say what they are instead.</p></aside>
+</section>
+
+<section class="slide" id="agenda" data-auto="agenda" data-label="Agenda" data-n="2">
+  <div class="kicker">Today</div>
+  <h2>What drives the predictions</h2>
+  <div class="agenda"><div class="item"><div><b>Session 1 · Permutation importance</b><small>Permutation importance measures what the model loses without a feature, and with correlated features it measures something else</small></div></div><div class="item"><div><b>Session 2 · Effect plots</b><small>Partial dependence averages over combinations that never occur; accumulated local effects stay inside the data</small></div></div><div class="item"><div><b>Session 3 · Shapley values</b><small>Shapley values split one prediction among the features, add up exactly, and can change when the model is refitted</small></div></div><div class="item"><div><b>Session 4 · When explanations mislead</b><small>A feature correlated with a protected attribute takes its attribution, and the reason shown to an applicant then names a proxy</small></div></div></div>
+</section>
+
+<section class="slide" data-label="Review" id="review-day2" data-lo="LO2" data-n="3">
+  <div class="kicker">Review of Day 2</div>
+  <h2>Which statement about the loss intervals is supported?</h2>
+  <div class="quiz" data-type="single" data-lo="LO2" data-id="review-day2-q1">
+    <p class="lead">Split conformal intervals for Amana's loss model cover 91% of holdout defaults, 77% of large loans, and 77% of all defaults after a strong simulated income shift. Which sentence can go in the report?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reads marginal coverage as a promise for every group" data-k="A">Every loan's interval holds 90% of the time</div>
+      <div class="opt" data-ok data-k="B">Coverage holds overall, not for large loans or a richer population</div>
+      <div class="opt" data-why="Treats under-coverage as a modelling fault; the wrapper, not the model, sets the width" data-k="C">The loss model must be retrained before any of its intervals can be used</div>
+      <div class="opt" data-why="Thinks a fixed width adapts to a new population; the threshold only knows the calib rows" data-k="D">Under a shift the intervals widen to keep 90%</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The guarantee is marginal and rests on exchangeability; the group table and the stress test show where it stops.</div>
+  </div>
+  <aside class="notes"><p>Answer: B. Two minutes.</p></aside>
+</section>
+
+<!-- ======================= SESSION 1 ======================= -->
+<section class="slide section" id="s1" data-auto="section" data-session="1" data-n="4">
+  <div class="kicker">Session 1</div>
+  <h1>Permutation importance</h1>
+  <ul class="bullets outcomes"><li>Compute permutation importance on held-out rows with repeats</li><li>Report its spread, not a single number</li><li>Permute correlated features together and explain the difference</li></ul>
+  <div class="sess-no">01</div>
+</section>
+
+<section class="slide" data-label="Three questions" id="three-explanation-questions" data-lo="LO3" data-n="5" data-session="1">
+  <div class="kicker">Explanations</div>
+  <h2>Each explanation method answers a different question</h2>
+  <table class="t small">
+    <tr><th>Method</th><th>Its question</th><th>Session</th></tr>
+    <tr><td>Permutation importance</td><td>How much worse does the model do without this feature?</td><td>1</td></tr>
+    <tr><td>Partial dependence, ALE</td><td>How does the prediction change as this feature changes?</td><td>2</td></tr>
+    <tr><td>Shapley values</td><td>How much did each feature move this one prediction?</td><td>3</td></tr>
+  </table>
+  <div class="callout warn small mt-s"><b>None of them asks</b> what causes default. All three describe the model, on data that may have features moving together.</div>
+  <aside class="notes"><p>Recap from DS-204 Day 2: built-in split-gain importances say what the trees used in training, not what matters on new data. Today's three methods are model-agnostic or exact, and each fails in its own way with correlated features. Tools are interchangeable: the scikit-learn inspection module, the SHAP library, DALEX; the labs use the course functions and LightGBM's own TreeSHAP.</p></aside>
+</section>
+
+<section class="slide" data-label="Shuffle" id="permutation-idea" data-lo="LO3" data-n="6" data-session="1">
+  <div class="kicker">Permutation importance</div>
+  <h2>Shuffle one column on the holdout and measure how much worse the predictions get</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 3.1 · step 1"><code class="language-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">rise_one</span>(<span class="hljs-params">df, col, rng</span>):
+    d = df.copy()
+    d[col] = d[col].to_numpy()[rng.permutation(<span class="hljs-built_in">len</span>(d))]
+    <span class="hljs-keyword">return</span> log_loss(y, predict(d)) - base</code></pre>
+    <ul class="bullets small">
+      <li>On the <b>holdout</b>: importance for new applicants, not memorised noise.</li>
+      <li>On the validator's model: Amana with the Platt repair, log loss 0.284.</li>
+      <li>One shuffle is one draw: repeat and report the spread.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The rise is in log loss, a proper score, so importance means "how much worse the probabilities get". Ask: what does a negative importance mean? Shuffling helped, by chance: the feature carries nothing measurable.</p><p>Sources: scikit-learn user guide, permutation feature importance.</p></aside>
+</section>
+
+<section class="slide" data-label="Spread" id="importance-with-spread" data-lo="LO3" data-n="7" data-session="1">
+  <div class="kicker">Lab 3.1 · ten repeats</div>
+  <h2>Two income features lead; the last two cannot be told from zero</h2>
+  <div class="bars">
+    <div class="row"><span>bank_inflow</span><div class="bar c-teal" style="--w:100%"></div><span class="val">0.068</span></div>
+    <div class="row"><span>declared_income</span><div class="bar c-teal" style="--w:67%"></div><span class="val">0.046</span></div>
+    <div class="row"><span>term_months</span><div class="bar c-cyan" style="--w:48%"></div><span class="val">0.033</span></div>
+    <div class="row"><span>loan_amount</span><div class="bar c-cyan" style="--w:37%"></div><span class="val">0.025</span></div>
+    <div class="row"><span>prior_missed</span><div class="bar c-navy" style="--w:13%"></div><span class="val">0.009</span></div>
+    <div class="row"><span>household_size, channel</span><div class="bar c-coral" style="--w:1%"></div><span class="val">range includes 0</span></div>
+  </div>
+  <aside class="notes"><p>From the Lab 3.1 solution run (full mode, ten repeats). Bank inflow ranges 0.064 to 0.072 over the repeats; household size -0.0003 to 0.0010, channel -0.0007 to 0.0003. The order of the top four is stable; the claim "channel matters" is not supported. The ranking is identical with the Brier score in place of log loss (the stretch).</p></aside>
+</section>
+
+<section class="slide" data-label="Impossible rows" id="shuffle-creates-impossible" data-lo="LO3" data-n="8" data-session="1">
+  <div class="kicker">The correlated pair</div>
+  <h2>Shuffling one income creates applicants who do not exist</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">0.84</div><div class="lbl">correlation of log declared income and log bank inflow</div></div>
+      <div class="stat"><div class="big">36%</div><div class="lbl">of rows outside the real declared-to-inflow range after shuffling declared income</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>98% of real applicants declare between 0.72 and 2.36 times their bank inflow.</li>
+      <li>Shuffle declared income alone and a third of rows declare 20,000 against an inflow of 4,000.</li>
+      <li>The model reads that as overstatement and predicts high risk: importance measures its reaction to fiction.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>This is the extrapolation problem named by Hooker, Mentch and Zhou: unrestricted permutation forces the model to predict outside the data. Overstatement is a real risk signal in these data (the generator plants it), so the model is right to react; the importance number is simply not about the feature alone.</p><p>Sources: Hooker, Mentch and Zhou, Unrestricted Permutation forces Extrapolation.</p></aside>
+</section>
+
+<section class="slide" data-label="Together" id="grouped-permutation" data-lo="LO3" data-n="9" data-session="1">
+  <div class="kicker">Lab 3.1 · step 4</div>
+  <h2>Shuffled together, the pair matters less than either one alone</h2>
+  <table class="t">
+    <tr><th>Shuffled</th><th class="num">Rise in log loss</th><th class="num">Range over 10 repeats</th></tr>
+    <tr><td>bank_inflow alone</td><td class="num">0.068</td><td class="num">0.064 to 0.072</td></tr>
+    <tr><td>declared_income alone</td><td class="num">0.046</td><td class="num">0.043 to 0.050</td></tr>
+    <tr class="hl"><td>Both, same permutation</td><td class="num">0.034</td><td class="num">0.030 to 0.037</td></tr>
+  </table>
+  <div class="callout tip small mt-s"><b>For the report.</b> Give features that travel together one grouped importance. Do not rank them against each other.</div>
+  <aside class="notes"><p>Shuffled together, each row keeps a real pair of incomes from another applicant: the information about income level is lost, the overstatement signal is not invented. With features that only share information (no interaction), the opposite happens: each alone looks unimportant because the other covers for it. Either way the single numbers mislead.</p></aside>
+</section>
+
+<section class="slide" data-label="May say" id="what-importance-may-say" data-lo="LO3" data-n="10" data-session="1">
+  <div class="kicker">Writing it up</div>
+  <h2>The table supports a statement about the model, never about the world</h2>
+  <div class="cols cols-2">
+    <div class="card c-green"><h4>Supported</h4><p class="small mb0">Amana's holdout log loss depends most on the two income features, then on term and loan size.</p></div>
+    <div class="card c-coral"><h4>Not supported</h4><p class="small mb0">"Bank inflow matters more than declared income", or "income drives default".</p></div>
+  </div>
+  <aside class="notes"><p>Lab 3.1 step 5. The first unsupported sentence ranks members of a correlated pair; the second is causal. Both appear in real model documentation. The SDAIA AI Ethics Principles ask that AI systems be explainable to those affected: an explanation that ranks the wrong thing is not one.</p></aside>
+</section>
+
+<section class="slide" id="check-permutation" data-lo="LO3" data-n="11" data-session="1">
+  <div class="kicker">Checkpoint</div>
+  <h2>What do the two single-income importances tell you?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3" data-id="check-permutation-q1">
+    <p class="lead">Shuffled alone, bank inflow raises the log loss by 0.068 and declared income by 0.046. Shuffled together, by 0.034. The two correlate at 0.84. Which reading is right?</p>
+    <div class="opts">
+      <div class="opt" data-why="Ranks members of a correlated pair, which the single shuffles cannot separate" data-k="A">Bank inflow is the more important of the two</div>
+      <div class="opt" data-why="Adds importances as if they were independent shares of one total" data-k="B">Income accounts for 0.114 of the log loss</div>
+      <div class="opt" data-ok data-k="C">Income matters; the single numbers measure reactions to impossible pairs</div>
+      <div class="opt" data-why="Reads a smaller grouped number as evidence that income is irrelevant" data-k="D">Together they matter little, so income can be dropped from the next version</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Shuffling one feature of a correlated pair creates rows outside the data; the grouped shuffle keeps realistic pairs and is the number to report.</div>
+  </div>
+  <aside class="notes"><p>Answer: C. If the room picks D, recall that 0.034 is still the third largest importance in the table.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-3-1" data-auto="lab" data-lab="3.1" data-label="Lab 3.1" data-n="12" data-session="1">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 3.1 · 25 min</div><h2>Importance and its spread</h2><p class="lead small">Write permutation importance on the holdout with ten repeats, report the spread, then permute the two correlated income features together and see the pair matter less than either one shuffled alone.</p><a class="nb" href="../labs/D3_1_compute_permutation_importance.ipynb">D3_1_compute_permutation_importance.ipynb</a></div><ul class="checklist"><li>Write permutation importance for one feature <span class="min">7 min</span></li><li>All features, ten repeats, with spread <span class="min">5 min</span></li><li>Plot the importances with their range <span class="min">4 min</span></li><li>Permute the two incomes together <span class="min">5 min</span></li><li>Write what the table may and may not say <span class="min">4 min</span></li><li class="stretch">✱ Stretch: Use the Brier score in place of log loss and see whether the order changes</li></ul></div>
+  <aside class="notes"><p>Expected (full mode): bank inflow 0.068, declared income 0.046, term 0.033, loan amount 0.025; grouped incomes 0.034; 36% of rows outside the real ratio range after shuffling declared income. Quick mode uses five repeats and gives the same order. Common problem: shuffling both incomes with different permutations, which is two single shuffles at once.</p></aside>
+</section>
+
+<!-- ======================= SESSION 2 ======================= -->
+<section class="slide section" id="s2" data-auto="section" data-session="2" data-n="13">
+  <div class="kicker">Session 2</div>
+  <h1>Effect plots</h1>
+  <ul class="bullets outcomes"><li>Compute a partial dependence curve and individual curves</li><li>Compute accumulated local effects for the same feature</li><li>Show where the two disagree and which one to report</li></ul>
+  <div class="sess-no">02</div>
+</section>
+
+<section class="slide" data-label="PD" id="partial-dependence-idea" data-lo="LO3" data-n="14" data-session="2">
+  <div class="kicker">Partial dependence</div>
+  <h2>Partial dependence sets everyone's value to the same number and averages</h2>
+  <div class="cols cols-2">
+    <pre class="code" data-file="Lab 3.2 · step 1"><code class="language-python"><span class="hljs-keyword">for</span> v <span class="hljs-keyword">in</span> grid:
+    d = sample.copy()
+    d[<span class="hljs-string">&quot;declared_income&quot;</span>] = v      <span class="hljs-comment"># everyone</span>
+    pd_curve.append(predict(d).mean())</code></pre>
+    <ul class="bullets small">
+      <li>Answers: what if every applicant had declared <b>v</b>, all else unchanged?</li>
+      <li>Fine when the feature is independent of the others.</li>
+      <li>With bank inflow fixed, a high <b>v</b> means overstatement for most applicants.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The individual curves behind the average are ICE curves (the stretch). The question PD answers is a counterfactual about the model's input, which is exactly where correlated features create rows that never occur.</p><p>Sources: scikit-learn user guide, partial dependence and individual conditional expectation.</p></aside>
+</section>
+
+<section class="slide" data-label="ALE" id="ale-idea" data-lo="LO3" data-n="15" data-session="2">
+  <div class="kicker">Accumulated local effects</div>
+  <h2>ALE moves each applicant only a little, inside their own bin</h2>
+  <div class="flow">
+    <div class="step c-teal"><b>1 · Bin</b>Cut declared income at the grid values</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>2 · Nudge</b>Move only that bin's applicants from its lower to its upper edge</div>
+    <div class="arrow">→</div>
+    <div class="step c-coral"><b>3 · Accumulate</b>Add the mean changes from left to right, centre at zero</div>
+  </div>
+  <p class="small mt">Every prediction is for a nearby, realistic applicant: their bank inflow already matches an income in that bin.</p>
+  <aside class="notes"><p>ALE was proposed by Apley and Zhu to fix exactly this: effects of correlated predictors without extrapolation. Its price: it answers a local question ("how does risk change between similar real applicants?"), and it is harder to explain to a committee than PD.</p><p>Sources: Apley and Zhu, Visualizing the Effects of Predictor Variables in Black Box Supervised Learning Models.</p></aside>
+</section>
+
+<section class="slide" data-label="Disagree" id="pd-ale-disagree" data-lo="LO3" data-n="16" data-session="2">
+  <div class="kicker">Lab 3.2</div>
+  <h2>Both curves rise above 10,000 riyals; partial dependence rises 1.6 times as much</h2>
+  <table class="t small">
+    <tr><th>Declared income (SAR)</th><th class="num">4,310</th><th class="num">7,290</th><th class="num">9,070</th><th class="num">11,650</th><th class="num">13,880</th><th class="num">18,930</th></tr>
+    <tr><td>PD, centred</td><td class="num">-0.036</td><td class="num">-0.055</td><td class="num">-0.033</td><td class="num">0.035</td><td class="num">0.073</td><td class="num">0.133</td></tr>
+    <tr><td>ALE, centred</td><td class="num">-0.032</td><td class="num">-0.032</td><td class="num">-0.026</td><td class="num">0.012</td><td class="num">0.047</td><td class="num">0.080</td></tr>
+    <tr class="hl"><td>PD rows outside the data</td><td class="num">75%</td><td class="num">29%</td><td class="num">17%</td><td class="num">17%</td><td class="num">27%</td><td class="num">53%</td></tr>
+  </table>
+  <p class="small mt-s">From 9,070 to 18,930 riyals: PD rises by 0.166, ALE by 0.106 (change in predicted default probability).</p>
+  <aside class="notes"><p>From the Lab 3.2 solution run on 4,000 holdout applicants. The two agree where few PD rows are impossible (the middle of the grid) and part where most are (the ends). The disagreement is not huge, and that is a fair finding too: the report says by how much the curves differ and why, rather than declaring PD wrong.</p></aside>
+</section>
+
+<section class="slide" data-label="Count them" id="counting-impossible-rows" data-lo="LO3" data-n="17" data-session="2">
+  <div class="kicker">Making the disagreement checkable</div>
+  <h2>Count the rows a curve was built from that no real applicant resembles</h2>
+  <ul class="bullets">
+    <li>In the 4,000 sampled applicants, declared income is 0.72 to 2.34 times bank inflow (1st to 99th percentile).</li>
+    <li>At 18,930 riyals, <b>53%</b> of PD rows lie outside that range; at 4,310, <b>75%</b>.</li>
+    <li>A curve point built mostly from such rows describes the model's behaviour on fiction.</li>
+  </ul>
+  <div class="callout tip small mt-s"><b>A habit for any effect plot.</b> Report, under the plot, the share of evaluated rows outside the data.</div>
+  <aside class="notes"><p>Lab 3.2 step 4. This turns "PD extrapolates" from a textbook warning into a number the panel can check. The same count can be made for any pair of correlated features in the capstone package.</p></aside>
+</section>
+
+<section class="slide" data-label="Individual" id="ice-curves" data-lo="LO3" data-n="18" data-session="2">
+  <div class="kicker">Behind the average</div>
+  <h2>Individual curves show who the average hides</h2>
+  <div class="cols cols-2">
+    <div class="stat"><div class="big">37 of 50</div><div class="lbl">applicants whose predicted risk moves more than 10 points across the grid</div></div>
+    <ul class="bullets small">
+      <li>An ICE curve is one applicant's partial dependence.</li>
+      <li>Their average is the PD curve.</li>
+      <li>The curves are not parallel: how much a declared income moves risk depends on the applicant's own bank inflow, through the overstatement signal.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The stretch of Lab 3.2. ICE curves are a good diagnostic for interactions: if they are not parallel, a single curve misdescribes the effect. Here the bend depends on bank inflow, which is the interaction the generator plants through the overstatement ratio.</p></aside>
+</section>
+
+<section class="slide" data-label="Report" id="which-curve-report" data-lo="LO3" data-n="19" data-session="2">
+  <div class="kicker">What the report shows</div>
+  <h2>Put ALE in the report, and say what PD would have claimed</h2>
+  <div class="callout tip">Among realistic applicants, predicted risk changes little with declared income below about 12,000 riyals and rises above it, by 0.11 between 9,070 and 18,930 riyals. Partial dependence shows 1.6 times that rise because, at the top of the grid, 53% of the rows it averages over pair a high declared income with a bank inflow no real applicant has.</div>
+  <div class="callout warn small mt-s"><b>Neither is causal.</b> ALE does not say what would happen if an applicant earned more.</div>
+  <aside class="notes"><p>The caption is the output of Lab 3.2 step 5 in full mode. Insist that both curves are correct answers to different questions; the validator chooses the question that matches the use (an officer comparing applicants).</p></aside>
+</section>
+
+<section class="slide" id="check-effect-plots" data-lo="LO3" data-n="20" data-session="2">
+  <div class="kicker">Checkpoint</div>
+  <h2>Why does partial dependence overstate the rise?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3" data-id="check-effect-plots-q1">
+    <p class="lead">PD for declared income rises 1.6 times as much as ALE between 9,000 and 19,000 riyals. Declared income and bank inflow correlate at 0.84, and overstating income is a risk signal in the model. What explains the gap?</p>
+    <div class="opts">
+      <div class="opt" data-ok data-k="A">PD pairs high declared incomes with inflows real applicants do not have</div>
+      <div class="opt" data-why="Blames sample size; the gap comes from which rows are evaluated, not how many" data-k="B">ALE uses too few applicants in each bin, so its curve is flattened by noise</div>
+      <div class="opt" data-why="Assumes the model is wrong; it reacts correctly to rows that do not occur" data-k="C">The model overreacts to declared income</div>
+      <div class="opt" data-why="Confuses centring with the shape: both curves are centred" data-k="D">PD is not centred and ALE is</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Partial dependence evaluates the model on combinations outside the data; with a correlated, interacting pair those combinations look like overstatement.</div>
+  </div>
+  <aside class="notes"><p>Answer: A.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-3-2" data-auto="lab" data-lab="3.2" data-label="Lab 3.2" data-n="21" data-session="2">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 3.2 · 25 min</div><h2>Partial dependence against local effects</h2><p class="lead small">Draw partial dependence and accumulated local effects for declared income, find where they disagree, and trace the disagreement to applicants whose declared income is set far from their bank inflow.</p><a class="nb" href="../labs/D3_2_show_where_partial.ipynb">D3_2_show_where_partial.ipynb</a></div><ul class="checklist"><li>Write partial dependence for declared income <span class="min">6 min</span></li><li>Accumulated local effects from the helper <span class="min">4 min</span></li><li>Plot both, centred <span class="min">5 min</span></li><li>Count the impossible rows partial dependence used <span class="min">6 min</span></li><li>Say which curve goes in the report <span class="min">4 min</span></li><li class="stretch">✱ Stretch: Draw individual conditional expectation curves for 50 applicants and find the ones that bend</li></ul></div>
+  <aside class="notes"><p>Expected (full mode, 4,000 applicants): PD rises 0.166 and ALE 0.106 from 9,070 to 18,930 SAR; 75% of PD rows outside the data at the bottom of the grid and 53% at the top; 37 of 50 ICE curves move more than 10 points. Quick mode uses 2,000 applicants and gives 0.211 against 0.132. Common problem: comparing uncentred PD with centred ALE.</p></aside>
+</section>
+
+<!-- ======================= SESSION 3 ======================= -->
+<section class="slide section" id="s3" data-auto="section" data-session="3" data-n="22">
+  <div class="kicker">Session 3</div>
+  <h1>Shapley values</h1>
+  <ul class="bullets outcomes"><li>Compute exact tree Shapley values and check that they add up</li><li>Read the top reasons for one applicant</li><li>Measure whether the reasons survive five refits</li></ul>
+  <div class="sess-no">03</div>
+</section>
+
+<section class="slide" data-label="Shapley" id="shapley-accounting" data-lo="LO3" data-n="23" data-session="3">
+  <div class="kicker">Shapley values</div>
+  <h2>Shapley values split one prediction exactly among the features</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>Each feature's value is its average contribution over all orders of adding features.</li>
+      <li>For trees it is computed exactly and fast (TreeSHAP).</li>
+      <li>They <b>add up</b>: base value plus the features' values equals the raw score of that applicant.</li>
+    </ul>
+    <pre class="code s" data-file="Lab 3.3 · step 1"><code class="language-python">v = amana.predict(X10, pred_contrib=<span class="hljs-literal">True</span>)
+<span class="hljs-comment"># columns: one per feature, then the base</span>
+raw = amana.predict(X10, raw_score=<span class="hljs-literal">True</span>)
+np.allclose(v.<span class="hljs-built_in">sum</span>(axis=<span class="hljs-number">1</span>), raw)   <span class="hljs-comment"># True</span></code></pre>
+  </div>
+  <aside class="notes"><p>LightGBM computes TreeSHAP itself; the SHAP library's TreeExplainer gives the same numbers and nicer plots. The values are on the log-odds scale of the raw model, before the Platt repair; a monotone map after the model does not change which features push risk up.</p><p>Sources: Lundberg and Lee, A Unified Approach to Interpreting Model Predictions; LightGBM documentation.</p></aside>
+</section>
+
+<section class="slide" data-label="Reasons" id="reasons-to-officers" data-lo="LO3" data-n="24" data-session="3">
+  <div class="kicker">How Mizan uses them</div>
+  <h2>Officers see the three features that pushed risk up most</h2>
+  <table class="t small">
+    <tr><th>Applicant</th><th>Reasons shown</th></tr>
+    <tr><td>M008832</td><td>bank_inflow, prior_loans, channel</td></tr>
+    <tr><td>M004026</td><td>bank_inflow, prior_missed, years_in_business</td></tr>
+    <tr><td>M027921</td><td>declared_income, channel, business_type</td></tr>
+    <tr><td>M046515</td><td>term_months, years_in_business, channel</td></tr>
+  </table>
+  <div class="callout note small mt-s"><b>The question.</b> Would the same applicant get the same reasons from a model the developers could equally have shipped?</div>
+  <aside class="notes"><p>Four of the ten applicants of Lab 3.3. Ask Fuad's question: if an applicant is declined and asks why, is "your bank inflow" the honest answer? Lab 3.3 tests one condition of honesty: stability.</p></aside>
+</section>
+
+<section class="slide" data-label="Refits" id="refits-equally-shippable" data-lo="LO3" data-n="25" data-session="3">
+  <div class="kicker">Stability</div>
+  <h2>Refit with the developers' own recipe and see whether the reasons survive</h2>
+  <div class="flow">
+    <div class="step c-teal"><b>Recipe</b>From metadata.json: rebalance to 50/50, 300 rounds, bagging</div>
+    <div class="arrow">→</div>
+    <div class="step c-cyan"><b>Five refits</b>Bootstrap samples of the training rows, seeds 1 to 5</div>
+    <div class="arrow">→</div>
+    <div class="step c-coral"><b>Panel</b>Top reason per applicant per refit</div>
+  </div>
+  <p class="small mt">Each refit is a model the developers could have shipped: same data source, same recipe, different random draws.</p>
+  <aside class="notes"><p>The validator needs only the recipe and the training rows, both in the package. Without them, stability cannot be tested and that becomes a finding about the package (Lab 4.3). Refit cost: a few seconds each on a laptop.</p></aside>
+</section>
+
+<section class="slide" data-label="Panel" id="stability-panel" data-lo="LO3" data-n="26" data-session="3">
+  <div class="kicker">Lab 3.3 · the stability panel</div>
+  <h2>Two of ten applicants change their top reason; only one keeps all three</h2>
+  <table class="t small">
+    <tr><th>Applicant</th><th>Refit 1</th><th>Refit 2</th><th>Refit 3</th><th>Refit 4</th><th>Refit 5</th></tr>
+    <tr class="hl"><td>M004026</td><td>bank_inflow</td><td>prior_missed</td><td>bank_inflow</td><td>prior_missed</td><td>bank_inflow</td></tr>
+    <tr class="hl"><td>M008361</td><td>loan_amount</td><td>years_in_business</td><td>loan_amount</td><td>loan_amount</td><td>years_in_business</td></tr>
+    <tr><td>M008832</td><td>bank_inflow</td><td>bank_inflow</td><td>bank_inflow</td><td>bank_inflow</td><td>bank_inflow</td></tr>
+    <tr><td>Seven others</td><td colspan="5">the same top reason in all five refits</td></tr>
+  </table>
+  <p class="small mt-s">The set of three reasons is the same in all five refits for 1 of the 10 applicants.</p>
+  <aside class="notes"><p>From the Lab 3.3 solution run (full mode; quick mode gives 8 stable top reasons and 2 stable sets of three). The top reason is fairly stable; the second and third reasons, which officers also see, are not. A rule follows in the next slide.</p></aside>
+</section>
+
+<section class="slide" data-label="Trade" id="incomes-trade-credit" data-lo="LO3" data-n="27" data-session="3">
+  <div class="kicker">Why they move</div>
+  <h2>The two incomes trade credit between refits; their sum moves less</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="stat"><div class="big">3.35</div><div class="lbl">widest range of one income feature's value for one applicant, in log-odds</div></div>
+      <div class="stat"><div class="big">1.70</div><div class="lbl">widest range of the two incomes' sum</div></div>
+    </div>
+    <ul class="bullets small">
+      <li>The model needs both incomes; how it splits the credit between them is partly chance.</li>
+      <li>"Your bank inflow" and "your declared income" are one reason told two ways.</li>
+      <li>Grouping them as "income" is the more honest reason.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>The stretch of Lab 3.3. Same lesson as grouped permutation importance, at the level of one applicant. If the SHAP library is used in the capstone, the grouping is done by summing the columns of the pair.</p></aside>
+</section>
+
+<section class="slide" data-label="Rule" id="reason-display-rule" data-lo="LO3 LO5" data-n="28" data-session="3">
+  <div class="kicker">From the panel to a rule</div>
+  <h2>Show a reason only when it survives refits</h2>
+  <div class="cols cols-2">
+    <div class="card c-teal"><h4>Proposed rule</h4><p class="small mb0">Show a reason when it is the top reason in at least four of five refits; group correlated features into one reason; otherwise say the model has no stable main reason.</p></div>
+    <div class="card c-coral"><h4>Why it matters</h4><p class="small mb0">An applicant told a reason that flips with a refit has been given an accident of training, not an explanation.</p></div>
+  </div>
+  <aside class="notes"><p>Lab 3.3 step 5. The SDAIA AI Ethics Principles put transparency and explainability to those affected among the principles, especially for outcomes that may harm them. A refused loan is such an outcome. The principle does not specify a stability test; the rule here is the validator's recommendation, labelled as such.</p><p>Sources: SDAIA AI Ethics Principles.</p></aside>
+</section>
+
+<section class="slide" id="check-shapley" data-lo="LO3" data-n="29" data-session="3">
+  <div class="kicker">Checkpoint</div>
+  <h2>What does "the values add up" guarantee?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3" data-id="check-shapley-q1">
+    <p class="lead">For every applicant, the base value plus the Shapley values of the ten features equals the model's raw score exactly. A colleague says this proves the reasons shown to officers are reliable. What do you answer?</p>
+    <div class="opts">
+      <div class="opt" data-why="Reads exact accounting as stability across equally valid models" data-k="A">Yes: an exact decomposition cannot change</div>
+      <div class="opt" data-ok data-k="B">Complete accounting for this model, not survival across a refit</div>
+      <div class="opt" data-why="Reads additivity as a causal property of the features" data-k="C">Yes: each value is the feature's causal effect</div>
+      <div class="opt" data-why="Thinks additivity fails with correlated features; it holds, the split between them is what moves" data-k="D">No: Shapley values stop adding up once two features are strongly correlated</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> Additivity is a property of one model's prediction. A refit is a different model, and the split between correlated features can change.</div>
+  </div>
+  <aside class="notes"><p>Answer: B.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-3-3" data-auto="lab" data-lab="3.3" data-label="Lab 3.3" data-n="30" data-session="3">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 3.3 · 25 min</div><h2>Ten applicants, five refits</h2><p class="lead small">Explain ten applicants with LightGBM's exact tree Shapley values, check they add up to the prediction, then refit the model five times on bootstrap samples and build a stability panel of each applicant's top reason.</p><a class="nb" href="../labs/D3_3_explain_ten_applicants.ipynb">D3_3_explain_ten_applicants.ipynb</a></div><ul class="checklist"><li>Shapley values for ten applicants <span class="min">5 min</span></li><li>Check that they add up <span class="min">4 min</span></li><li>Refit five times with the developers' recipe <span class="min">6 min</span></li><li>The stability panel: top reason per refit <span class="min">6 min</span></li><li>Mark the explanations you would not show <span class="min">4 min</span></li><li class="stretch">✱ Stretch: Measure the spread of the declared-income and bank-inflow values across the refits</li></ul></div>
+  <aside class="notes"><p>Expected (full mode): every applicant's values add up to the raw score; 8 of 10 keep their top reason over five refits (M004026 and M008361 change); 1 of 10 keeps all three reasons. Common problem: comparing Shapley values of the raw model with probabilities after Platt; keep everything on the raw model's log-odds. Refits take a few seconds each.</p></aside>
+</section>
+
+<!-- ======================= SESSION 4 ======================= -->
+<section class="slide section" id="s4" data-auto="section" data-session="4" data-n="31">
+  <div class="kicker">Session 4</div>
+  <h1>When explanations mislead</h1>
+  <ul class="bullets outcomes"><li>Show how a correlated proxy moves attributions</li><li>Tell a proxy from a cause with the data you have</li><li>Write a caution that a validator can attach to the explanations</li></ul>
+  <div class="sess-no">04</div>
+</section>
+
+<section class="slide" data-label="Proposal" id="wallet-proposal" data-lo="LO3" data-n="32" data-session="4">
+  <div class="kicker">A change request</div>
+  <h2>Version 2.2 adds mobile-wallet months and gains 0.004 of AUC</h2>
+  <div class="cols cols-2">
+    <ul class="bullets small">
+      <li>Rasil's team proposes one new feature: how long the applicant has used a mobile wallet.</li>
+      <li>Holdout AUC: 0.757 without, 0.761 with.</li>
+      <li>Age is excluded from the model on purpose, and remains so.</li>
+    </ul>
+    <div class="card c-coral flat"><h4>The validator's question</h4><p class="small mb0">What does the new feature carry, and who will be told it is their reason?</p></div>
+  </div>
+  <aside class="notes"><p>Both models are refits with seed 1 on all training rows, so the comparison is fair. A gain of 0.004 is within what a refit alone can change. Ask the room to guess which applicants have the shortest wallet histories.</p></aside>
+</section>
+
+<section class="slide" data-label="Proxy" id="what-a-proxy-is" data-lo="LO3 LO5" data-n="33" data-session="4">
+  <div class="kicker">Proxies</div>
+  <h2>A proxy is a permitted feature that carries an excluded one</h2>
+  <ul class="bullets">
+    <li>Wallet months correlates with age band at <b>-0.44</b>: median 43 months for 18 to 24, 12 for 55 and over.</li>
+    <li>Age is related to default in these data, so the model learns to use what wallet months carries of it.</li>
+    <li>"Uses no age" stays true as written and becomes misleading in effect.</li>
+  </ul>
+  <div class="callout warn small mt-s"><b>What goes wrong.</b> Checking only the feature list. Claim 3 of the card passed Lab 1.1 on exactly that check.</div>
+  <aside class="notes"><p>Remind the room of the trap in Lab 1.1: claim 3 was supported as written. This session is where its limit shows. Other features can carry age too (years in business, prior loans); the validator cannot remove them all, which is why the audit by age band becomes a condition of use on Day 4.</p></aside>
+</section>
+
+<section class="slide" data-label="Who is told" id="who-gets-wallet-reason" data-lo="LO3" data-n="34" data-session="4">
+  <div class="kicker">Lab 3.4</div>
+  <h2>Applicants over 55 are told "short wallet history" more than twice as often</h2>
+  <div class="bars">
+    <div class="row"><span>18-24</span><div class="bar c-teal" style="--w:44%"></div><span class="val">20.6%</span></div>
+    <div class="row"><span>25-34</span><div class="bar c-teal" style="--w:46%"></div><span class="val">21.3%</span></div>
+    <div class="row"><span>35-44</span><div class="bar c-teal" style="--w:54%"></div><span class="val">25.1%</span></div>
+    <div class="row"><span>45-54</span><div class="bar c-amber" style="--w:66%"></div><span class="val">30.7%</span></div>
+    <div class="row"><span>55+</span><div class="bar c-coral" style="--w:100%"></div><span class="val">46.5%</span></div>
+  </div>
+  <p class="small mt-s">Share of holdout applicants for whom wallet months is among the three reasons. For the 55+ band its mean value pushes risk up (+0.073 log-odds).</p>
+  <aside class="notes"><p>From the Lab 3.4 solution run (full mode). Overall, the new feature is a top-three reason for 26.5% of applicants. The pattern by age is the finding; the overall share hides it.</p></aside>
+</section>
+
+<section class="slide" data-label="Gap" id="proxy-narrows-gap" data-lo="LO3" data-n="35" data-session="4">
+  <div class="kicker">The tell-tale</div>
+  <h2>The proxy narrows the age calibration gap a little, which is what a proxy does</h2>
+  <table class="t">
+    <tr><th>Age band</th><th class="num">Gap without wallet months</th><th class="num">Gap with it</th></tr>
+    <tr><td>18-24</td><td class="num">4.9 points</td><td class="num">4.7 points</td></tr>
+    <tr class="hl"><td>55+</td><td class="num">1.2 points</td><td class="num">0.8 points</td></tr>
+  </table>
+  <p class="small mt-s">Observed minus predicted default rate after Platt scaling, holdout rows.</p>
+  <aside class="notes"><p>The stretch of Lab 3.4. A feature that reduces a calibration gap by age is bringing age information back. That can look like an improvement on the subgroup table, which is exactly why the explanation side must be read too.</p></aside>
+</section>
+
+<section class="slide" data-label="Caution" id="writing-the-caution" data-lo="LO3 LO5" data-n="36" data-session="4">
+  <div class="kicker">The documented misleading result</div>
+  <h2>A caution names what the feature carries, who receives it and what to do</h2>
+  <div class="callout warn">Wallet months correlates with age (r = -0.44) and is a top-three reason for 47% of applicants over 55 against 21% of those aged 18 to 24. Shown to officers or applicants, "short wallet history" would in effect tell older applicants that their age counts against them, in a model that excludes age.</div>
+  <div class="callout tip small mt-s"><b>Recommendation.</b> Do not add the feature for an AUC gain of 0.004; if it is added, do not show it as a reason, and audit by age band.</div>
+  <aside class="notes"><p>Lab 3.4 step 5. This is the "one documented misleading result" that outcome LO3 asks for. Mitigation of such effects is DS-309's subject; the validator's job is the evidence and the caution.</p></aside>
+</section>
+
+<section class="slide" id="check-proxy" data-lo="LO3" data-n="37" data-session="4">
+  <div class="kicker">Checkpoint</div>
+  <h2>Is wallet months a proxy for age?</h2>
+  <div class="quiz" data-type="single" data-lo="LO3" data-id="check-proxy-q1">
+    <p class="lead">Wallet months correlates with age band at -0.44, is a top reason for 47% of applicants over 55 against 21% under 25, and narrows the age gap. What can you conclude?</p>
+    <div class="opts">
+      <div class="opt" data-why="Claims a causal conclusion the observational data cannot support" data-k="A">Wallet history causes default, so the feature is legitimate to use</div>
+      <div class="opt" data-why="Treats a modest correlation as no relation; the pattern of reasons by age shows the link at work" data-k="B">The correlation is too weak to matter</div>
+      <div class="opt" data-why="Thinks excluding age from the features settles the question" data-k="C">Age is not in the model, so there is no age effect</div>
+      <div class="opt" data-ok data-k="D">It carries age information and would deliver age-linked reasons</div>
+    </div>
+    <div class="callout tip why"><b>Why.</b> The link with age, the pattern of reasons and the narrowed gap show it carrying age; a causal role cannot be settled here, and the caution does not need one.</div>
+  </div>
+  <aside class="notes"><p>Answer: D.</p></aside>
+</section>
+
+<section class="slide lab top" id="lab-3-4" data-auto="lab" data-lab="3.4" data-label="Lab 3.4" data-n="38" data-session="4">
+  <div class="cols cols-2 mid"><div><div class="lab-tag">Lab 3.4 · 25 min</div><h2>A proxy takes the credit</h2><p class="lead small">Refit the model with mobile-wallet months added, show that the new feature becomes a top reason far more often for older applicants, check its link with age, and write the caution for the validation report.</p><a class="nb" href="../labs/D3_4_show_how_correlated.ipynb">D3_4_show_how_correlated.ipynb</a></div><ul class="checklist"><li>Refit with wallet months added <span class="min">5 min</span></li><li>Shapley values with and without it <span class="min">5 min</span></li><li>How often it is a top reason, by age band <span class="min">6 min</span></li><li>Its link with age <span class="min">4 min</span></li><li>Write the caution <span class="min">5 min</span></li><li class="stretch">✱ Stretch: Remove the proxy and check whether the age-band calibration gap of Lab 1.4 changed</li></ul></div>
+  <aside class="notes"><p>Expected (full mode): AUC 0.757 without, 0.761 with; wallet months among the reasons for 20.6% (18-24) up to 46.5% (55+); correlation with age band -0.44. Common problem: comparing a bootstrap refit with a non-bootstrap one; both models here use bootstrap=False and seed 1.</p></aside>
+</section>
+
+<!-- ======================= CLOSE ======================= -->
+<section class="slide" data-label="Wrap-up" id="wrap-up" data-n="39" data-session="4">
+  <div class="kicker">Day 3 · three things to keep</div>
+  <h2>What today showed about Amana's explanations</h2>
+  <div class="cols cols-3 gap-s">
+    <div class="card c-teal"><h4>Correlated features</h4><p class="small mb0">Group them: one importance, one reason. Single numbers measure reactions to impossible rows.</p></div>
+    <div class="card c-cyan"><h4>Stability</h4><p class="small mb0">Top reasons survive five refits for 8 of 10 applicants; full sets of three for 1.</p></div>
+    <div class="card c-coral"><h4>Proxies</h4><p class="small mb0">An excluded attribute comes back through a permitted feature, and so do its reasons.</p></div>
+  </div>
+  <aside class="notes"><p>Each participant drafts the explanation report: the importance table with spread, the ALE curve with its caption, the stability panel and the caution. That is the evidence of outcome LO3.</p></aside>
+</section>
+
+<section class="slide dark" data-label="Next" id="next" data-n="40" data-session="4">
+  <div class="kicker">Tomorrow</div>
+  <h2>Day 4: validate and decide</h2>
+  <ul class="bullets">
+    <li>Every finding by subgroup in one table, tagged with a bias type from the national guide.</li>
+    <li>A later batch where performance fell, with a cause to find.</li>
+    <li>A checklist, a decision, and the choice of your capstone package.</li>
+  </ul>
+  <aside class="notes"><p>Ask participants to skim the SDAIA AI Bias Reference Guide's list of bias types tonight; tomorrow's first lab tags each gap with one of them.</p></aside>
+</section>
+</div>
+<script type="application/json" id="academy-data">{"v":1,"engine":"1.0.0","build":{"at":"2026-11-15T18:29:43Z","version":"2027.1.0","commit":"cc8abd5"},"course":{"id":"ds-305","code":"DS-305","title":"Uncertainty, Interpretability and Model Validation","track":"data-science","lang":"en","dir":"ltr","url":"https://sdaiaacademy.github.io/ds-305/","repo":"SDAIAAcademy/ds-305","home":"../index.html"},"deck":{"id":"day3","kind":"day","day":3,"label":"Day 3","title":"What drives the predictions","prev":"day2.html","next":"day4.html","md":"day3.md","alt":{}},"sessions":[{"n":1,"label":"Session 1","title":"Permutation importance","slide":"s1","outcomes":["Compute permutation importance on held-out rows with repeats","Report its spread, not a single number","Permute correlated features together and explain the difference"],"minutes":50,"lab":{"id":"3.1","title":"Importance and its spread","minutes":25,"href":"../labs/D3_1_compute_permutation_importance.ipynb"}},{"n":2,"label":"Session 2","title":"Effect plots","slide":"s2","outcomes":["Compute a partial dependence curve and individual curves","Compute accumulated local effects for the same feature","Show where the two disagree and which one to report"],"minutes":50,"lab":{"id":"3.2","title":"Partial dependence against local effects","minutes":25,"href":"../labs/D3_2_show_where_partial.ipynb"}},{"n":3,"label":"Session 3","title":"Shapley values","slide":"s3","outcomes":["Compute exact tree Shapley values and check that they add up","Read the top reasons for one applicant","Measure whether the reasons survive five refits"],"minutes":50,"lab":{"id":"3.3","title":"Ten applicants, five refits","minutes":25,"href":"../labs/D3_3_explain_ten_applicants.ipynb"}},{"n":4,"label":"Session 4","title":"When explanations mislead","slide":"s4","outcomes":["Show how a correlated proxy moves attributions","Tell a proxy from a cause with the data you have","Write a caution that a validator can attach to the explanations"],"minutes":50,"lab":{"id":"3.4","title":"A proxy takes the credit","minutes":25,"href":"../labs/D3_4_show_how_correlated.ipynb"}}],"slides":[{"id":"title","n":1,"title":"What drives the predictions","kind":"title","session":0,"hash":"5f67239d","md":"#### [day3#title] What drives the predictions\n\n*SDAIA Academy · Uncertainty, Interpretability and Model Validation*\n\nDay 3: Explain the default model three ways, test how stable each explanation is, and find where explanations mislead\n\nData Science Track · 4 teaching days + capstone day · 4 sessions · 4 labs · DS-305","notes":"Recap in one sentence: probabilities repaired, intervals that hold on average and fail for large loans and under shift. Today: the reasons. Every application at Mizan is shown to an officer with three reasons. The model card says they are the causes of risk. By the end of the day participants can say what they are instead.","minutes":null,"lo":[]},{"id":"agenda","n":2,"title":"What drives the predictions","kind":"content","session":0,"hash":"2db89673","md":"#### [day3#agenda] What drives the predictions\n\n*Today*\n\n- **Session 1 · Permutation importance**: Permutation importance measures what the model loses without a feature, and with correlated features it measures something else\n- **Session 2 · Effect plots**: Partial dependence averages over combinations that never occur; accumulated local effects stay inside the data\n- **Session 3 · Shapley values**: Shapley values split one prediction among the features, add up exactly, and can change when the model is refitted\n- **Session 4 · When explanations mislead**: A feature correlated with a protected attribute takes its attribution, and the reason shown to an applicant then names a proxy","notes":"","minutes":null,"lo":[]},{"id":"review-day2","n":3,"title":"Which statement about the loss intervals is supported?","kind":"quiz","session":0,"hash":"f418b81d","md":"#### [day3#review-day2] Which statement about the loss intervals is supported?\n\n*Review of Day 2*\n\n**Question:** Split conformal intervals for Amana's loss model cover 91% of holdout defaults, 77% of large loans, and 77% of all defaults after a strong simulated income shift. Which sentence can go in the report?\n\n- A. Every loan's interval holds 90% of the time\n- B. Coverage holds overall, not for large loans or a richer population\n- C. The loss model must be retrained before any of its intervals can be used\n- D. Under a shift the intervals widen to keep 90%","notes":"Answer: B. Two minutes.","minutes":null,"lo":["LO2"]},{"id":"s1","n":4,"title":"Permutation importance","kind":"section","session":1,"hash":"17b5953a","md":"#### [day3#s1] Permutation importance\n\n*Session 1*\n\n- Compute permutation importance on held-out rows with repeats\n- Report its spread, not a single number\n- Permute correlated features together and explain the difference","notes":"","minutes":null,"lo":["LO3"]},{"id":"three-explanation-questions","n":5,"title":"Each explanation method answers a different question","kind":"content","session":1,"hash":"4fe64c53","md":"#### [day3#three-explanation-questions] Each explanation method answers a different question\n\n*Explanations*\n\n| Method | Its question | Session |\n| --- | --- | --- |\n| Permutation importance | How much worse does the model do without this feature? | 1 |\n| Partial dependence, ALE | How does the prediction change as this feature changes? | 2 |\n| Shapley values | How much did each feature move this one prediction? | 3 |\n\n> **None of them asks** what causes default. All three describe the model, on data that may have features moving together.","notes":"Recap from DS-204 Day 2: built-in split-gain importances say what the trees used in training, not what matters on new data. Today's three methods are model-agnostic or exact, and each fails in its own way with correlated features. Tools are interchangeable: the scikit-learn inspection module, the SHAP library, DALEX; the labs use the course functions and LightGBM's own TreeSHAP.","minutes":null,"lo":["LO3"]},{"id":"permutation-idea","n":6,"title":"Shuffle one column on the holdout and measure how much worse the predictions get","kind":"content","session":1,"hash":"617e7a88","md":"#### [day3#permutation-idea] Shuffle one column on the holdout and measure how much worse the predictions get\n\n*Permutation importance*\n\n```python\n# file: Lab 3.1 · step 1\ndef rise_one(df, col, rng):\n    d = df.copy()\n    d[col] = d[col].to_numpy()[rng.permutation(len(d))]\n    return log_loss(y, predict(d)) - base\n```\n\n- On the **holdout**: importance for new applicants, not memorised noise.\n- On the validator's model: Amana with the Platt repair, log loss 0.284.\n- One shuffle is one draw: repeat and report the spread.","notes":"The rise is in log loss, a proper score, so importance means \"how much worse the probabilities get\". Ask: what does a negative importance mean? Shuffling helped, by chance: the feature carries nothing measurable.\n\nSources: scikit-learn user guide, permutation feature importance.","minutes":null,"lo":["LO3"]},{"id":"importance-with-spread","n":7,"title":"Two income features lead; the last two cannot be told from zero","kind":"content","session":1,"hash":"ac899304","md":"#### [day3#importance-with-spread] Two income features lead; the last two cannot be told from zero\n\n*Lab 3.1 · ten repeats*\n\n| Item | Value |\n| --- | --- |\n| bank_inflow | 0.068 |\n| declared_income | 0.046 |\n| term_months | 0.033 |\n| loan_amount | 0.025 |\n| prior_missed | 0.009 |\n| household_size, channel | range includes 0 |","notes":"From the Lab 3.1 solution run (full mode, ten repeats). Bank inflow ranges 0.064 to 0.072 over the repeats; household size -0.0003 to 0.0010, channel -0.0007 to 0.0003. The order of the top four is stable; the claim \"channel matters\" is not supported. The ranking is identical with the Brier score in place of log loss (the stretch).","minutes":null,"lo":["LO3"]},{"id":"shuffle-creates-impossible","n":8,"title":"Shuffling one income creates applicants who do not exist","kind":"content","session":1,"hash":"be95de15","md":"#### [day3#shuffle-creates-impossible] Shuffling one income creates applicants who do not exist\n\n*The correlated pair*\n\n- **0.84** correlation of log declared income and log bank inflow\n- **36%** of rows outside the real declared-to-inflow range after shuffling declared income\n\n- 98% of real applicants declare between 0.72 and 2.36 times their bank inflow.\n- Shuffle declared income alone and a third of rows declare 20,000 against an inflow of 4,000.\n- The model reads that as overstatement and predicts high risk: importance measures its reaction to fiction.","notes":"This is the extrapolation problem named by Hooker, Mentch and Zhou: unrestricted permutation forces the model to predict outside the data. Overstatement is a real risk signal in these data (the generator plants it), so the model is right to react; the importance number is simply not about the feature alone.\n\nSources: Hooker, Mentch and Zhou, Unrestricted Permutation forces Extrapolation.","minutes":null,"lo":["LO3"]},{"id":"grouped-permutation","n":9,"title":"Shuffled together, the pair matters less than either one alone","kind":"content","session":1,"hash":"68a03439","md":"#### [day3#grouped-permutation] Shuffled together, the pair matters less than either one alone\n\n*Lab 3.1 · step 4*\n\n| Shuffled | Rise in log loss | Range over 10 repeats |\n| --- | --- | --- |\n| bank_inflow alone | 0.068 | 0.064 to 0.072 |\n| declared_income alone | 0.046 | 0.043 to 0.050 |\n| Both, same permutation | 0.034 | 0.030 to 0.037 |\n\n> **For the report.** Give features that travel together one grouped importance. Do not rank them against each other.","notes":"Shuffled together, each row keeps a real pair of incomes from another applicant: the information about income level is lost, the overstatement signal is not invented. With features that only share information (no interaction), the opposite happens: each alone looks unimportant because the other covers for it. Either way the single numbers mislead.","minutes":null,"lo":["LO3"]},{"id":"what-importance-may-say","n":10,"title":"The table supports a statement about the model, never about the world","kind":"content","session":1,"hash":"8f509836","md":"#### [day3#what-importance-may-say] The table supports a statement about the model, never about the world\n\n*Writing it up*\n\n- **Supported.** Amana's holdout log loss depends most on the two income features, then on term and loan size.\n- **Not supported.** \"Bank inflow matters more than declared income\", or \"income drives default\".","notes":"Lab 3.1 step 5. The first unsupported sentence ranks members of a correlated pair; the second is causal. Both appear in real model documentation. The SDAIA AI Ethics Principles ask that AI systems be explainable to those affected: an explanation that ranks the wrong thing is not one.","minutes":null,"lo":["LO3"]},{"id":"check-permutation","n":11,"title":"What do the two single-income importances tell you?","kind":"quiz","session":1,"hash":"a61c6167","md":"#### [day3#check-permutation] What do the two single-income importances tell you?\n\n*Checkpoint*\n\n**Question:** Shuffled alone, bank inflow raises the log loss by 0.068 and declared income by 0.046. Shuffled together, by 0.034. The two correlate at 0.84. Which reading is right?\n\n- A. Bank inflow is the more important of the two\n- B. Income accounts for 0.114 of the log loss\n- C. Income matters; the single numbers measure reactions to impossible pairs\n- D. Together they matter little, so income can be dropped from the next version","notes":"Answer: C. If the room picks D, recall that 0.034 is still the third largest importance in the table.","minutes":null,"lo":["LO3"]},{"id":"lab-3-1","n":12,"title":"Importance and its spread","kind":"lab","session":1,"hash":"935b16f0","md":"#### [day3#lab-3-1] Importance and its spread\n\nLab 3.1 · 25 min\n\nWrite permutation importance on the holdout with ten repeats, report the spread, then permute the two correlated income features together and see the pair matter less than either one shuffled alone.\n\n[D3_1_compute_permutation_importance.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D3_1_compute_permutation_importance.ipynb)\n\n- [ ] Write permutation importance for one feature (7 min)\n- [ ] All features, ten repeats, with spread (5 min)\n- [ ] Plot the importances with their range (4 min)\n- [ ] Permute the two incomes together (5 min)\n- [ ] Write what the table may and may not say (4 min)\n- [ ] ✱ Stretch: Use the Brier score in place of log loss and see whether the order changes","notes":"Expected (full mode): bank inflow 0.068, declared income 0.046, term 0.033, loan amount 0.025; grouped incomes 0.034; 36% of rows outside the real ratio range after shuffling declared income. Quick mode uses five repeats and gives the same order. Common problem: shuffling both incomes with different permutations, which is two single shuffles at once.","minutes":null,"lo":[]},{"id":"s2","n":13,"title":"Effect plots","kind":"section","session":2,"hash":"7fc45f41","md":"#### [day3#s2] Effect plots\n\n*Session 2*\n\n- Compute a partial dependence curve and individual curves\n- Compute accumulated local effects for the same feature\n- Show where the two disagree and which one to report","notes":"","minutes":null,"lo":["LO3"]},{"id":"partial-dependence-idea","n":14,"title":"Partial dependence sets everyone's value to the same number and averages","kind":"content","session":2,"hash":"a214f775","md":"#### [day3#partial-dependence-idea] Partial dependence sets everyone's value to the same number and averages\n\n*Partial dependence*\n\n```python\n# file: Lab 3.2 · step 1\nfor v in grid:\n    d = sample.copy()\n    d[\"declared_income\"] = v      # everyone\n    pd_curve.append(predict(d).mean())\n```\n\n- Answers: what if every applicant had declared **v**, all else unchanged?\n- Fine when the feature is independent of the others.\n- With bank inflow fixed, a high **v** means overstatement for most applicants.","notes":"The individual curves behind the average are ICE curves (the stretch). The question PD answers is a counterfactual about the model's input, which is exactly where correlated features create rows that never occur.\n\nSources: scikit-learn user guide, partial dependence and individual conditional expectation.","minutes":null,"lo":["LO3"]},{"id":"ale-idea","n":15,"title":"ALE moves each applicant only a little, inside their own bin","kind":"content","session":2,"hash":"0100adac","md":"#### [day3#ale-idea] ALE moves each applicant only a little, inside their own bin\n\n*Accumulated local effects*\n\n1. **1 · Bin** Cut declared income at the grid values\n2. **2 · Nudge** Move only that bin's applicants from its lower to its upper edge\n3. **3 · Accumulate** Add the mean changes from left to right, centre at zero\n\nEvery prediction is for a nearby, realistic applicant: their bank inflow already matches an income in that bin.","notes":"ALE was proposed by Apley and Zhu to fix exactly this: effects of correlated predictors without extrapolation. Its price: it answers a local question (\"how does risk change between similar real applicants?\"), and it is harder to explain to a committee than PD.\n\nSources: Apley and Zhu, Visualizing the Effects of Predictor Variables in Black Box Supervised Learning Models.","minutes":null,"lo":["LO3"]},{"id":"pd-ale-disagree","n":16,"title":"Both curves rise above 10,000 riyals; partial dependence rises 1.6 times as much","kind":"content","session":2,"hash":"39b92043","md":"#### [day3#pd-ale-disagree] Both curves rise above 10,000 riyals; partial dependence rises 1.6 times as much\n\n*Lab 3.2*\n\n| Declared income (SAR) | 4,310 | 7,290 | 9,070 | 11,650 | 13,880 | 18,930 |\n| --- | --- | --- | --- | --- | --- | --- |\n| PD, centred | -0.036 | -0.055 | -0.033 | 0.035 | 0.073 | 0.133 |\n| ALE, centred | -0.032 | -0.032 | -0.026 | 0.012 | 0.047 | 0.080 |\n| PD rows outside the data | 75% | 29% | 17% | 17% | 27% | 53% |\n\nFrom 9,070 to 18,930 riyals: PD rises by 0.166, ALE by 0.106 (change in predicted default probability).","notes":"From the Lab 3.2 solution run on 4,000 holdout applicants. The two agree where few PD rows are impossible (the middle of the grid) and part where most are (the ends). The disagreement is not huge, and that is a fair finding too: the report says by how much the curves differ and why, rather than declaring PD wrong.","minutes":null,"lo":["LO3"]},{"id":"counting-impossible-rows","n":17,"title":"Count the rows a curve was built from that no real applicant resembles","kind":"content","session":2,"hash":"650cd696","md":"#### [day3#counting-impossible-rows] Count the rows a curve was built from that no real applicant resembles\n\n*Making the disagreement checkable*\n\n- In the 4,000 sampled applicants, declared income is 0.72 to 2.34 times bank inflow (1st to 99th percentile).\n- At 18,930 riyals, **53%** of PD rows lie outside that range; at 4,310, **75%**.\n- A curve point built mostly from such rows describes the model's behaviour on fiction.\n\n> **A habit for any effect plot.** Report, under the plot, the share of evaluated rows outside the data.","notes":"Lab 3.2 step 4. This turns \"PD extrapolates\" from a textbook warning into a number the panel can check. The same count can be made for any pair of correlated features in the capstone package.","minutes":null,"lo":["LO3"]},{"id":"ice-curves","n":18,"title":"Individual curves show who the average hides","kind":"content","session":2,"hash":"54ff7abe","md":"#### [day3#ice-curves] Individual curves show who the average hides\n\n*Behind the average*\n\n**37 of 50** applicants whose predicted risk moves more than 10 points across the grid\n\n- An ICE curve is one applicant's partial dependence.\n- Their average is the PD curve.\n- The curves are not parallel: how much a declared income moves risk depends on the applicant's own bank inflow, through the overstatement signal.","notes":"The stretch of Lab 3.2. ICE curves are a good diagnostic for interactions: if they are not parallel, a single curve misdescribes the effect. Here the bend depends on bank inflow, which is the interaction the generator plants through the overstatement ratio.","minutes":null,"lo":["LO3"]},{"id":"which-curve-report","n":19,"title":"Put ALE in the report, and say what PD would have claimed","kind":"content","session":2,"hash":"a11359e0","md":"#### [day3#which-curve-report] Put ALE in the report, and say what PD would have claimed\n\n*What the report shows*\n\n> Among realistic applicants, predicted risk changes little with declared income below about 12,000 riyals and rises above it, by 0.11 between 9,070 and 18,930 riyals. Partial dependence shows 1.6 times that rise because, at the top of the grid, 53% of the rows it averages over pair a high declared income with a bank inflow no real applicant has.\n\n> **Neither is causal.** ALE does not say what would happen if an applicant earned more.","notes":"The caption is the output of Lab 3.2 step 5 in full mode. Insist that both curves are correct answers to different questions; the validator chooses the question that matches the use (an officer comparing applicants).","minutes":null,"lo":["LO3"]},{"id":"check-effect-plots","n":20,"title":"Why does partial dependence overstate the rise?","kind":"quiz","session":2,"hash":"052a4528","md":"#### [day3#check-effect-plots] Why does partial dependence overstate the rise?\n\n*Checkpoint*\n\n**Question:** PD for declared income rises 1.6 times as much as ALE between 9,000 and 19,000 riyals. Declared income and bank inflow correlate at 0.84, and overstating income is a risk signal in the model. What explains the gap?\n\n- A. PD pairs high declared incomes with inflows real applicants do not have\n- B. ALE uses too few applicants in each bin, so its curve is flattened by noise\n- C. The model overreacts to declared income\n- D. PD is not centred and ALE is","notes":"Answer: A.","minutes":null,"lo":["LO3"]},{"id":"lab-3-2","n":21,"title":"Partial dependence against local effects","kind":"lab","session":2,"hash":"f68e1bdc","md":"#### [day3#lab-3-2] Partial dependence against local effects\n\nLab 3.2 · 25 min\n\nDraw partial dependence and accumulated local effects for declared income, find where they disagree, and trace the disagreement to applicants whose declared income is set far from their bank inflow.\n\n[D3_2_show_where_partial.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D3_2_show_where_partial.ipynb)\n\n- [ ] Write partial dependence for declared income (6 min)\n- [ ] Accumulated local effects from the helper (4 min)\n- [ ] Plot both, centred (5 min)\n- [ ] Count the impossible rows partial dependence used (6 min)\n- [ ] Say which curve goes in the report (4 min)\n- [ ] ✱ Stretch: Draw individual conditional expectation curves for 50 applicants and find the ones that bend","notes":"Expected (full mode, 4,000 applicants): PD rises 0.166 and ALE 0.106 from 9,070 to 18,930 SAR; 75% of PD rows outside the data at the bottom of the grid and 53% at the top; 37 of 50 ICE curves move more than 10 points. Quick mode uses 2,000 applicants and gives 0.211 against 0.132. Common problem: comparing uncentred PD with centred ALE.","minutes":null,"lo":[]},{"id":"s3","n":22,"title":"Shapley values","kind":"section","session":3,"hash":"5a6deeb5","md":"#### [day3#s3] Shapley values\n\n*Session 3*\n\n- Compute exact tree Shapley values and check that they add up\n- Read the top reasons for one applicant\n- Measure whether the reasons survive five refits","notes":"","minutes":null,"lo":["LO3"]},{"id":"shapley-accounting","n":23,"title":"Shapley values split one prediction exactly among the features","kind":"content","session":3,"hash":"0c1f9f41","md":"#### [day3#shapley-accounting] Shapley values split one prediction exactly among the features\n\n*Shapley values*\n\n- Each feature's value is its average contribution over all orders of adding features.\n- For trees it is computed exactly and fast (TreeSHAP).\n- They **add up**: base value plus the features' values equals the raw score of that applicant.\n\n```python\n# file: Lab 3.3 · step 1\nv = amana.predict(X10, pred_contrib=True)\n# columns: one per feature, then the base\nraw = amana.predict(X10, raw_score=True)\nnp.allclose(v.sum(axis=1), raw)   # True\n```","notes":"LightGBM computes TreeSHAP itself; the SHAP library's TreeExplainer gives the same numbers and nicer plots. The values are on the log-odds scale of the raw model, before the Platt repair; a monotone map after the model does not change which features push risk up.\n\nSources: Lundberg and Lee, A Unified Approach to Interpreting Model Predictions; LightGBM documentation.","minutes":null,"lo":["LO3"]},{"id":"reasons-to-officers","n":24,"title":"Officers see the three features that pushed risk up most","kind":"content","session":3,"hash":"b60452d7","md":"#### [day3#reasons-to-officers] Officers see the three features that pushed risk up most\n\n*How Mizan uses them*\n\n| Applicant | Reasons shown |\n| --- | --- |\n| M008832 | bank_inflow, prior_loans, channel |\n| M004026 | bank_inflow, prior_missed, years_in_business |\n| M027921 | declared_income, channel, business_type |\n| M046515 | term_months, years_in_business, channel |\n\n> **The question.** Would the same applicant get the same reasons from a model the developers could equally have shipped?","notes":"Four of the ten applicants of Lab 3.3. Ask Fuad's question: if an applicant is declined and asks why, is \"your bank inflow\" the honest answer? Lab 3.3 tests one condition of honesty: stability.","minutes":null,"lo":["LO3"]},{"id":"refits-equally-shippable","n":25,"title":"Refit with the developers' own recipe and see whether the reasons survive","kind":"content","session":3,"hash":"041149c9","md":"#### [day3#refits-equally-shippable] Refit with the developers' own recipe and see whether the reasons survive\n\n*Stability*\n\n1. **Recipe** From metadata.json: rebalance to 50/50, 300 rounds, bagging\n2. **Five refits** Bootstrap samples of the training rows, seeds 1 to 5\n3. **Panel** Top reason per applicant per refit\n\nEach refit is a model the developers could have shipped: same data source, same recipe, different random draws.","notes":"The validator needs only the recipe and the training rows, both in the package. Without them, stability cannot be tested and that becomes a finding about the package (Lab 4.3). Refit cost: a few seconds each on a laptop.","minutes":null,"lo":["LO3"]},{"id":"stability-panel","n":26,"title":"Two of ten applicants change their top reason; only one keeps all three","kind":"content","session":3,"hash":"c0ed469d","md":"#### [day3#stability-panel] Two of ten applicants change their top reason; only one keeps all three\n\n*Lab 3.3 · the stability panel*\n\n| Applicant | Refit 1 | Refit 2 | Refit 3 | Refit 4 | Refit 5 |\n| --- | --- | --- | --- | --- | --- |\n| M004026 | bank_inflow | prior_missed | bank_inflow | prior_missed | bank_inflow |\n| M008361 | loan_amount | years_in_business | loan_amount | loan_amount | years_in_business |\n| M008832 | bank_inflow | bank_inflow | bank_inflow | bank_inflow | bank_inflow |\n| Seven others | the same top reason in all five refits |  |  |  |  |\n\nThe set of three reasons is the same in all five refits for 1 of the 10 applicants.","notes":"From the Lab 3.3 solution run (full mode; quick mode gives 8 stable top reasons and 2 stable sets of three). The top reason is fairly stable; the second and third reasons, which officers also see, are not. A rule follows in the next slide.","minutes":null,"lo":["LO3"]},{"id":"incomes-trade-credit","n":27,"title":"The two incomes trade credit between refits; their sum moves less","kind":"content","session":3,"hash":"f35eb8a5","md":"#### [day3#incomes-trade-credit] The two incomes trade credit between refits; their sum moves less\n\n*Why they move*\n\n- **3.35** widest range of one income feature's value for one applicant, in log-odds\n- **1.70** widest range of the two incomes' sum\n\n- The model needs both incomes; how it splits the credit between them is partly chance.\n- \"Your bank inflow\" and \"your declared income\" are one reason told two ways.\n- Grouping them as \"income\" is the more honest reason.","notes":"The stretch of Lab 3.3. Same lesson as grouped permutation importance, at the level of one applicant. If the SHAP library is used in the capstone, the grouping is done by summing the columns of the pair.","minutes":null,"lo":["LO3"]},{"id":"reason-display-rule","n":28,"title":"Show a reason only when it survives refits","kind":"content","session":3,"hash":"3a53b2f5","md":"#### [day3#reason-display-rule] Show a reason only when it survives refits\n\n*From the panel to a rule*\n\n- **Proposed rule.** Show a reason when it is the top reason in at least four of five refits; group correlated features into one reason; otherwise say the model has no stable main reason.\n- **Why it matters.** An applicant told a reason that flips with a refit has been given an accident of training, not an explanation.","notes":"Lab 3.3 step 5. The SDAIA AI Ethics Principles put transparency and explainability to those affected among the principles, especially for outcomes that may harm them. A refused loan is such an outcome. The principle does not specify a stability test; the rule here is the validator's recommendation, labelled as such.\n\nSources: SDAIA AI Ethics Principles.","minutes":null,"lo":["LO3","LO5"]},{"id":"check-shapley","n":29,"title":"What does \"the values add up\" guarantee?","kind":"quiz","session":3,"hash":"a044d21c","md":"#### [day3#check-shapley] What does \"the values add up\" guarantee?\n\n*Checkpoint*\n\n**Question:** For every applicant, the base value plus the Shapley values of the ten features equals the model's raw score exactly. A colleague says this proves the reasons shown to officers are reliable. What do you answer?\n\n- A. Yes: an exact decomposition cannot change\n- B. Complete accounting for this model, not survival across a refit\n- C. Yes: each value is the feature's causal effect\n- D. No: Shapley values stop adding up once two features are strongly correlated","notes":"Answer: B.","minutes":null,"lo":["LO3"]},{"id":"lab-3-3","n":30,"title":"Ten applicants, five refits","kind":"lab","session":3,"hash":"7ff1e570","md":"#### [day3#lab-3-3] Ten applicants, five refits\n\nLab 3.3 · 25 min\n\nExplain ten applicants with LightGBM's exact tree Shapley values, check they add up to the prediction, then refit the model five times on bootstrap samples and build a stability panel of each applicant's top reason.\n\n[D3_3_explain_ten_applicants.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D3_3_explain_ten_applicants.ipynb)\n\n- [ ] Shapley values for ten applicants (5 min)\n- [ ] Check that they add up (4 min)\n- [ ] Refit five times with the developers' recipe (6 min)\n- [ ] The stability panel: top reason per refit (6 min)\n- [ ] Mark the explanations you would not show (4 min)\n- [ ] ✱ Stretch: Measure the spread of the declared-income and bank-inflow values across the refits","notes":"Expected (full mode): every applicant's values add up to the raw score; 8 of 10 keep their top reason over five refits (M004026 and M008361 change); 1 of 10 keeps all three reasons. Common problem: comparing Shapley values of the raw model with probabilities after Platt; keep everything on the raw model's log-odds. Refits take a few seconds each.","minutes":null,"lo":[]},{"id":"s4","n":31,"title":"When explanations mislead","kind":"section","session":4,"hash":"46b59bab","md":"#### [day3#s4] When explanations mislead\n\n*Session 4*\n\n- Show how a correlated proxy moves attributions\n- Tell a proxy from a cause with the data you have\n- Write a caution that a validator can attach to the explanations","notes":"","minutes":null,"lo":["LO3","LO5"]},{"id":"wallet-proposal","n":32,"title":"Version 2.2 adds mobile-wallet months and gains 0.004 of AUC","kind":"content","session":4,"hash":"a9f18642","md":"#### [day3#wallet-proposal] Version 2.2 adds mobile-wallet months and gains 0.004 of AUC\n\n*A change request*\n\n- Rasil's team proposes one new feature: how long the applicant has used a mobile wallet.\n- Holdout AUC: 0.757 without, 0.761 with.\n- Age is excluded from the model on purpose, and remains so.\n\n- **The validator's question.** What does the new feature carry, and who will be told it is their reason?","notes":"Both models are refits with seed 1 on all training rows, so the comparison is fair. A gain of 0.004 is within what a refit alone can change. Ask the room to guess which applicants have the shortest wallet histories.","minutes":null,"lo":["LO3"]},{"id":"what-a-proxy-is","n":33,"title":"A proxy is a permitted feature that carries an excluded one","kind":"content","session":4,"hash":"57190051","md":"#### [day3#what-a-proxy-is] A proxy is a permitted feature that carries an excluded one\n\n*Proxies*\n\n- Wallet months correlates with age band at **-0.44**: median 43 months for 18 to 24, 12 for 55 and over.\n- Age is related to default in these data, so the model learns to use what wallet months carries of it.\n- \"Uses no age\" stays true as written and becomes misleading in effect.\n\n> **What goes wrong.** Checking only the feature list. Claim 3 of the card passed Lab 1.1 on exactly that check.","notes":"Remind the room of the trap in Lab 1.1: claim 3 was supported as written. This session is where its limit shows. Other features can carry age too (years in business, prior loans); the validator cannot remove them all, which is why the audit by age band becomes a condition of use on Day 4.","minutes":null,"lo":["LO3","LO5"]},{"id":"who-gets-wallet-reason","n":34,"title":"Applicants over 55 are told \"short wallet history\" more than twice as often","kind":"content","session":4,"hash":"384db987","md":"#### [day3#who-gets-wallet-reason] Applicants over 55 are told \"short wallet history\" more than twice as often\n\n*Lab 3.4*\n\n| Item | Value |\n| --- | --- |\n| 18-24 | 20.6% |\n| 25-34 | 21.3% |\n| 35-44 | 25.1% |\n| 45-54 | 30.7% |\n| 55+ | 46.5% |\n\nShare of holdout applicants for whom wallet months is among the three reasons. For the 55+ band its mean value pushes risk up (+0.073 log-odds).","notes":"From the Lab 3.4 solution run (full mode). Overall, the new feature is a top-three reason for 26.5% of applicants. The pattern by age is the finding; the overall share hides it.","minutes":null,"lo":["LO3"]},{"id":"proxy-narrows-gap","n":35,"title":"The proxy narrows the age calibration gap a little, which is what a proxy does","kind":"content","session":4,"hash":"f1154d57","md":"#### [day3#proxy-narrows-gap] The proxy narrows the age calibration gap a little, which is what a proxy does\n\n*The tell-tale*\n\n| Age band | Gap without wallet months | Gap with it |\n| --- | --- | --- |\n| 18-24 | 4.9 points | 4.7 points |\n| 55+ | 1.2 points | 0.8 points |\n\nObserved minus predicted default rate after Platt scaling, holdout rows.","notes":"The stretch of Lab 3.4. A feature that reduces a calibration gap by age is bringing age information back. That can look like an improvement on the subgroup table, which is exactly why the explanation side must be read too.","minutes":null,"lo":["LO3"]},{"id":"writing-the-caution","n":36,"title":"A caution names what the feature carries, who receives it and what to do","kind":"content","session":4,"hash":"0935d47e","md":"#### [day3#writing-the-caution] A caution names what the feature carries, who receives it and what to do\n\n*The documented misleading result*\n\n> Wallet months correlates with age (r = -0.44) and is a top-three reason for 47% of applicants over 55 against 21% of those aged 18 to 24. Shown to officers or applicants, \"short wallet history\" would in effect tell older applicants that their age counts against them, in a model that excludes age.\n\n> **Recommendation.** Do not add the feature for an AUC gain of 0.004; if it is added, do not show it as a reason, and audit by age band.","notes":"Lab 3.4 step 5. This is the \"one documented misleading result\" that outcome LO3 asks for. Mitigation of such effects is DS-309's subject; the validator's job is the evidence and the caution.","minutes":null,"lo":["LO3","LO5"]},{"id":"check-proxy","n":37,"title":"Is wallet months a proxy for age?","kind":"quiz","session":4,"hash":"00e63e3b","md":"#### [day3#check-proxy] Is wallet months a proxy for age?\n\n*Checkpoint*\n\n**Question:** Wallet months correlates with age band at -0.44, is a top reason for 47% of applicants over 55 against 21% under 25, and narrows the age gap. What can you conclude?\n\n- A. Wallet history causes default, so the feature is legitimate to use\n- B. The correlation is too weak to matter\n- C. Age is not in the model, so there is no age effect\n- D. It carries age information and would deliver age-linked reasons","notes":"Answer: D.","minutes":null,"lo":["LO3"]},{"id":"lab-3-4","n":38,"title":"A proxy takes the credit","kind":"lab","session":4,"hash":"276bf9be","md":"#### [day3#lab-3-4] A proxy takes the credit\n\nLab 3.4 · 25 min\n\nRefit the model with mobile-wallet months added, show that the new feature becomes a top reason far more often for older applicants, check its link with age, and write the caution for the validation report.\n\n[D3_4_show_how_correlated.ipynb](https://sdaiaacademy.github.io/ds-305/labs/D3_4_show_how_correlated.ipynb)\n\n- [ ] Refit with wallet months added (5 min)\n- [ ] Shapley values with and without it (5 min)\n- [ ] How often it is a top reason, by age band (6 min)\n- [ ] Its link with age (4 min)\n- [ ] Write the caution (5 min)\n- [ ] ✱ Stretch: Remove the proxy and check whether the age-band calibration gap of Lab 1.4 changed","notes":"Expected (full mode): AUC 0.757 without, 0.761 with; wallet months among the reasons for 20.6% (18-24) up to 46.5% (55+); correlation with age band -0.44. Common problem: comparing a bootstrap refit with a non-bootstrap one; both models here use bootstrap=False and seed 1.","minutes":null,"lo":[]},{"id":"wrap-up","n":39,"title":"What today showed about Amana's explanations","kind":"content","session":4,"hash":"fca9ea24","md":"#### [day3#wrap-up] What today showed about Amana's explanations\n\n*Day 3 · three things to keep*\n\n- **Correlated features.** Group them: one importance, one reason. Single numbers measure reactions to impossible rows.\n- **Stability.** Top reasons survive five refits for 8 of 10 applicants; full sets of three for 1.\n- **Proxies.** An excluded attribute comes back through a permitted feature, and so do its reasons.","notes":"Each participant drafts the explanation report: the importance table with spread, the ALE curve with its caption, the stability panel and the caution. That is the evidence of outcome LO3.","minutes":null,"lo":[]},{"id":"next","n":40,"title":"Day 4: validate and decide","kind":"content","session":4,"hash":"5d11c434","md":"#### [day3#next] Day 4: validate and decide\n\n*Tomorrow*\n\n- Every finding by subgroup in one table, tagged with a bias type from the national guide.\n- A later batch where performance fell, with a cause to find.\n- A checklist, a decision, and the choice of your capstone package.","notes":"Ask participants to skim the SDAIA AI Bias Reference Guide's list of bias types tonight; tomorrow's first lab tags each gap with one of them.","minutes":null,"lo":[]}],"activities":[{"id":"review-day2-q1","slide":"review-day2","type":"single","prompt":"Split conformal intervals for Amana's loss model cover 91% of holdout defaults, 77% of large loans, and 77% of all defaults after a strong simulated income shift. Which sentence can go in the report?","options":[{"key":"A","text":"Every loan's interval holds 90% of the time"},{"key":"B","text":"Coverage holds overall, not for large loans or a richer population"},{"key":"C","text":"The loss model must be retrained before any of its intervals can be used"},{"key":"D","text":"Under a shift the intervals widen to keep 90%"}],"correct":[1],"explanation":"The guarantee is marginal and rests on exchangeability; the group table and the stress test show where it stops.","misconceptions":["Reads marginal coverage as a promise for every group","","Treats under-coverage as a modelling fault; the wrapper, not the model, sets the width","Thinks a fixed width adapts to a new population; the threshold only knows the calib rows"],"lo":["LO2"]},{"id":"check-permutation-q1","slide":"check-permutation","type":"single","prompt":"Shuffled alone, bank inflow raises the log loss by 0.068 and declared income by 0.046. Shuffled together, by 0.034. The two correlate at 0.84. Which reading is right?","options":[{"key":"A","text":"Bank inflow is the more important of the two"},{"key":"B","text":"Income accounts for 0.114 of the log loss"},{"key":"C","text":"Income matters; the single numbers measure reactions to impossible pairs"},{"key":"D","text":"Together they matter little, so income can be dropped from the next version"}],"correct":[2],"explanation":"Shuffling one feature of a correlated pair creates rows outside the data; the grouped shuffle keeps realistic pairs and is the number to report.","misconceptions":["Ranks members of a correlated pair, which the single shuffles cannot separate","Adds importances as if they were independent shares of one total","","Reads a smaller grouped number as evidence that income is irrelevant"],"lo":["LO3"]},{"id":"check-effect-plots-q1","slide":"check-effect-plots","type":"single","prompt":"PD for declared income rises 1.6 times as much as ALE between 9,000 and 19,000 riyals. Declared income and bank inflow correlate at 0.84, and overstating income is a risk signal in the model. What explains the gap?","options":[{"key":"A","text":"PD pairs high declared incomes with inflows real applicants do not have"},{"key":"B","text":"ALE uses too few applicants in each bin, so its curve is flattened by noise"},{"key":"C","text":"The model overreacts to declared income"},{"key":"D","text":"PD is not centred and ALE is"}],"correct":[0],"explanation":"Partial dependence evaluates the model on combinations outside the data; with a correlated, interacting pair those combinations look like overstatement.","misconceptions":["","Blames sample size; the gap comes from which rows are evaluated, not how many","Assumes the model is wrong; it reacts correctly to rows that do not occur","Confuses centring with the shape: both curves are centred"],"lo":["LO3"]},{"id":"check-shapley-q1","slide":"check-shapley","type":"single","prompt":"For every applicant, the base value plus the Shapley values of the ten features equals the model's raw score exactly. A colleague says this proves the reasons shown to officers are reliable. What do you answer?","options":[{"key":"A","text":"Yes: an exact decomposition cannot change"},{"key":"B","text":"Complete accounting for this model, not survival across a refit"},{"key":"C","text":"Yes: each value is the feature's causal effect"},{"key":"D","text":"No: Shapley values stop adding up once two features are strongly correlated"}],"correct":[1],"explanation":"Additivity is a property of one model's prediction. A refit is a different model, and the split between correlated features can change.","misconceptions":["Reads exact accounting as stability across equally valid models","","Reads additivity as a causal property of the features","Thinks additivity fails with correlated features; it holds, the split between them is what moves"],"lo":["LO3"]},{"id":"check-proxy-q1","slide":"check-proxy","type":"single","prompt":"Wallet months correlates with age band at -0.44, is a top reason for 47% of applicants over 55 against 21% under 25, and narrows the age gap. What can you conclude?","options":[{"key":"A","text":"Wallet history causes default, so the feature is legitimate to use"},{"key":"B","text":"The correlation is too weak to matter"},{"key":"C","text":"Age is not in the model, so there is no age effect"},{"key":"D","text":"It carries age information and would deliver age-linked reasons"}],"correct":[3],"explanation":"The link with age, the pattern of reasons and the narrowed gap show it carrying age; a causal role cannot be settled here, and the caution does not need one.","misconceptions":["Claims a causal conclusion the observational data cannot support","Treats a modest correlation as no relation; the pattern of reasons by age shows the link at work","Thinks excluding age from the features settles the question",""],"lo":["LO3"]}],"ai":{"context":{"course":"../context/course.md","courseJs":"../context/course.js","day":"day3.md","llms":"../llms.txt"},"tasks":[],"tools":[]},"bridge":{"allowedOrigins":[]},"features":{},"strings":{}}</script>
+<script src="../_engine/academy.js"></script>
+</body>
+</html>

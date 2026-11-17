@@ -1,0 +1,1597 @@
+{
+  "v": 1,
+  "engine": "1.0.0",
+  "build": {
+    "at": "2026-11-15T18:29:43Z",
+    "version": "2027.1.0",
+    "commit": "cc8abd5"
+  },
+  "lang": "en",
+  "dir": "ltr",
+  "slides": [
+    {
+      "deck": "day1",
+      "id": "title",
+      "n": 1,
+      "session": 0,
+      "title": "Can the probabilities be trusted",
+      "text": "SDAIA Academy · Uncertainty, Interpretability and Model Validation Can the probabilities be trusted Day 1: Read the package as a validator, score its probabilities with proper scores, repair them and check the repair in every group Data Science Track4 teaching days + capstone day4 sessions · 4 labsDS-305",
+      "href": "../slides/day1.html#title"
+    },
+    {
+      "deck": "day1",
+      "id": "four-days-one-validation",
+      "n": 2,
+      "session": 0,
+      "title": "Four days of evidence, then a decision you defend",
+      "text": "The course at a glance Four days of evidence, then a decision you defend Day 1 · Probabilities Read the claims, score the probabilities, repair them, check every group. Day 2 · Intervals Conformal intervals and prediction sets, by group and under shift. Day 3 · Explanations Importance, effect plots, Shapley values, and where they mislead. Day 4 · Decide Subgroup findings, a decline diagnosed, a checklist, a decision. Day 5 · Capstone. An independent validation of another package, in a public repository, defended before a panel for eight minutes plus questions.",
+      "href": "../slides/day1.html#four-days-one-validation"
+    },
+    {
+      "deck": "day1",
+      "id": "evidence-not-opinion",
+      "n": 3,
+      "session": 0,
+      "title": "A validator's job is evidence, and every number is rerun",
+      "text": "How this course works A validator's job is evidence, and every number is rerun Rows nobody trained on Every claim is checked on rows the developers never saw: the calib and holdout splits. Guarantees with assumptions Calibration, coverage and explanations each hold under conditions. The report names them. A decision at the end Fit, fit with conditions, or not fit. Evidence without a decision is not a validation. AI policy. AI off for the entry and exit checks and for your first reading of a diagram or a coverage table. In labs an AI tutor may explain, not write code or findings. In the capstone anything goes, defended live.",
+      "href": "../slides/day1.html#evidence-not-opinion"
+    },
+    {
+      "deck": "day1",
+      "id": "mizan-and-amana",
+      "n": 4,
+      "session": 0,
+      "title": "Mizan Community Lending hands you Amana to validate",
+      "text": "One case study all week Mizan Community Lending hands you Amana to validate A fictional microfinance lender. Its credit analytics team built Amana (أمانة); you are the independent model risk team. Three models Probability of default, a grade (on time, late, default) and the loss in riyals if a loan defaults. Your data 50,000 applications from 2023 and 2024: 30,000 the developers trained on, 10,000 calib and 10,000 holdout rows that are yours. A later batch 10,000 applications from early 2025, with their outcomes. Something in it changed.",
+      "href": "../slides/day1.html#mizan-and-amana"
+    },
+    {
+      "deck": "day1",
+      "id": "setup-and-reference-state",
+      "n": 5,
+      "session": 0,
+      "title": "Open the notebooks in Colab, or run them locally with uv",
+      "text": "Lab environment Open the notebooks in Colab, or run them locally with uv Colab: open a notebook from the course page. Its first cell clones the repository and installs one package. Locally: the commands on the right, then 00_setup_check.ipynb once. Every lab starts from a supplied reference state: the package, the data and the course functions in mizan.py. No lab needs your earlier run. git clone https://github.com/SDAIAAcademy/ds-305 cd ds-305/labs uv sync uv run jupyter lab",
+      "href": "../slides/day1.html#setup-and-reference-state"
+    },
+    {
+      "deck": "day1",
+      "id": "agenda",
+      "n": 6,
+      "session": 0,
+      "title": "Can the probabilities be trusted",
+      "text": "Today Can the probabilities be trusted Session 1 · What a validator needs Validation is evidence on conceptual soundness, outcomes and monitoring, and each claim in a model card is supported, unsupported or untestable Session 2 · Proper scores and reliability A proper score rewards honest probabilities; the Brier score, log loss and a reliability diagram show what AUC hides Session 3 · Recalibration Platt scaling and isotonic regression repair probabilities on rows the model never saw, and leave the ranking untouched Session 4 · Calibration by subgroup A model calibrated on average can be miscalibrated for a group it never saw as a feature; small groups need intervals",
+      "href": "../slides/day1.html#agenda"
+    },
+    {
+      "deck": "day1",
+      "id": "s1",
+      "n": 7,
+      "session": 1,
+      "title": "What a validator needs",
+      "text": "Session 1 What a validator needs Name the three kinds of evidence an independent validation must produce Separate a claim the data can test from one it cannot Recompute a headline metric on rows the developers never saw 01",
+      "href": "../slides/day1.html#s1"
+    },
+    {
+      "deck": "day1",
+      "id": "three-kinds-of-evidence",
+      "n": 8,
+      "session": 1,
+      "title": "A validation answers three questions, not one",
+      "text": "What validation must show A validation answers three questions, not one Conceptual soundness Is the design fit for the purpose: the target, the data, the features, the training choices? Outcome analysis Does it perform on rows it never saw: discrimination, calibration, intervals, every group? Monitoring Will anyone notice when it stops working: which metric, which threshold, who acts? This week. Day 1 and 2 are outcome analysis; Day 3 tests soundness of the explanations; Day 4 adds monitoring and the decision.",
+      "href": "../slides/day1.html#three-kinds-of-evidence"
+    },
+    {
+      "deck": "day1",
+      "id": "independent-means-other-rows",
+      "n": 9,
+      "session": 1,
+      "title": "Independent means other people, other rows and other questions",
+      "text": "Who validates Independent means other people, other rows and other questions The developers The validator Question Does my model work? Where does it stop working, and for whom? Rows Their training and test split Rows they never touched: calib and holdout Output A model and a card Rated findings, conditions of use, a decision At Mizan Rasil's credit analytics team Your model risk team, reporting to Dr. Sameera What goes wrong. A validator who retrains the model has become a second developer. Repairs are recommended, and the developers own them.",
+      "href": "../slides/day1.html#independent-means-other-rows"
+    },
+    {
+      "deck": "day1",
+      "id": "claims-evidence-verdicts",
+      "n": 10,
+      "session": 1,
+      "title": "Every claim gets one of three verdicts",
+      "text": "Reading a model card Every claim gets one of three verdicts Supported The package's evidence, or your recomputation, backs the claim as written. Unsupported The evidence is missing, or it contradicts the claim. Missing counts. Untestable No data you have, or could have today, can test it as written. Rewrite it as a test. The habit. \"Supported\" needs evidence. Silence is not support.",
+      "href": "../slides/day1.html#claims-evidence-verdicts"
+    },
+    {
+      "deck": "day1",
+      "id": "amana-six-claims",
+      "n": 11,
+      "session": 1,
+      "title": "Amana's card makes six claims",
+      "text": "The package you received Amana's card makes six claims It discriminates well: AUC 0.864 on a held-out sample of 4,000 applications. Its probabilities are well calibrated and can be read as default rates. It uses no gender, age or location information. Performance is consistent across all customer groups. It will remain accurate for the next three years. The reasons shown to officers are the causes of an applicant's risk. Also in the package. metadata.json (what they did) and evidence.json (what they measured). Read all three before computing anything.",
+      "href": "../slides/day1.html#amana-six-claims"
+    },
+    {
+      "deck": "day1",
+      "id": "headline-auc-rows",
+      "n": 12,
+      "session": 1,
+      "title": "The claimed AUC came from rows the shipped model had seen",
+      "text": "One recomputation The claimed AUC came from rows the shipped model had seen Claimed in the card 0.864 On the training rows 0.858 On the holdout 0.755 The developers held out 4,000 rows, measured, then retrained on all rows and shipped that model. The shipped model has seen the 4,000 rows: its 0.864 is an in-sample number. On 10,000 rows it never saw: 0.755.",
+      "href": "../slides/day1.html#headline-auc-rows"
+    },
+    {
+      "deck": "day1",
+      "id": "guarantees-assumptions",
+      "n": 13,
+      "session": 1,
+      "title": "Every guarantee this week holds under a condition you must state",
+      "text": "Guarantees and assumptions Every guarantee this week holds under a condition you must state Evidence It guarantees If this holds A holdout score Performance on similar new applicants New applicants look like the holdout Recalibration Average calibration The calib rows look like the applicants Conformal intervals 90% coverage on average Rows are exchangeable An explanation What the model does Not what causes default What goes wrong. A report that quotes the guarantee and drops the condition. The condition is where the next failure comes from.",
+      "href": "../slides/day1.html#guarantees-assumptions"
+    },
+    {
+      "deck": "day1",
+      "id": "credit-data-personal",
+      "n": 14,
+      "session": 1,
+      "title": "Validation data is applicants' personal data, even in a model risk team",
+      "text": "Responsible use Validation data is applicants' personal data, even in a model risk team Income, loans and missed payments of named people fall under the Personal Data Protection Law. A validator needs outcomes and predictions, not names: ask for the minimum, and ask the data protection officer. Subgroup columns (age band, gender, region) are needed to audit the model and must not leak into it. In this course Every applicant is synthetic. The capstone uses the course packages or a peer's synthetic package; no real borrower data enters a repository.",
+      "href": "../slides/day1.html#credit-data-personal"
+    },
+    {
+      "deck": "day1",
+      "id": "check-supported-claim",
+      "n": 15,
+      "session": 1,
+      "title": "Which verdict does claim 4 get?",
+      "text": "Checkpoint Which verdict does claim 4 get? Amana's card says \"performance is consistent across all customer groups\". The evidence file has an overall AUC and no subgroup results. You have not yet computed anything by group. What is the verdict today? Supported, since no gap has been found Unsupported, since the package has no evidence for it Untestable, since groups were not measured No verdict until the subgroup tables of Lab 1.4 exist and are read",
+      "href": "../slides/day1.html#check-supported-claim"
+    },
+    {
+      "deck": "day1",
+      "id": "lab-1-1",
+      "n": 16,
+      "session": 1,
+      "title": "Six claims, three verdicts",
+      "text": "Lab 1.1 · 25 min Six claims, three verdicts Read Amana's model card, metadata and evidence, recompute the claimed AUC on the validator's held-out rows, and mark each of six claims supported, unsupported or untestable with the evidence that decides it. D1_1_mark_six_model.ipynb Open the package: card, metadata, evidence 5 min Recompute the AUC on the holdout 6 min Compare mean prediction with the default rate 4 min Mark the six claims with their evidence 7 min Rewrite one untestable claim as a test 3 min ✱ Stretch: Find out on which rows the developers measured their AUC, and say why it is higher",
+      "href": "../slides/day1.html#lab-1-1"
+    },
+    {
+      "deck": "day1",
+      "id": "s2",
+      "n": 17,
+      "session": 2,
+      "title": "Proper scores and reliability",
+      "text": "Session 2 Proper scores and reliability Compute the Brier score and log loss by hand and against a constant forecast Draw a reliability diagram from equal-count bins Explain why a model can rank well and still be miscalibrated 02",
+      "href": "../slides/day1.html#s2"
+    },
+    {
+      "deck": "day1",
+      "id": "ranking-not-probability",
+      "n": 18,
+      "session": 2,
+      "title": "A model can rank applicants well and still state the wrong risk",
+      "text": "Two different properties A model can rank applicants well and still state the wrong risk 0.755 AUC on the holdout: who is riskier than whom 0.40 mean predicted default probability, against 0.10 observed Discrimination : do defaulters get higher scores? AUC answers it, and ignores the scale. Calibration : when the model says 20%, do 20% default? AUC is blind to it. Officers read the score as a probability, so both matter.",
+      "href": "../slides/day1.html#ranking-not-probability"
+    },
+    {
+      "deck": "day1",
+      "id": "proper-scores",
+      "n": 19,
+      "session": 2,
+      "title": "A proper score rewards the forecaster for saying what they believe",
+      "text": "Scoring a probability A proper score rewards the forecaster for saying what they believe def brier(y, p): return np.mean((p - y) ** 2) def log_loss(y, p): p = np.clip(p, 1e-12, 1 - 1e-12) return -np.mean(y * np.log(p) + (1 - y) * np.log(1 - p)) Both are proper: the expected score is best when the forecast equals the true probability. Accuracy at 0.5 is not: 0.51 and 0.99 score the same. Log loss punishes a confident miss hard; Brier is bounded and easier to explain.",
+      "href": "../slides/day1.html#proper-scores"
+    },
+    {
+      "deck": "day1",
+      "id": "beaten-by-base-rate",
+      "n": 20,
+      "session": 2,
+      "title": "As a probability, Amana loses to the base rate",
+      "text": "A forecast that knows nothing As a probability, Amana loses to the base rate Forecast on the holdout Brier Log loss AUC Amana, as shipped 0.199 0.586 0.755 Everyone gets the calib default rate 0.090 0.324 0.500 What goes wrong. Reporting AUC alone. The model that ranks better is the worse probability by both proper scores.",
+      "href": "../slides/day1.html#beaten-by-base-rate"
+    },
+    {
+      "deck": "day1",
+      "id": "reliability-diagram-bins",
+      "n": 21,
+      "session": 2,
+      "title": "A reliability diagram puts predicted against observed, bin by bin",
+      "text": "Seeing calibration A reliability diagram puts predicted against observed, bin by bin Bin (1,000 each) Predicted Observed Lowest 0.076 0.020 Fourth 0.262 0.042 Seventh 0.484 0.108 Highest 0.854 0.314 Sort by prediction, cut into equal-count bins, compare the means. Perfect calibration lies on the diagonal. Every Amana bin lies far below it. Expected calibration error: 0.30.",
+      "href": "../slides/day1.html#reliability-diagram-bins"
+    },
+    {
+      "deck": "day1",
+      "id": "rebalancing-inflates",
+      "n": 22,
+      "session": 2,
+      "title": "Trained on a 50/50 sample, applied where one in ten defaults",
+      "text": "Why the curve is so low Trained on a 50/50 sample, applied where one in ten defaults 1 · Rebalance Non-defaults dropped until half the rows default → 2 · Train The model learns odds for a world with 50% defaults → 3 · Apply About 10% default: every probability is inflated A quick check. Rescaling the odds back to the true base rate brings the Brier score from 0.199 to 0.082. The proper repair is fitted on held-out rows: Session 3.",
+      "href": "../slides/day1.html#rebalancing-inflates"
+    },
+    {
+      "deck": "day1",
+      "id": "brier-decomposition",
+      "n": 23,
+      "session": 2,
+      "title": "Brier = reliability minus resolution plus uncertainty",
+      "text": "What the Brier score is made of Brier = reliability minus resolution plus uncertainty Reliability (miscalibration) 0.117 Uncertainty (the base rate) 0.089 Resolution (separation) 0.008 Read it. Amana loses more to miscalibration than it gains from separating applicants. Recalibration removes most of the first term and leaves the other two.",
+      "href": "../slides/day1.html#brier-decomposition"
+    },
+    {
+      "deck": "day1",
+      "id": "check-proper-score",
+      "n": 24,
+      "session": 2,
+      "title": "Which number shows that the probabilities are too high?",
+      "text": "Checkpoint Which number shows that the probabilities are too high? A second team's model has AUC 0.78 on your holdout and accuracy 90% at a threshold of 0.5. Its mean predicted default probability is 0.31; the default rate is 0.09. Which result tells the committee the probabilities cannot be read as rates? The AUC of 0.78, which is high for a credit model The accuracy of 90% The model's training loss, reported by the developers at the end of fitting A reliability diagram and a Brier score against the base rate",
+      "href": "../slides/day1.html#check-proper-score"
+    },
+    {
+      "deck": "day1",
+      "id": "lab-1-2",
+      "n": 25,
+      "session": 2,
+      "title": "Scores and a reliability diagram",
+      "text": "Lab 1.2 · 25 min Scores and a reliability diagram Write the Brier score, log loss and equal-count reliability bins, score Amana against the constant base-rate forecast on the holdout, and draw the diagram that shows its probabilities are about four times too high. D1_2_compute_brier_score.ipynb Write the Brier score and log loss 5 min Score Amana and the base-rate forecast 5 min Write equal-count reliability bins 6 min Draw the reliability diagram 5 min Name the cause in the metadata 4 min ✱ Stretch: Split the Brier score into reliability, resolution and uncertainty",
+      "href": "../slides/day1.html#lab-1-2"
+    },
+    {
+      "deck": "day1",
+      "id": "s3",
+      "n": 26,
+      "session": 3,
+      "title": "Recalibration",
+      "text": "Session 3 Recalibration Fit Platt scaling and isotonic regression on a calibration split Score both on separate held-out rows, never on the rows that fitted them Choose a method and state what it cannot repair 03",
+      "href": "../slides/day1.html#s3"
+    },
+    {
+      "deck": "day1",
+      "id": "recap-ds204-calibration",
+      "n": 27,
+      "session": 3,
+      "title": "You calibrated your own model before; now you repair someone else's",
+      "text": "From DS-204 You calibrated your own model before; now you repair someone else's DS-204, Day 4 Calibration measured by decile on your own model, repaired on unseen rows, lost again under drift. Here Two maps compared with proper scores, the rows each may touch, what no map can repair, and the check by group.",
+      "href": "../slides/day1.html#recap-ds204-calibration"
+    },
+    {
+      "deck": "day1",
+      "id": "repair-without-retraining",
+      "n": 28,
+      "session": 3,
+      "title": "A recalibration map sits after the model and changes only the meaning of the score",
+      "text": "Recalibration A recalibration map sits after the model and changes only the meaning of the score Amana score, unchanged → Map fitted on the calib rows → Probability judged on the holdout The map is monotone, so the ranking and the AUC do not move. The developers can adopt it without retraining: it is a recommendation with evidence.",
+      "href": "../slides/day1.html#repair-without-retraining"
+    },
+    {
+      "deck": "day1",
+      "id": "platt-and-isotonic",
+      "n": 29,
+      "session": 3,
+      "title": "Platt scaling fits one smooth curve; isotonic regression can step anywhere",
+      "text": "Two methods Platt scaling fits one smooth curve; isotonic regression can step anywhere Platt scaling A logistic regression of the outcome on the logit of the score: two parameters, a smooth S-shaped map. Steady with few rows. Isotonic regression Any non-decreasing step function of the score. Flexible, needs many rows, can overfit a small calib set. lr = LogisticRegression(C=1e6).fit(logit(p_cal).reshape(-1, 1), y_cal) platt = lambda q: lr.predict_proba(logit(q).reshape(-1, 1))[:, 1]",
+      "href": "../slides/day1.html#platt-and-isotonic"
+    },
+    {
+      "deck": "day1",
+      "id": "recalibration-results",
+      "n": 30,
+      "session": 3,
+      "title": "Both maps cut the Brier score by more than half, and the AUC stays at 0.755",
+      "text": "Lab 1.3 on the holdout Both maps cut the Brier score by more than half, and the AUC stays at 0.755 Holdout Brier Log loss ECE AUC Raw Amana 0.199 0.586 0.304 0.755 Platt 0.081 0.284 0.011 0.755 Isotonic 0.081 0.287 0.012 0.754 Both now beat the base rate (Brier 0.090, log loss 0.324).",
+      "href": "../slides/day1.html#recalibration-results"
+    },
+    {
+      "deck": "day1",
+      "id": "map-on-wrong-rows",
+      "n": 31,
+      "session": 3,
+      "title": "A map judged on the rows that fitted it looks perfect",
+      "text": "What goes wrong A map judged on the rows that fitted it looks perfect 0.002 ECE of isotonic fitted and scored on the holdout 0.012 ECE of isotonic fitted on calib, scored on the holdout Isotonic regression can follow the noise of the rows it was fitted on. The honest error is six times larger. Same mistake as the claimed AUC of Lab 1.1, one step later.",
+      "href": "../slides/day1.html#map-on-wrong-rows"
+    },
+    {
+      "deck": "day1",
+      "id": "what-no-map-repairs",
+      "n": 32,
+      "session": 3,
+      "title": "A map of the score cannot see what the score cannot see",
+      "text": "The limit of the repair A map of the score cannot see what the score cannot see It fixes the average relation between score and outcome. It cannot fix a group whose risk differs at the same score: a column the model never had. It cannot improve the ranking. It holds while new applicants resemble the calib rows; a shift breaks it again. Next session. Amana excludes region and age band on purpose. Is it calibrated within them?",
+      "href": "../slides/day1.html#what-no-map-repairs"
+    },
+    {
+      "deck": "day1",
+      "id": "check-recalibration-rows",
+      "n": 33,
+      "session": 3,
+      "title": "Where should the recalibration map be fitted?",
+      "text": "Checkpoint Where should the recalibration map be fitted? You recommend Platt scaling for Amana. You have the 30,000 training rows, 10,000 calib rows and 10,000 holdout rows. Where do you fit the map, and where do you report its effect? Fit on the calib rows, report on the holdout Fit on the training rows, report on the holdout Fit and report on the holdout Fit and report on the calib rows",
+      "href": "../slides/day1.html#check-recalibration-rows"
+    },
+    {
+      "deck": "day1",
+      "id": "lab-1-3",
+      "n": 34,
+      "session": 3,
+      "title": "Platt and isotonic on held-out rows",
+      "text": "Lab 1.3 · 25 min Platt and isotonic on held-out rows Fit Platt scaling and isotonic regression on the calib rows, score both on the holdout against the raw model, show that AUC does not move, and see what fitting on the wrong rows would have reported. D1_3_recalibrate_two_methods.ipynb Fit Platt scaling on the calib rows 6 min Fit isotonic regression on the same rows 4 min Score raw, Platt and isotonic on the holdout 6 min Draw the three reliability curves 5 min Choose one and write why 4 min ✱ Stretch: Recalibrate with only 500 calib rows and compare the two methods again",
+      "href": "../slides/day1.html#lab-1-3"
+    },
+    {
+      "deck": "day1",
+      "id": "s4",
+      "n": 35,
+      "session": 4,
+      "title": "Calibration by subgroup",
+      "text": "Session 4 Calibration by subgroup Break calibration down by a grouping column with an interval for each group Tell a real gap from noise in a small group Name the worst group and the evidence that it is not chance 04",
+      "href": "../slides/day1.html#s4"
+    },
+    {
+      "deck": "day1",
+      "id": "calibrated-on-average",
+      "n": 36,
+      "session": 4,
+      "title": "Calibrated on average can hide a group the model under-predicts",
+      "text": "Calibration by subgroup Calibrated on average can hide a group the model under-predicts After Platt, mean predicted 0.090 against 0.099 observed on the holdout. Region and age band are not features of Amana, by design. If risk differs between them at the same score, the average hides it. Why it matters at Mizan An under-predicted group gets loans priced below its risk; an over-predicted one is declined more than it should be. Both are harms to people.",
+      "href": "../slides/day1.html#calibrated-on-average"
+    },
+    {
+      "deck": "day1",
+      "id": "intervals-for-small-groups",
+      "n": 37,
+      "session": 4,
+      "title": "A gap in a group of 500 needs an interval before it is a finding",
+      "text": "Noise in small groups A gap in a group of 500 needs an interval before it is a finding def wilson(k, n, z=1.96): ph = k / n c = (ph + z*z/(2*n)) / (1 + z*z/n) h = z * np.sqrt(ph*(1-ph)/n + z*z/(4*n*n)) / (1 + z*z/n) return c - h, c + h The Northern region has 508 holdout applicants; 78 defaulted. The 95% Wilson interval for its rate: 12.5% to 18.8%. A finding is a prediction outside the interval, not any gap.",
+      "href": "../slides/day1.html#intervals-for-small-groups"
+    },
+    {
+      "deck": "day1",
+      "id": "calibration-by-region",
+      "n": 38,
+      "session": 4,
+      "title": "The Northern region defaults 6.7 points more often than predicted",
+      "text": "Lab 1.4 · by region The Northern region defaults 6.7 points more often than predicted Region n Predicted Observed 95% interval Central 3,448 8.9% 9.8% 8.9 to 10.9 Western 2,707 8.9% 9.8% 8.8 to 11.0 Eastern 1,951 9.2% 9.0% 7.8 to 10.4 Southern 1,386 9.2% 9.7% 8.2 to 11.3 Northern 508 8.7% 15.4% 12.5 to 18.8",
+      "href": "../slides/day1.html#calibration-by-region"
+    },
+    {
+      "deck": "day1",
+      "id": "calibration-by-age",
+      "n": 39,
+      "session": 4,
+      "title": "Applicants aged 18 to 24 are under-predicted by about 5 points",
+      "text": "Lab 1.4 · by age band Applicants aged 18 to 24 are under-predicted by about 5 points 18-24 · predicted 12.7% 18-24 · observed 17.5% 35-44 · predicted 8.2% 35-44 · observed 8.4% 18-24: 1,201 applicants, observed interval 15.4% to 19.7%, prediction outside. The other bands sit inside their intervals.",
+      "href": "../slides/day1.html#calibration-by-age"
+    },
+    {
+      "deck": "day1",
+      "id": "report-gap-not-fix",
+      "n": 40,
+      "session": 4,
+      "title": "Report the gap, its interval and its likely cause; leave the fix to the owners",
+      "text": "What the validator writes Report the gap, its interval and its likely cause; leave the fix to the owners The finding Northern applicants: 15.4% observed against 8.7% predicted, interval 12.5 to 18.8. The likely cause Region is excluded and the North is 5% of the data: the model never learned it. The options A condition of use, a group-aware calibration, more data: a policy choice for Talib and Dr. Sameera.",
+      "href": "../slides/day1.html#report-gap-not-fix"
+    },
+    {
+      "deck": "day1",
+      "id": "check-group-gap",
+      "n": 41,
+      "session": 4,
+      "title": "Which gap is a finding?",
+      "text": "Checkpoint Which gap is a finding? After recalibration, the Southern region shows 9.2% predicted and 9.7% observed (interval 8.2 to 11.3). The Northern region shows 8.7% predicted and 15.4% observed (interval 12.5 to 18.8). What do you report? Neither: the model was recalibrated Both, as under-predicted regions The Northern gap, with its interval Neither: the Northern group is too small",
+      "href": "../slides/day1.html#check-group-gap"
+    },
+    {
+      "deck": "day1",
+      "id": "lab-1-4",
+      "n": 42,
+      "session": 4,
+      "title": "Calibration by region and age band",
+      "text": "Lab 1.4 · 25 min Calibration by region and age band Break the recalibrated probabilities down by region and age band, put a 95% interval on each observed rate, and name the worst group: the young applicants and the small Northern region, which the model cannot see. D1_4_break_calibration_down.ipynb Write the calibration table by group 7 min Add a 95% interval to each observed rate 5 min Run it for region and age band 4 min Plot predicted against observed per group 5 min Name the worst group and why 4 min ✱ Stretch: Run the same table for gender and channel and say which gap you would report",
+      "href": "../slides/day1.html#lab-1-4"
+    },
+    {
+      "deck": "day1",
+      "id": "wrap-up",
+      "n": 43,
+      "session": 4,
+      "title": "What today showed about Amana's probabilities",
+      "text": "Day 1 · three things to keep What today showed about Amana's probabilities Claims need rows The 0.864 was in-sample. On the holdout, 0.755. Ranking is not risk Probabilities four times too high, repaired by Platt on calib rows: Brier 0.199 to 0.081. Average is not every group The North and the 18 to 24 band stay under-predicted after the repair.",
+      "href": "../slides/day1.html#wrap-up"
+    },
+    {
+      "deck": "day1",
+      "id": "next",
+      "n": 44,
+      "session": 4,
+      "title": "Day 2: intervals with guarantees",
+      "text": "Tomorrow Day 2: intervals with guarantees A point prediction of a loss amount says nothing about how wrong it can be. Tomorrow: conformal intervals and prediction sets, and the condition their 90% rests on. Prepare: reread the bootstrap pre-work; bring one question about today's diagram.",
+      "href": "../slides/day1.html#next"
+    },
+    {
+      "deck": "day2",
+      "id": "title",
+      "n": 1,
+      "session": 0,
+      "title": "Intervals with guarantees",
+      "text": "SDAIA Academy · Uncertainty, Interpretability and Model Validation Intervals with guarantees Day 2: Wrap the loss model and the grade model in conformal intervals and prediction sets, then test the guarantee by group and under shift Data Science Track4 teaching days + capstone day4 sessions · 4 labsDS-305",
+      "href": "../slides/day2.html#title"
+    },
+    {
+      "deck": "day2",
+      "id": "agenda",
+      "n": 2,
+      "session": 0,
+      "title": "Intervals with guarantees",
+      "text": "Today Intervals with guarantees Session 1 · Conformal intervals Split conformal prediction turns any regression into intervals with 90% coverage, as long as the rows are exchangeable Session 2 · Prediction sets For the three risk grades, conformal prediction returns a set of grades, and the size of the set is the uncertainty Session 3 · Coverage by group The 90% is an average over everyone: large loans and the Northern region can sit far below it, and a group-conditional variant repairs that Session 4 · Coverage under shift When the population moves, the rows are no longer exchangeable and the guarantee quietly fails; a simulated shift measures how much",
+      "href": "../slides/day2.html#agenda"
+    },
+    {
+      "deck": "day2",
+      "id": "review-day1",
+      "n": 3,
+      "session": 0,
+      "title": "Which statement about Amana after Platt scaling is right?",
+      "text": "Review of Day 1 Which statement about Amana after Platt scaling is right? Platt scaling was fitted on the calib rows. On the holdout, the Brier score fell from 0.199 to 0.081 and the mean prediction is 9.0% against 9.9% observed. Which statement holds? The AUC rose with the Brier score Every region is now calibrated, since the map was fitted on all of them The ranking is unchanged and the average is repaired The developers' model was retrained",
+      "href": "../slides/day2.html#review-day1"
+    },
+    {
+      "deck": "day2",
+      "id": "s1",
+      "n": 4,
+      "session": 1,
+      "title": "Conformal intervals",
+      "text": "Session 1 Conformal intervals Compute the split conformal threshold with its finite-sample correction Wrap a fitted regression in intervals and check coverage on new rows State the one assumption the guarantee rests on 01",
+      "href": "../slides/day2.html#s1"
+    },
+    {
+      "deck": "day2",
+      "id": "point-prediction-silent",
+      "n": 5,
+      "session": 1,
+      "title": "A loss prediction of 12,000 riyals says nothing about how wrong it can be",
+      "text": "The problem A loss prediction of 12,000 riyals says nothing about how wrong it can be Amana's loss model predicts the riyals lost if a loan defaults. Finance provisions on it; collections plan on it. A point prediction is silent about its error: 12,000 could mean 11,000 to 13,000 or 2,000 to 30,000. What the validator adds An interval around every prediction that contains the real loss 90% of the time, with the condition under which that holds.",
+      "href": "../slides/day2.html#point-prediction-silent"
+    },
+    {
+      "deck": "day2",
+      "id": "exchangeability",
+      "n": 6,
+      "session": 1,
+      "title": "Conformal prediction needs only one thing: new rows drawn like the calib rows",
+      "text": "The one assumption Conformal prediction needs only one thing: new rows drawn like the calib rows Exchangeable : the calib rows and the new row could be shuffled without changing their joint distribution. Independent draws from one population are exchangeable. No assumption on the model, the shape of the errors or the features. The guarantee breaks when the population moves: a new product, a new region, a shift in incomes. What goes wrong. Quoting \"90% guaranteed\" for applicants who no longer look like the calib rows. Session 4 measures how much is lost.",
+      "href": "../slides/day2.html#exchangeability"
+    },
+    {
+      "deck": "day2",
+      "id": "split-conformal-steps",
+      "n": 7,
+      "session": 1,
+      "title": "Score the calib rows, take a quantile, widen every prediction by it",
+      "text": "Split conformal, in three steps Score the calib rows, take a quantile, widen every prediction by it 1 · Score On calib defaults, the error |loss - prediction| → 2 · Threshold The ceil((n+1)(1-α))-th smallest score → 3 · Interval prediction ± q, clipped at zero No retraining. The model is used as delivered; only its predictions on calib rows are needed.",
+      "href": "../slides/day2.html#split-conformal-steps"
+    },
+    {
+      "deck": "day2",
+      "id": "finite-sample-correction",
+      "n": 8,
+      "session": 1,
+      "title": "Counting the new loan turns \"about 90%\" into \"at least 90%\"",
+      "text": "Why \"n + 1\" Counting the new loan turns \"about 90%\" into \"at least 90%\" def conformal_quantile(scores, alpha=0.1): s = np.sort(scores) k = ceil((len(s) + 1) * (1 - alpha)) if k > len(s): return inf # too few rows return s[k - 1] The new loan's score is equally likely to fall at any of the n + 1 ranks. So the chance it falls at or below rank k is k / (n + 1), at least 90%. With 8 calib rows, 90% needs a ninth: the interval is infinite. Honest, and a warning about small groups.",
+      "href": "../slides/day2.html#finite-sample-correction"
+    },
+    {
+      "deck": "day2",
+      "id": "loss-interval-result",
+      "n": 9,
+      "session": 1,
+      "title": "Plus or minus 8,134 riyals covers 91% of real losses",
+      "text": "Lab 2.1 on the holdout Plus or minus 8,134 riyals covers 91% of real losses 91.0% coverage on 993 holdout defaults, target 90% 8,134 threshold q in riyals, from 895 calib defaults 15,667 mean interval width in riyals; median loss 10,520 Same answer from a library. MAPIE's SplitConformalRegressor with prefit=True returns the same half-width, 8,134.",
+      "href": "../slides/day2.html#loss-interval-result"
+    },
+    {
+      "deck": "day2",
+      "id": "coverage-over-splits",
+      "n": 10,
+      "session": 1,
+      "title": "Coverage is a promise about the average over draws, not about one interval",
+      "text": "What the 90% promises Coverage is a promise about the average over draws, not about one interval 0.900 mean coverage over 100 random calib and test splits 0.867 to 0.935 the range across those splits One calib set can give 87% or 93% on one test set. \"This loan has a 90% chance to fall in its interval\" is not the promise. The promise is marginal: over loans and calib draws, on average.",
+      "href": "../slides/day2.html#coverage-over-splits"
+    },
+    {
+      "deck": "day2",
+      "id": "check-conformal-promise",
+      "n": 11,
+      "session": 1,
+      "title": "What does the 90% interval promise?",
+      "text": "Checkpoint What does the 90% interval promise? Split conformal on 895 calib defaults gives Amana's loss model intervals of plus or minus 8,134 riyals. A provisioning analyst asks what the \"90%\" means. What do you tell her? Each loan has a 90% chance of a loss inside its own interval Nine in ten losses fall inside, whoever applies to Mizan next year The loss model is now 90% accurate Over new loans like the calib loans, at least 90% fall inside",
+      "href": "../slides/day2.html#check-conformal-promise"
+    },
+    {
+      "deck": "day2",
+      "id": "lab-2-1",
+      "n": 12,
+      "session": 1,
+      "title": "Loss intervals with 90% coverage",
+      "text": "Lab 2.1 · 25 min Loss intervals with 90% coverage Wrap Amana's loss model in split conformal intervals from the calib defaults, check 90% coverage and width on the holdout defaults, and confirm the same numbers with MAPIE. D2_1_wrap_loss_regression.ipynb Score the calib defaults: absolute residuals 4 min Write the conformal threshold 6 min Intervals for the holdout defaults 4 min Coverage and mean width 5 min The same with MAPIE 6 min ✱ Stretch: Repeat over 100 random calib and test splits and plot the coverage you get",
+      "href": "../slides/day2.html#lab-2-1"
+    },
+    {
+      "deck": "day2",
+      "id": "s2",
+      "n": 13,
+      "session": 2,
+      "title": "Prediction sets",
+      "text": "Session 2 Prediction sets Build LAC prediction sets from calibrated scores Build adaptive (APS) sets and compare their sizes Read a set of size one, two or three as a decision 02",
+      "href": "../slides/day2.html#s2"
+    },
+    {
+      "deck": "day2",
+      "id": "top-grade-hides",
+      "n": 14,
+      "session": 2,
+      "title": "An officer who sees only the top grade cannot see the model's doubt",
+      "text": "Classification An officer who sees only the top grade cannot see the model's doubt Amana's grade model gives three probabilities: on time (A), late but repaid (B), default (C). The top grade is right for 74.4% of holdout applicants. For some it is a near-certainty; for others three grades are close. The top grade looks the same. A prediction set The grades the model cannot rule out, chosen so the true grade is in the set 90% of the time. Its size is the doubt.",
+      "href": "../slides/day2.html#top-grade-hides"
+    },
+    {
+      "deck": "day2",
+      "id": "lac-sets",
+      "n": 15,
+      "session": 2,
+      "title": "LAC keeps every grade whose probability clears one bar",
+      "text": "The simplest sets LAC keeps every grade whose probability clears one bar score = 1 - P_cal[i, true_grade] # calib rows q = conformal_quantile(score, 0.1) # 0.834 in_set = P_hold >= 1 - q # 0.166 Score: one minus the probability of the true grade. On Amana: a grade enters the set if its probability is at least 0.166. Smallest sets on average; can be empty.",
+      "href": "../slides/day2.html#lac-sets"
+    },
+    {
+      "deck": "day2",
+      "id": "aps-sets",
+      "n": 16,
+      "session": 2,
+      "title": "APS adds grades from most to least likely until their total reaches the threshold",
+      "text": "Adaptive sets APS adds grades from most to least likely until their total reaches the threshold Sort grades by probability → Accumulate add the next grade's probability → Stop when the total passes q (with a random share of the last grade) Unsure applicants, whose probabilities are spread, get larger sets. The randomisation makes coverage exact rather than conservative.",
+      "href": "../slides/day2.html#aps-sets"
+    },
+    {
+      "deck": "day2",
+      "id": "set-results",
+      "n": 17,
+      "session": 2,
+      "title": "Both cover 90%; APS gives fewer one-grade sets",
+      "text": "Lab 2.2 on the holdout Both cover 90%; APS gives fewer one-grade sets Method Coverage Mean size Size 1 Size 2 Size 3 LAC 89.2% 1.56 56.7% 30.6% 12.7% APS 90.3% 1.67 43.1% 46.4% 10.5% No empty sets with either method on this holdout.",
+      "href": "../slides/day2.html#set-results"
+    },
+    {
+      "deck": "day2",
+      "id": "coverage-by-true-grade",
+      "n": 18,
+      "session": 2,
+      "title": "The sets miss the true grade of more than half the defaulters",
+      "text": "What the average hides The sets miss the true grade of more than half the defaulters A · on time 99.8% / 99.4% B · late 70.7% / 79.6% C · default 44.9% / 43.0% Coverage by true grade, LAC / APS. Marginal 90% is reached by over-covering the 72% who pay on time.",
+      "href": "../slides/day2.html#coverage-by-true-grade"
+    },
+    {
+      "deck": "day2",
+      "id": "set-size-as-doubt",
+      "n": 19,
+      "session": 2,
+      "title": "Applicants whose set holds all three grades default three times as often",
+      "text": "Reading set size Applicants whose set holds all three grades default three times as often 1,046 holdout applicants (10.5%) with the set {A, B, C} 24.8% vs 8.2% their default rate, against everyone else's A use for the set A set of three grades could route an application to Fuad's officers for review instead of an automatic decision. Day 4 turns this into a condition of use.",
+      "href": "../slides/day2.html#set-size-as-doubt"
+    },
+    {
+      "deck": "day2",
+      "id": "check-set-size",
+      "n": 20,
+      "session": 2,
+      "title": "What does a set of size one tell the officer?",
+      "text": "Checkpoint What does a set of size one tell the officer? An applicant's 90% APS set is {A}. The officer asks whether the model is certain this applicant will repay on time. What is the right answer? No: across applicants, about one in ten sets misses the true grade Yes: only one grade could be the true one Yes, with exactly 90% probability for this applicant No: a set of one means the model failed to find enough grades to include",
+      "href": "../slides/day2.html#check-set-size"
+    },
+    {
+      "deck": "day2",
+      "id": "lab-2-2",
+      "n": 21,
+      "session": 2,
+      "title": "Sets for three risk grades",
+      "text": "Lab 2.2 · 25 min Sets for three risk grades Build LAC and adaptive prediction sets for grades A, B and C from the grade model, check 90% coverage on the holdout, and measure how set sizes differ by method and by true grade. D2_2_build_prediction_sets.ipynb Write the LAC score and its sets 7 min Coverage and set sizes 4 min Adaptive sets (APS) from the helper 5 min Coverage and size by true grade 5 min Which applicants get all three grades 4 min ✱ Stretch: Make sets at 80% and 95% and plot the mean set size against the level",
+      "href": "../slides/day2.html#lab-2-2"
+    },
+    {
+      "deck": "day2",
+      "id": "s3",
+      "n": 22,
+      "session": 3,
+      "title": "Coverage by group",
+      "text": "Session 3 Coverage by group Measure coverage and width by subgroup Explain why marginal coverage says nothing about a group Apply group-conditional (Mondrian) conformal and read its cost in width 03",
+      "href": "../slides/day2.html#s3"
+    },
+    {
+      "deck": "day2",
+      "id": "marginal-not-conditional",
+      "n": 23,
+      "session": 3,
+      "title": "90% for everyone together can be 77% for the loans that matter",
+      "text": "Marginal and conditional 90% for everyone together can be 77% for the loans that matter Marginal coverage: over all loans, 90%. This is what split conformal guarantees. Conditional coverage: within a group (large loans, a region), 90%. Not guaranteed. One width for all loans is too wide for loans whose losses vary little and too narrow for those that vary a lot. The question at Mizan Talib provisions large loans separately. He needs their intervals to hold, not the average.",
+      "href": "../slides/day2.html#marginal-not-conditional"
+    },
+    {
+      "deck": "day2",
+      "id": "coverage-by-loan-size",
+      "n": 24,
+      "session": 3,
+      "title": "Large loans are covered 77% of the time, the others 100%",
+      "text": "Lab 2.3 · one threshold for all Large loans are covered 77% of the time, the others 100% Loan size Holdout defaults Coverage Mean width (SAR) Large, above 25,000 382 76.7% 16,268 Medium, 10,000 to 25,000 532 100% 15,737 Small, up to 10,000 79 100% 12,286 By region, the Northern region is lowest: 87.2% on 78 defaults, too few to call it a finding on its own.",
+      "href": "../slides/day2.html#coverage-by-loan-size"
+    },
+    {
+      "deck": "day2",
+      "id": "group-conditional-conformal",
+      "n": 25,
+      "session": 3,
+      "title": "One threshold per group gives each group its own guarantee",
+      "text": "The repair One threshold per group gives each group its own guarantee def group_thresholds(s, groups, alpha=0.1): return {g: conformal_quantile( s[groups == g], alpha) for g in sorted(set(groups))} Called group-conditional or Mondrian conformal. Thresholds: large 13,256, medium 4,332, small 1,536 riyals. Each group needs enough calib rows: 79 small-loan defaults give a threshold from 79 scores.",
+      "href": "../slides/day2.html#group-conditional-conformal"
+    },
+    {
+      "deck": "day2",
+      "id": "who-pays-in-width",
+      "n": 26,
+      "session": 3,
+      "title": "Large loans get wider intervals; small loans get narrower ones",
+      "text": "Lab 2.3 · before and after Large loans get wider intervals; small loans get narrower ones Loan size Coverage before after Width before after Large 76.7% 90.6% 16,268 26,422 Medium 100% 92.5% 15,737 8,665 Small 100% 86.1% 12,286 3,072 Overall coverage stays at 91.2%. Small loans' 86.1% is on 79 defaults: within chance of 90%.",
+      "href": "../slides/day2.html#who-pays-in-width"
+    },
+    {
+      "deck": "day2",
+      "id": "coverage-finding",
+      "n": 27,
+      "session": 3,
+      "title": "A coverage finding names the group, the number and the cost of the repair",
+      "text": "What the report says A coverage finding names the group, the number and the cost of the repair Finding. The loss intervals cover 91% of defaults overall but only 77% of loans above 25,000 SAR (382 holdout defaults). One threshold per loan-size band restores 91% for large loans, with intervals 1.6 times wider. What Under-coverage of large loans Evidence 382 holdout defaults, coverage table Recommendation Per-band thresholds, recomputed when the loan mix changes",
+      "href": "../slides/day2.html#coverage-finding"
+    },
+    {
+      "deck": "day2",
+      "id": "check-group-coverage",
+      "n": 28,
+      "session": 3,
+      "title": "Why did one threshold under-cover large loans?",
+      "text": "Checkpoint Why did one threshold under-cover large loans? Split conformal with one threshold reaches 91% coverage overall on Amana's loss intervals, 77% on large loans and 100% on medium and small loans. What explains it? The conformal threshold was computed wrongly Losses on large loans vary more, and one width averages over groups Large loans are too rare in the calib rows The loss model under-predicts large losses, so their intervals sit too low",
+      "href": "../slides/day2.html#check-group-coverage"
+    },
+    {
+      "deck": "day2",
+      "id": "lab-2-3",
+      "n": 29,
+      "session": 3,
+      "title": "Coverage by group, then per group",
+      "text": "Lab 2.3 · 25 min Coverage by group, then per group Measure the loss intervals' coverage by loan size and region, find the large loans near 77%, then compute one threshold per loan-size band and show every band back near 90% with wider intervals where they are needed. D2_3_measure_subgroup_coverage.ipynb Coverage and width by loan size and region 6 min Write group-conditional thresholds 7 min Coverage by group again 5 min Width by group: who pays for the repair 4 min Write one finding for the report 3 min ✱ Stretch: Scale the residuals by the predicted loss and compare with the group-conditional repair",
+      "href": "../slides/day2.html#lab-2-3"
+    },
+    {
+      "deck": "day2",
+      "id": "s4",
+      "n": 30,
+      "session": 4,
+      "title": "Coverage under shift",
+      "text": "Session 4 Coverage under shift Simulate a covariate shift by reweighting a held-out sample Measure the coverage lost for intervals and for sets Explain why the guarantee needs exchangeability and what restores it 04",
+      "href": "../slides/day2.html#s4"
+    },
+    {
+      "deck": "day2",
+      "id": "when-population-moves",
+      "n": 31,
+      "session": 4,
+      "title": "When applicants change, the interval does not know",
+      "text": "Coverage under shift When applicants change, the interval does not know A conformal threshold is a fact about the calib rows. If next year's applicants earn more, borrow more or come from a new region, the rows are no longer exchangeable. The interval keeps its width and quietly loses coverage. At Mizan A planned campaign for salaried applicants with higher incomes. Higher incomes mean larger loans.",
+      "href": "../slides/day2.html#when-population-moves"
+    },
+    {
+      "deck": "day2",
+      "id": "simulating-a-shift",
+      "n": 32,
+      "session": 4,
+      "title": "Tilt the holdout towards higher incomes and measure what is lost",
+      "text": "A shift you control Tilt the holdout towards higher incomes and measure what is lost z = standardise(log(declared_income)) w = exp(strength * z) shifted = hold.iloc[rng.choice(n, n, p=w / w.sum())] Strength 0: the holdout as it is. Strength 1: median declared income of defaulters from 9,400 to 16,100 riyals. The truth of every resampled row is known, so coverage can be measured exactly.",
+      "href": "../slides/day2.html#simulating-a-shift"
+    },
+    {
+      "deck": "day2",
+      "id": "coverage-lost-under-shift",
+      "n": 33,
+      "session": 4,
+      "title": "A strong income shift costs the loss intervals 14 points; the grade sets lose 1",
+      "text": "Lab 2.4 A strong income shift costs the loss intervals 14 points; the grade sets lose 1 Shift strength Loss interval coverage Large-loan share Grade set coverage 0 (holdout) 91.0% 38.5% 89.2% 0.5 88.4% 47.5% 89.3% 1.0 83.2% 58.1% 88.7% 1.5 77.1% 69.4% 88.0% The loss intervals' mean width moves by less than 5% across the four rows.",
+      "href": "../slides/day2.html#coverage-lost-under-shift"
+    },
+    {
+      "deck": "day2",
+      "id": "weighted-conformal",
+      "n": 34,
+      "session": 4,
+      "title": "Weighting the calib scores by the shift restores the coverage",
+      "text": "When the shift is known Weighting the calib scores by the shift restores the coverage 83.2% plain split conformal at strength 1 93.6% weighted conformal with the true weights Each calib score counts as much as its row is more likely after the shift. Needs the weights: in a simulation you know them; with real applicants you estimate them. The guarantee then rests on that estimate.",
+      "href": "../slides/day2.html#weighted-conformal"
+    },
+    {
+      "deck": "day2",
+      "id": "monitoring-rule",
+      "n": 35,
+      "session": 4,
+      "title": "The result becomes a monitoring rule with a trigger and an action",
+      "text": "From a stress test to a condition The result becomes a monitoring rule with a trigger and an action Watch Monthly: the share of new loans above 25,000 riyals and the median declared income Trigger Large-loan share above 48% (holdout: 38%) Action Recompute the per-band thresholds on recent defaults, or stop quoting the 90% What goes wrong. Monitoring coverage itself: losses are known only months after a default. Watch the inputs that predict the loss of coverage.",
+      "href": "../slides/day2.html#monitoring-rule"
+    },
+    {
+      "deck": "day2",
+      "id": "check-shift",
+      "n": 36,
+      "session": 4,
+      "title": "Why did the grade sets survive the shift that broke the loss intervals?",
+      "text": "Checkpoint Why did the grade sets survive the shift that broke the loss intervals? Under the same income shift, loss interval coverage falls from 91% to 77% while grade set coverage falls from 89% to 88%. Which explanation is right? Prediction sets keep their guarantee under shift; intervals for amounts do not The grade model was calibrated on more rows Loss errors grow with income through loan size; grade errors barely do Richer applicants default less, so the sets are easier",
+      "href": "../slides/day2.html#check-shift"
+    },
+    {
+      "deck": "day2",
+      "id": "lab-2-4",
+      "n": 37,
+      "session": 4,
+      "title": "An income shift, measured",
+      "text": "Lab 2.4 · 25 min An income shift, measured Tilt the holdout towards higher declared incomes at three strengths, measure the coverage the loss intervals and the grade sets lose, and see that the cost falls on the large loans. D2_4_simulate_income_shift.ipynb Write the shifted sample 5 min Loss interval coverage at three strengths 7 min Grade set coverage at three strengths 5 min Which loans lose coverage 5 min A monitoring rule from the result 3 min ✱ Stretch: Reweight the calib scores by the known shift and restore the coverage (weighted conformal)",
+      "href": "../slides/day2.html#lab-2-4"
+    },
+    {
+      "deck": "day2",
+      "id": "wrap-up",
+      "n": 38,
+      "session": 4,
+      "title": "What today showed about Amana's intervals and sets",
+      "text": "Day 2 · three things to keep What today showed about Amana's intervals and sets The guarantee is marginal 91% overall; 77% for large loans; defaulters' grade covered 45% of the time. Groups need their own threshold Per-band thresholds restore 91% for large loans, at 1.6 times the width. Shift breaks it silently A strong income shift: 77% coverage, same width. Watch the loan mix.",
+      "href": "../slides/day2.html#wrap-up"
+    },
+    {
+      "deck": "day2",
+      "id": "next",
+      "n": 39,
+      "session": 4,
+      "title": "Day 3: what drives the predictions",
+      "text": "Tomorrow Day 3: what drives the predictions Officers see three reasons with every application. Are they right, and are they stable? Permutation importance, effect plots and Shapley values, on two income features that move together. Prepare: one question about the reasons a credit model should be allowed to give.",
+      "href": "../slides/day2.html#next"
+    },
+    {
+      "deck": "day3",
+      "id": "title",
+      "n": 1,
+      "session": 0,
+      "title": "What drives the predictions",
+      "text": "SDAIA Academy · Uncertainty, Interpretability and Model Validation What drives the predictions Day 3: Explain the default model three ways, test how stable each explanation is, and find where explanations mislead Data Science Track4 teaching days + capstone day4 sessions · 4 labsDS-305",
+      "href": "../slides/day3.html#title"
+    },
+    {
+      "deck": "day3",
+      "id": "agenda",
+      "n": 2,
+      "session": 0,
+      "title": "What drives the predictions",
+      "text": "Today What drives the predictions Session 1 · Permutation importance Permutation importance measures what the model loses without a feature, and with correlated features it measures something else Session 2 · Effect plots Partial dependence averages over combinations that never occur; accumulated local effects stay inside the data Session 3 · Shapley values Shapley values split one prediction among the features, add up exactly, and can change when the model is refitted Session 4 · When explanations mislead A feature correlated with a protected attribute takes its attribution, and the reason shown to an applicant then names a proxy",
+      "href": "../slides/day3.html#agenda"
+    },
+    {
+      "deck": "day3",
+      "id": "review-day2",
+      "n": 3,
+      "session": 0,
+      "title": "Which statement about the loss intervals is supported?",
+      "text": "Review of Day 2 Which statement about the loss intervals is supported? Split conformal intervals for Amana's loss model cover 91% of holdout defaults, 77% of large loans, and 77% of all defaults after a strong simulated income shift. Which sentence can go in the report? Every loan's interval holds 90% of the time Coverage holds overall, not for large loans or a richer population The loss model must be retrained before any of its intervals can be used Under a shift the intervals widen to keep 90%",
+      "href": "../slides/day3.html#review-day2"
+    },
+    {
+      "deck": "day3",
+      "id": "s1",
+      "n": 4,
+      "session": 1,
+      "title": "Permutation importance",
+      "text": "Session 1 Permutation importance Compute permutation importance on held-out rows with repeats Report its spread, not a single number Permute correlated features together and explain the difference 01",
+      "href": "../slides/day3.html#s1"
+    },
+    {
+      "deck": "day3",
+      "id": "three-explanation-questions",
+      "n": 5,
+      "session": 1,
+      "title": "Each explanation method answers a different question",
+      "text": "Explanations Each explanation method answers a different question Method Its question Session Permutation importance How much worse does the model do without this feature? 1 Partial dependence, ALE How does the prediction change as this feature changes? 2 Shapley values How much did each feature move this one prediction? 3 None of them asks what causes default. All three describe the model, on data that may have features moving together.",
+      "href": "../slides/day3.html#three-explanation-questions"
+    },
+    {
+      "deck": "day3",
+      "id": "permutation-idea",
+      "n": 6,
+      "session": 1,
+      "title": "Shuffle one column on the holdout and measure how much worse the predictions get",
+      "text": "Permutation importance Shuffle one column on the holdout and measure how much worse the predictions get def rise_one(df, col, rng): d = df.copy() d[col] = d[col].to_numpy()[rng.permutation(len(d))] return log_loss(y, predict(d)) - base On the holdout: importance for new applicants, not memorised noise. On the validator's model: Amana with the Platt repair, log loss 0.284. One shuffle is one draw: repeat and report the spread.",
+      "href": "../slides/day3.html#permutation-idea"
+    },
+    {
+      "deck": "day3",
+      "id": "importance-with-spread",
+      "n": 7,
+      "session": 1,
+      "title": "Two income features lead; the last two cannot be told from zero",
+      "text": "Lab 3.1 · ten repeats Two income features lead; the last two cannot be told from zero bank_inflow 0.068 declared_income 0.046 term_months 0.033 loan_amount 0.025 prior_missed 0.009 household_size, channel range includes 0",
+      "href": "../slides/day3.html#importance-with-spread"
+    },
+    {
+      "deck": "day3",
+      "id": "shuffle-creates-impossible",
+      "n": 8,
+      "session": 1,
+      "title": "Shuffling one income creates applicants who do not exist",
+      "text": "The correlated pair Shuffling one income creates applicants who do not exist 0.84 correlation of log declared income and log bank inflow 36% of rows outside the real declared-to-inflow range after shuffling declared income 98% of real applicants declare between 0.72 and 2.36 times their bank inflow. Shuffle declared income alone and a third of rows declare 20,000 against an inflow of 4,000. The model reads that as overstatement and predicts high risk: importance measures its reaction to fiction.",
+      "href": "../slides/day3.html#shuffle-creates-impossible"
+    },
+    {
+      "deck": "day3",
+      "id": "grouped-permutation",
+      "n": 9,
+      "session": 1,
+      "title": "Shuffled together, the pair matters less than either one alone",
+      "text": "Lab 3.1 · step 4 Shuffled together, the pair matters less than either one alone Shuffled Rise in log loss Range over 10 repeats bank_inflow alone 0.068 0.064 to 0.072 declared_income alone 0.046 0.043 to 0.050 Both, same permutation 0.034 0.030 to 0.037 For the report. Give features that travel together one grouped importance. Do not rank them against each other.",
+      "href": "../slides/day3.html#grouped-permutation"
+    },
+    {
+      "deck": "day3",
+      "id": "what-importance-may-say",
+      "n": 10,
+      "session": 1,
+      "title": "The table supports a statement about the model, never about the world",
+      "text": "Writing it up The table supports a statement about the model, never about the world Supported Amana's holdout log loss depends most on the two income features, then on term and loan size. Not supported \"Bank inflow matters more than declared income\", or \"income drives default\".",
+      "href": "../slides/day3.html#what-importance-may-say"
+    },
+    {
+      "deck": "day3",
+      "id": "check-permutation",
+      "n": 11,
+      "session": 1,
+      "title": "What do the two single-income importances tell you?",
+      "text": "Checkpoint What do the two single-income importances tell you? Shuffled alone, bank inflow raises the log loss by 0.068 and declared income by 0.046. Shuffled together, by 0.034. The two correlate at 0.84. Which reading is right? Bank inflow is the more important of the two Income accounts for 0.114 of the log loss Income matters; the single numbers measure reactions to impossible pairs Together they matter little, so income can be dropped from the next version",
+      "href": "../slides/day3.html#check-permutation"
+    },
+    {
+      "deck": "day3",
+      "id": "lab-3-1",
+      "n": 12,
+      "session": 1,
+      "title": "Importance and its spread",
+      "text": "Lab 3.1 · 25 min Importance and its spread Write permutation importance on the holdout with ten repeats, report the spread, then permute the two correlated income features together and see the pair matter less than either one shuffled alone. D3_1_compute_permutation_importance.ipynb Write permutation importance for one feature 7 min All features, ten repeats, with spread 5 min Plot the importances with their range 4 min Permute the two incomes together 5 min Write what the table may and may not say 4 min ✱ Stretch: Use the Brier score in place of log loss and see whether the order changes",
+      "href": "../slides/day3.html#lab-3-1"
+    },
+    {
+      "deck": "day3",
+      "id": "s2",
+      "n": 13,
+      "session": 2,
+      "title": "Effect plots",
+      "text": "Session 2 Effect plots Compute a partial dependence curve and individual curves Compute accumulated local effects for the same feature Show where the two disagree and which one to report 02",
+      "href": "../slides/day3.html#s2"
+    },
+    {
+      "deck": "day3",
+      "id": "partial-dependence-idea",
+      "n": 14,
+      "session": 2,
+      "title": "Partial dependence sets everyone's value to the same number and averages",
+      "text": "Partial dependence Partial dependence sets everyone's value to the same number and averages for v in grid: d = sample.copy() d[\"declared_income\"] = v # everyone pd_curve.append(predict(d).mean()) Answers: what if every applicant had declared v, all else unchanged? Fine when the feature is independent of the others. With bank inflow fixed, a high v means overstatement for most applicants.",
+      "href": "../slides/day3.html#partial-dependence-idea"
+    },
+    {
+      "deck": "day3",
+      "id": "ale-idea",
+      "n": 15,
+      "session": 2,
+      "title": "ALE moves each applicant only a little, inside their own bin",
+      "text": "Accumulated local effects ALE moves each applicant only a little, inside their own bin 1 · Bin Cut declared income at the grid values → 2 · Nudge Move only that bin's applicants from its lower to its upper edge → 3 · Accumulate Add the mean changes from left to right, centre at zero Every prediction is for a nearby, realistic applicant: their bank inflow already matches an income in that bin.",
+      "href": "../slides/day3.html#ale-idea"
+    },
+    {
+      "deck": "day3",
+      "id": "pd-ale-disagree",
+      "n": 16,
+      "session": 2,
+      "title": "Both curves rise above 10,000 riyals; partial dependence rises 1.6 times as much",
+      "text": "Lab 3.2 Both curves rise above 10,000 riyals; partial dependence rises 1.6 times as much Declared income (SAR) 4,310 7,290 9,070 11,650 13,880 18,930 PD, centred -0.036 -0.055 -0.033 0.035 0.073 0.133 ALE, centred -0.032 -0.032 -0.026 0.012 0.047 0.080 PD rows outside the data 75% 29% 17% 17% 27% 53% From 9,070 to 18,930 riyals: PD rises by 0.166, ALE by 0.106 (change in predicted default probability).",
+      "href": "../slides/day3.html#pd-ale-disagree"
+    },
+    {
+      "deck": "day3",
+      "id": "counting-impossible-rows",
+      "n": 17,
+      "session": 2,
+      "title": "Count the rows a curve was built from that no real applicant resembles",
+      "text": "Making the disagreement checkable Count the rows a curve was built from that no real applicant resembles In the 4,000 sampled applicants, declared income is 0.72 to 2.34 times bank inflow (1st to 99th percentile). At 18,930 riyals, 53% of PD rows lie outside that range; at 4,310, 75%. A curve point built mostly from such rows describes the model's behaviour on fiction. A habit for any effect plot. Report, under the plot, the share of evaluated rows outside the data.",
+      "href": "../slides/day3.html#counting-impossible-rows"
+    },
+    {
+      "deck": "day3",
+      "id": "ice-curves",
+      "n": 18,
+      "session": 2,
+      "title": "Individual curves show who the average hides",
+      "text": "Behind the average Individual curves show who the average hides 37 of 50 applicants whose predicted risk moves more than 10 points across the grid An ICE curve is one applicant's partial dependence. Their average is the PD curve. The curves are not parallel: how much a declared income moves risk depends on the applicant's own bank inflow, through the overstatement signal.",
+      "href": "../slides/day3.html#ice-curves"
+    },
+    {
+      "deck": "day3",
+      "id": "which-curve-report",
+      "n": 19,
+      "session": 2,
+      "title": "Put ALE in the report, and say what PD would have claimed",
+      "text": "What the report shows Put ALE in the report, and say what PD would have claimed Among realistic applicants, predicted risk changes little with declared income below about 12,000 riyals and rises above it, by 0.11 between 9,070 and 18,930 riyals. Partial dependence shows 1.6 times that rise because, at the top of the grid, 53% of the rows it averages over pair a high declared income with a bank inflow no real applicant has. Neither is causal. ALE does not say what would happen if an applicant earned more.",
+      "href": "../slides/day3.html#which-curve-report"
+    },
+    {
+      "deck": "day3",
+      "id": "check-effect-plots",
+      "n": 20,
+      "session": 2,
+      "title": "Why does partial dependence overstate the rise?",
+      "text": "Checkpoint Why does partial dependence overstate the rise? PD for declared income rises 1.6 times as much as ALE between 9,000 and 19,000 riyals. Declared income and bank inflow correlate at 0.84, and overstating income is a risk signal in the model. What explains the gap? PD pairs high declared incomes with inflows real applicants do not have ALE uses too few applicants in each bin, so its curve is flattened by noise The model overreacts to declared income PD is not centred and ALE is",
+      "href": "../slides/day3.html#check-effect-plots"
+    },
+    {
+      "deck": "day3",
+      "id": "lab-3-2",
+      "n": 21,
+      "session": 2,
+      "title": "Partial dependence against local effects",
+      "text": "Lab 3.2 · 25 min Partial dependence against local effects Draw partial dependence and accumulated local effects for declared income, find where they disagree, and trace the disagreement to applicants whose declared income is set far from their bank inflow. D3_2_show_where_partial.ipynb Write partial dependence for declared income 6 min Accumulated local effects from the helper 4 min Plot both, centred 5 min Count the impossible rows partial dependence used 6 min Say which curve goes in the report 4 min ✱ Stretch: Draw individual conditional expectation curves for 50 applicants and find the ones that bend",
+      "href": "../slides/day3.html#lab-3-2"
+    },
+    {
+      "deck": "day3",
+      "id": "s3",
+      "n": 22,
+      "session": 3,
+      "title": "Shapley values",
+      "text": "Session 3 Shapley values Compute exact tree Shapley values and check that they add up Read the top reasons for one applicant Measure whether the reasons survive five refits 03",
+      "href": "../slides/day3.html#s3"
+    },
+    {
+      "deck": "day3",
+      "id": "shapley-accounting",
+      "n": 23,
+      "session": 3,
+      "title": "Shapley values split one prediction exactly among the features",
+      "text": "Shapley values Shapley values split one prediction exactly among the features Each feature's value is its average contribution over all orders of adding features. For trees it is computed exactly and fast (TreeSHAP). They add up: base value plus the features' values equals the raw score of that applicant. v = amana.predict(X10, pred_contrib=True) # columns: one per feature, then the base raw = amana.predict(X10, raw_score=True) np.allclose(v.sum(axis=1), raw) # True",
+      "href": "../slides/day3.html#shapley-accounting"
+    },
+    {
+      "deck": "day3",
+      "id": "reasons-to-officers",
+      "n": 24,
+      "session": 3,
+      "title": "Officers see the three features that pushed risk up most",
+      "text": "How Mizan uses them Officers see the three features that pushed risk up most Applicant Reasons shown M008832 bank_inflow, prior_loans, channel M004026 bank_inflow, prior_missed, years_in_business M027921 declared_income, channel, business_type M046515 term_months, years_in_business, channel The question. Would the same applicant get the same reasons from a model the developers could equally have shipped?",
+      "href": "../slides/day3.html#reasons-to-officers"
+    },
+    {
+      "deck": "day3",
+      "id": "refits-equally-shippable",
+      "n": 25,
+      "session": 3,
+      "title": "Refit with the developers' own recipe and see whether the reasons survive",
+      "text": "Stability Refit with the developers' own recipe and see whether the reasons survive Recipe From metadata.json: rebalance to 50/50, 300 rounds, bagging → Five refits Bootstrap samples of the training rows, seeds 1 to 5 → Panel Top reason per applicant per refit Each refit is a model the developers could have shipped: same data source, same recipe, different random draws.",
+      "href": "../slides/day3.html#refits-equally-shippable"
+    },
+    {
+      "deck": "day3",
+      "id": "stability-panel",
+      "n": 26,
+      "session": 3,
+      "title": "Two of ten applicants change their top reason; only one keeps all three",
+      "text": "Lab 3.3 · the stability panel Two of ten applicants change their top reason; only one keeps all three Applicant Refit 1 Refit 2 Refit 3 Refit 4 Refit 5 M004026 bank_inflow prior_missed bank_inflow prior_missed bank_inflow M008361 loan_amount years_in_business loan_amount loan_amount years_in_business M008832 bank_inflow bank_inflow bank_inflow bank_inflow bank_inflow Seven others the same top reason in all five refits The set of three reasons is the same in all five refits for 1 of the 10 applicants.",
+      "href": "../slides/day3.html#stability-panel"
+    },
+    {
+      "deck": "day3",
+      "id": "incomes-trade-credit",
+      "n": 27,
+      "session": 3,
+      "title": "The two incomes trade credit between refits; their sum moves less",
+      "text": "Why they move The two incomes trade credit between refits; their sum moves less 3.35 widest range of one income feature's value for one applicant, in log-odds 1.70 widest range of the two incomes' sum The model needs both incomes; how it splits the credit between them is partly chance. \"Your bank inflow\" and \"your declared income\" are one reason told two ways. Grouping them as \"income\" is the more honest reason.",
+      "href": "../slides/day3.html#incomes-trade-credit"
+    },
+    {
+      "deck": "day3",
+      "id": "reason-display-rule",
+      "n": 28,
+      "session": 3,
+      "title": "Show a reason only when it survives refits",
+      "text": "From the panel to a rule Show a reason only when it survives refits Proposed rule Show a reason when it is the top reason in at least four of five refits; group correlated features into one reason; otherwise say the model has no stable main reason. Why it matters An applicant told a reason that flips with a refit has been given an accident of training, not an explanation.",
+      "href": "../slides/day3.html#reason-display-rule"
+    },
+    {
+      "deck": "day3",
+      "id": "check-shapley",
+      "n": 29,
+      "session": 3,
+      "title": "What does \"the values add up\" guarantee?",
+      "text": "Checkpoint What does \"the values add up\" guarantee? For every applicant, the base value plus the Shapley values of the ten features equals the model's raw score exactly. A colleague says this proves the reasons shown to officers are reliable. What do you answer? Yes: an exact decomposition cannot change Complete accounting for this model, not survival across a refit Yes: each value is the feature's causal effect No: Shapley values stop adding up once two features are strongly correlated",
+      "href": "../slides/day3.html#check-shapley"
+    },
+    {
+      "deck": "day3",
+      "id": "lab-3-3",
+      "n": 30,
+      "session": 3,
+      "title": "Ten applicants, five refits",
+      "text": "Lab 3.3 · 25 min Ten applicants, five refits Explain ten applicants with LightGBM's exact tree Shapley values, check they add up to the prediction, then refit the model five times on bootstrap samples and build a stability panel of each applicant's top reason. D3_3_explain_ten_applicants.ipynb Shapley values for ten applicants 5 min Check that they add up 4 min Refit five times with the developers' recipe 6 min The stability panel: top reason per refit 6 min Mark the explanations you would not show 4 min ✱ Stretch: Measure the spread of the declared-income and bank-inflow values across the refits",
+      "href": "../slides/day3.html#lab-3-3"
+    },
+    {
+      "deck": "day3",
+      "id": "s4",
+      "n": 31,
+      "session": 4,
+      "title": "When explanations mislead",
+      "text": "Session 4 When explanations mislead Show how a correlated proxy moves attributions Tell a proxy from a cause with the data you have Write a caution that a validator can attach to the explanations 04",
+      "href": "../slides/day3.html#s4"
+    },
+    {
+      "deck": "day3",
+      "id": "wallet-proposal",
+      "n": 32,
+      "session": 4,
+      "title": "Version 2.2 adds mobile-wallet months and gains 0.004 of AUC",
+      "text": "A change request Version 2.2 adds mobile-wallet months and gains 0.004 of AUC Rasil's team proposes one new feature: how long the applicant has used a mobile wallet. Holdout AUC: 0.757 without, 0.761 with. Age is excluded from the model on purpose, and remains so. The validator's question What does the new feature carry, and who will be told it is their reason?",
+      "href": "../slides/day3.html#wallet-proposal"
+    },
+    {
+      "deck": "day3",
+      "id": "what-a-proxy-is",
+      "n": 33,
+      "session": 4,
+      "title": "A proxy is a permitted feature that carries an excluded one",
+      "text": "Proxies A proxy is a permitted feature that carries an excluded one Wallet months correlates with age band at -0.44: median 43 months for 18 to 24, 12 for 55 and over. Age is related to default in these data, so the model learns to use what wallet months carries of it. \"Uses no age\" stays true as written and becomes misleading in effect. What goes wrong. Checking only the feature list. Claim 3 of the card passed Lab 1.1 on exactly that check.",
+      "href": "../slides/day3.html#what-a-proxy-is"
+    },
+    {
+      "deck": "day3",
+      "id": "who-gets-wallet-reason",
+      "n": 34,
+      "session": 4,
+      "title": "Applicants over 55 are told \"short wallet history\" more than twice as often",
+      "text": "Lab 3.4 Applicants over 55 are told \"short wallet history\" more than twice as often 18-24 20.6% 25-34 21.3% 35-44 25.1% 45-54 30.7% 55+ 46.5% Share of holdout applicants for whom wallet months is among the three reasons. For the 55+ band its mean value pushes risk up (+0.073 log-odds).",
+      "href": "../slides/day3.html#who-gets-wallet-reason"
+    },
+    {
+      "deck": "day3",
+      "id": "proxy-narrows-gap",
+      "n": 35,
+      "session": 4,
+      "title": "The proxy narrows the age calibration gap a little, which is what a proxy does",
+      "text": "The tell-tale The proxy narrows the age calibration gap a little, which is what a proxy does Age band Gap without wallet months Gap with it 18-24 4.9 points 4.7 points 55+ 1.2 points 0.8 points Observed minus predicted default rate after Platt scaling, holdout rows.",
+      "href": "../slides/day3.html#proxy-narrows-gap"
+    },
+    {
+      "deck": "day3",
+      "id": "writing-the-caution",
+      "n": 36,
+      "session": 4,
+      "title": "A caution names what the feature carries, who receives it and what to do",
+      "text": "The documented misleading result A caution names what the feature carries, who receives it and what to do Wallet months correlates with age (r = -0.44) and is a top-three reason for 47% of applicants over 55 against 21% of those aged 18 to 24. Shown to officers or applicants, \"short wallet history\" would in effect tell older applicants that their age counts against them, in a model that excludes age. Recommendation. Do not add the feature for an AUC gain of 0.004; if it is added, do not show it as a reason, and audit by age band.",
+      "href": "../slides/day3.html#writing-the-caution"
+    },
+    {
+      "deck": "day3",
+      "id": "check-proxy",
+      "n": 37,
+      "session": 4,
+      "title": "Is wallet months a proxy for age?",
+      "text": "Checkpoint Is wallet months a proxy for age? Wallet months correlates with age band at -0.44, is a top reason for 47% of applicants over 55 against 21% under 25, and narrows the age gap. What can you conclude? Wallet history causes default, so the feature is legitimate to use The correlation is too weak to matter Age is not in the model, so there is no age effect It carries age information and would deliver age-linked reasons",
+      "href": "../slides/day3.html#check-proxy"
+    },
+    {
+      "deck": "day3",
+      "id": "lab-3-4",
+      "n": 38,
+      "session": 4,
+      "title": "A proxy takes the credit",
+      "text": "Lab 3.4 · 25 min A proxy takes the credit Refit the model with mobile-wallet months added, show that the new feature becomes a top reason far more often for older applicants, check its link with age, and write the caution for the validation report. D3_4_show_how_correlated.ipynb Refit with wallet months added 5 min Shapley values with and without it 5 min How often it is a top reason, by age band 6 min Its link with age 4 min Write the caution 5 min ✱ Stretch: Remove the proxy and check whether the age-band calibration gap of Lab 1.4 changed",
+      "href": "../slides/day3.html#lab-3-4"
+    },
+    {
+      "deck": "day3",
+      "id": "wrap-up",
+      "n": 39,
+      "session": 4,
+      "title": "What today showed about Amana's explanations",
+      "text": "Day 3 · three things to keep What today showed about Amana's explanations Correlated features Group them: one importance, one reason. Single numbers measure reactions to impossible rows. Stability Top reasons survive five refits for 8 of 10 applicants; full sets of three for 1. Proxies An excluded attribute comes back through a permitted feature, and so do its reasons.",
+      "href": "../slides/day3.html#wrap-up"
+    },
+    {
+      "deck": "day3",
+      "id": "next",
+      "n": 40,
+      "session": 4,
+      "title": "Day 4: validate and decide",
+      "text": "Tomorrow Day 4: validate and decide Every finding by subgroup in one table, tagged with a bias type from the national guide. A later batch where performance fell, with a cause to find. A checklist, a decision, and the choice of your capstone package.",
+      "href": "../slides/day3.html#next"
+    },
+    {
+      "deck": "day4",
+      "id": "title",
+      "n": 1,
+      "session": 0,
+      "title": "Validate and decide",
+      "text": "SDAIA Academy · Uncertainty, Interpretability and Model Validation Validate and decide Day 4: Turn the evidence into rated findings by subgroup, diagnose a decline, score the package against a checklist and decide Data Science Track4 teaching days + capstone day4 sessions · 4 labsDS-305",
+      "href": "../slides/day4.html#title"
+    },
+    {
+      "deck": "day4",
+      "id": "agenda",
+      "n": 2,
+      "session": 0,
+      "title": "Validate and decide",
+      "text": "Today Validate and decide Session 1 · Subgroup validation Calibration, coverage and error by subgroup are validation evidence, and each gap gets a cause and a bias type from the national guide Session 2 · Diagnosing degradation A decline is diagnosed from slices, coverage and explanations together, and the cause decides the action Session 3 · Checklists and model cards A reporting checklist turns \"is it documented?\" into items with evidence, and the missing evidence is a finding Session 4 · The fit-for-use decision A validation ends in a decision: fit, fit with conditions, or not fit, with conditions of use, human review and monitoring",
+      "href": "../slides/day4.html#agenda"
+    },
+    {
+      "deck": "day4",
+      "id": "review-day3",
+      "n": 3,
+      "session": 0,
+      "title": "Which explanation statement can go in the report?",
+      "text": "Review of Day 3 Which explanation statement can go in the report? Over five refits, 8 of 10 applicants keep their top reason and 1 of 10 keeps all three. Bank inflow and declared income correlate at 0.84. Which sentence is supported? Show officers one grouped income reason, and only reasons that survive refits The three reasons are exact, so they can be shown as they are Bank inflow is a stronger reason than declared income The model must be retrained until all three reasons are stable across refits",
+      "href": "../slides/day4.html#review-day3"
+    },
+    {
+      "deck": "day4",
+      "id": "s1",
+      "n": 4,
+      "session": 1,
+      "title": "Subgroup validation",
+      "text": "Session 1 Subgroup validation Tabulate calibration, coverage and error by subgroup in one table Separate a gap from noise with an interval Tag each gap with a bias type from the SDAIA AI Bias Reference Guide 01",
+      "href": "../slides/day4.html#s1"
+    },
+    {
+      "deck": "day4",
+      "id": "one-audit-table",
+      "n": 5,
+      "session": 1,
+      "title": "One table, every group the lender answers for, every measure with its uncertainty",
+      "text": "Subgroup validation One table, every group the lender answers for, every measure with its uncertainty Column Measures per group region, age band, gender, channel n, mean predicted, observed rate with a 95% interval, Brier, AUC the same groups, defaulters only loss interval coverage and the number of defaults behind it loan size band loss coverage, because Talib provisions by loan size The validator's model. Amana with the Platt repair from Day 1 and one conformal threshold of 8,134 SAR from Day 2.",
+      "href": "../slides/day4.html#one-audit-table"
+    },
+    {
+      "deck": "day4",
+      "id": "region-table",
+      "n": 6,
+      "session": 1,
+      "title": "The Northern region defaults at 15.4% against 8.7% predicted",
+      "text": "Lab 4.1 · region The Northern region defaults at 15.4% against 8.7% predicted Region n Predicted Observed (95% interval) AUC Loss coverage Central 3,448 8.9% 9.8% (8.9 to 10.9) 0.775 90.0% Eastern 1,951 9.2% 9.0% (7.8 to 10.4) 0.766 93.2% Northern 508 8.7% 15.4% (12.5 to 18.8) 0.720 87.2% Southern 1,386 9.2% 9.7% (8.2 to 11.3) 0.751 93.3% Western 2,707 8.9% 9.8% (8.8 to 11.0) 0.740 91.0%",
+      "href": "../slides/day4.html#region-table"
+    },
+    {
+      "deck": "day4",
+      "id": "flag-rules",
+      "n": 7,
+      "session": 1,
+      "title": "Flag a gap only when an interval supports it",
+      "text": "From numbers to flags Flag a gap only when an interval supports it Calibration Flag when the mean prediction lies outside the observed rate's 95% interval. Coverage Flag when loss coverage is below 85% on at least 50 defaults. Flagged Value Northern, calibration +6.7 points Age 18 to 24, calibration +4.8 points Age 55+, coverage 83.1% on 83 defaults Men; branch channel, calibration +1.6; +1.0 points Loans above 25,000 SAR, coverage 76.7% on 382 defaults",
+      "href": "../slides/day4.html#flag-rules"
+    },
+    {
+      "deck": "day4",
+      "id": "bias-guide-tags",
+      "n": 8,
+      "session": 1,
+      "title": "A tag names how the gap arose, which points to the remedy",
+      "text": "SDAIA AI Bias Reference Guide A tag names how the gap arose, which points to the remedy Gap Tag Guide Mechanism in Amana Northern Aggregation Bias p. 12 5% of rows, pooled with larger regions, fitted worst Age 18 to 24 Age Bias p. 11 age excluded, its differences not accounted for Large loans Evaluation Bias p. 42 91% marginal coverage overstates how well they are covered A tag is not a verdict. It names a mechanism from the guide. Whether a gap is unfair is the committee's judgement, made with the evidence.",
+      "href": "../slides/day4.html#bias-guide-tags"
+    },
+    {
+      "deck": "day4",
+      "id": "rating-rule",
+      "n": 9,
+      "session": 1,
+      "title": "Rate by what the gap does to people and how firmly it is supported",
+      "text": "Rating Rate by what the gap does to people and how firmly it is supported High Affects approval or price, interval supports it, 2 points or more → Medium Affects provisioning, or supported but small → Low Neither Two high findings from this table: the Northern region and applicants aged 18 to 24.",
+      "href": "../slides/day4.html#rating-rule"
+    },
+    {
+      "deck": "day4",
+      "id": "small-cells",
+      "n": 10,
+      "session": 1,
+      "title": "Crossing groups multiplies the cells and divides the evidence",
+      "text": "Lab 4.1 · stretch Crossing groups multiplies the cells and divides the evidence 6 to 30 defaults per age band within the Northern region 9 to 27 points: width of the observed rate's interval per cell Young Northern applicants default at 39% in the sample, on 18 defaults. The interval runs from 26% to 54%: a reason to watch, not a finding. Report crossed cells with their counts and intervals, or not at all.",
+      "href": "../slides/day4.html#small-cells"
+    },
+    {
+      "deck": "day4",
+      "id": "check-subgroup",
+      "n": 11,
+      "session": 1,
+      "title": "How do you report the gap for men?",
+      "text": "Checkpoint How do you report the gap for men? After recalibration, men default at 10.5% against 8.9% predicted, interval 9.6 to 11.4; women at 9.5% against 9.1%. Under the course rules, what goes in the report? Nothing: the gap is within noise A high finding of gender bias, since gender is a protected attribute Evidence that the model discriminates against men A medium finding: supported, 1.6 points, monitored by gender",
+      "href": "../slides/day4.html#check-subgroup"
+    },
+    {
+      "deck": "day4",
+      "id": "lab-4-1",
+      "n": 12,
+      "session": 1,
+      "title": "Gaps by group, tagged",
+      "text": "Lab 4.1 · 25 min Gaps by group, tagged Build one audit table of calibration, loss-interval coverage and error by region, age band, gender and channel, flag the gaps an interval supports, and tag each with a bias type from the national guide and a reason. D4_1_tabulate_calibration_coverage.ipynb The audit table for one column 7 min All four columns 4 min Flag the gaps an interval supports 5 min Tag each gap with a bias type 6 min Rate each finding 3 min ✱ Stretch: Compute the same table for the age band within the Northern region and say what the counts allow",
+      "href": "../slides/day4.html#lab-4-1"
+    },
+    {
+      "deck": "day4",
+      "id": "s2",
+      "n": 13,
+      "session": 2,
+      "title": "Diagnosing degradation",
+      "text": "Session 2 Diagnosing degradation Find the slice and the month where performance fell Check feature distributions, coverage and explanations in that slice Write a memo that names one cause and one action 02",
+      "href": "../slides/day4.html#s2"
+    },
+    {
+      "deck": "day4",
+      "id": "model-got-worse",
+      "n": 14,
+      "session": 2,
+      "title": "Talib reports that Amana \"got worse\" in 2025",
+      "text": "Six months in production Talib reports that Amana \"got worse\" in 2025 0.755 → 0.677 AUC, holdout 2023-24 to the 2025 batch 17.6% vs 9.2% mean predicted against observed default, 2025 The tempting memo \"The model has degraded and must be retrained on recent data.\"",
+      "href": "../slides/day4.html#model-got-worse"
+    },
+    {
+      "deck": "day4",
+      "id": "where-and-since-when",
+      "n": 15,
+      "session": 2,
+      "title": "Slice by month and channel: the failure is the app channel from March",
+      "text": "Lab 4.2 · step 1 Slice by month and channel: the failure is the app channel from March Month App predicted App observed App AUC Branch AUC 2025-01 9.9% 10.1% 0.728 0.740 2025-02 9.8% 9.9% 0.723 0.770 2025-03 46.6% 11.0% 0.680 0.766 2025-04 to 06 46% 9 to 11% 0.53 to 0.68 0.69 to 0.77",
+      "href": "../slides/day4.html#where-and-since-when"
+    },
+    {
+      "deck": "day4",
+      "id": "psi-inputs",
+      "n": 16,
+      "session": 2,
+      "title": "One input has moved: bank inflow, by a factor of a thousand",
+      "text": "Lab 4.2 · step 2 One input has moved: bank inflow, by a factor of a thousand bank_inflow 8.28 declared_income 0.037 loan_amount 0.016 five others below 0.011 Population stability index against the holdout's app applicants: below 0.1 little change, above 0.25 large. Median app bank inflow: 8,065 SAR in January, 8.14 in March.",
+      "href": "../slides/day4.html#psi-inputs"
+    },
+    {
+      "deck": "day4",
+      "id": "coverage-and-reasons",
+      "n": 17,
+      "session": 2,
+      "title": "The explanations changed before anyone read the outcomes",
+      "text": "Lab 4.2 · step 3 The explanations changed before anyone read the outcomes Slice Bank inflow is the top reason Loss coverage Holdout, app 21.6% 92.4% 2025, app from March 98.4% 94.8% 2025, branch 15.9% 88.1% Use it. Reasons are available on the day of scoring; outcomes take twelve months. A sudden change in the reasons officers see is an early alarm.",
+      "href": "../slides/day4.html#coverage-and-reasons"
+    },
+    {
+      "deck": "day4",
+      "id": "rule-out-decoy",
+      "n": 18,
+      "session": 2,
+      "title": "Incomes also rose, in both channels; the branch channel is unharmed",
+      "text": "Lab 4.2 · step 4 Incomes also rose, in both channels; the branch channel is unharmed Median declared income +9.3% (app) and +8.7% (branch). Branch channel 2025 AUC 0.747, as before. A cause must explain why the failure is in one channel and starts in one month. Model drift or a broken input? The guide's Model Drift (p. 66) and Concept Drift (p. 28) describe a changing world. This is Measurement Bias (p. 63): values recorded too low.",
+      "href": "../slides/day4.html#rule-out-decoy"
+    },
+    {
+      "deck": "day4",
+      "id": "cause-memo",
+      "n": 19,
+      "session": 2,
+      "title": "The memo: one cause, three numbers, one action, one thing not to do",
+      "text": "Lab 4.2 · step 5 The memo: one cause, three numbers, one action, one thing not to do Cause From March 2025 the app channel's bank inflow arrives about a thousand times too small: a unit change in the data feed. Evidence App from March: 46% predicted against 10% observed; PSI of bank inflow 8.3; bank inflow the top reason for 98% of the slice. Action Fix the feed to riyals, rescore March to June, add an input range check before scoring. Not Do not retrain on the 2025 batch.",
+      "href": "../slides/day4.html#cause-memo"
+    },
+    {
+      "deck": "day4",
+      "id": "check-degradation",
+      "n": 20,
+      "session": 2,
+      "title": "What would have caught the fault in its first week?",
+      "text": "Checkpoint What would have caught the fault in its first week? The feed broke on 1 March 2025. Outcomes of March applications mature in March 2026. Which monitor raises the alarm in March 2025? Input range checks and top-reason shares, on the day of scoring Monthly AUC on scored applications, against the holdout AUC of 0.755 Loss interval coverage on defaulted loans Retraining every quarter on recent applications",
+      "href": "../slides/day4.html#check-degradation"
+    },
+    {
+      "deck": "day4",
+      "id": "lab-4-2",
+      "n": 21,
+      "session": 2,
+      "title": "The cause of the decline",
+      "text": "Lab 4.2 · 25 min The cause of the decline Score the 2025 batch, find that the decline sits in the app channel from March, trace it to bank inflow arriving a thousand times too small, reject the income rise as a decoy, and write a memo with the cause and the action. D4_2_find_seeded_cause.ipynb Score the batch by month and channel 6 min Feature stability in the failing slice 5 min Coverage and explanations in that slice 5 min Rule out the decoy 4 min Write the memo 5 min ✱ Stretch: Write the input check that would have stopped the batch on the first day",
+      "href": "../slides/day4.html#lab-4-2"
+    },
+    {
+      "deck": "day4",
+      "id": "s3",
+      "n": 22,
+      "session": 3,
+      "title": "Checklists and model cards",
+      "text": "Session 3 Checklists and model cards Score a package against a reporting checklist item by item Distinguish missing evidence from evidence of a problem List what the developers must supply before a decision 03",
+      "href": "../slides/day4.html#s3"
+    },
+    {
+      "deck": "day4",
+      "id": "why-a-checklist",
+      "n": 23,
+      "session": 3,
+      "title": "A checklist turns \"is it documented?\" into twelve answerable items",
+      "text": "Checklists A checklist turns \"is it documented?\" into twelve answerable items Each item is present, partial or missing, with the file and field that decide it. Two validators reach the same score; the developers know what to send. The course list adapts REFORMS (reporting standards for science that uses machine learning) and model cards to a credit model. Three parts Conceptual soundness (S1 to S5), outcomes (O1 to O5), monitoring (M1, M2): the three elements of validation in SR 11-7.",
+      "href": "../slides/day4.html#why-a-checklist"
+    },
+    {
+      "deck": "day4",
+      "id": "checklist-items",
+      "n": 24,
+      "session": 3,
+      "title": "Twelve items, each with the evidence that would satisfy it",
+      "text": "The course checklist Twelve items, each with the evidence that would satisfy it Soundness Outcomes Monitoring S1 intended and excluded uses O1 AUC on unseen rows M1 what is watched, thresholds, owner S2 target and its window O2 calibration, proper score M2 conditions of use, human review S3 training data, sampling O3 intervals or sets, coverage S4 features, when known, exclusions O4 results by subgroup S5 recipe, seeds, versions O5 explanation and its stability",
+      "href": "../slides/day4.html#checklist-items"
+    },
+    {
+      "deck": "day4",
+      "id": "amana-scored",
+      "n": 25,
+      "session": 3,
+      "title": "Amana: two items present, five partial, nothing about monitoring",
+      "text": "Lab 4.3 Amana: two items present, five partial, nothing about monitoring Part Present Partial Missing Soundness 2 3 0 Outcomes 0 2 3 Monitoring 0 0 2 Partial means the package answers part of the item, or answers it in a way you showed to be wrong.",
+      "href": "../slides/day4.html#amana-scored"
+    },
+    {
+      "deck": "day4",
+      "id": "partial-is-wrong",
+      "n": 26,
+      "session": 3,
+      "title": "A number in the evidence file is not evidence if it answers a different question",
+      "text": "The hard calls A number in the evidence file is not evidence if it answers a different question O1 · partial AUC 0.864 is in evidence.json, measured on rows the shipped model trained on (Lab 1.1). O2 · missing You computed calibration yourself. The package still lacks it; the report says who supplied the evidence.",
+      "href": "../slides/day4.html#partial-is-wrong"
+    },
+    {
+      "deck": "day4",
+      "id": "request-to-developers",
+      "n": 27,
+      "session": 3,
+      "title": "The request names each item and what would satisfy it",
+      "text": "Lab 4.3 · step 4 The request names each item and what would satisfy it S4 The reason for each exclusion and when each feature is known S5 Library versions, so the model can be refitted exactly O1 The shipped model's AUC on rows it never saw M1 Inputs and outcomes to monitor, thresholds and a named owner M2 Conditions of use and how officers review declined applicants",
+      "href": "../slides/day4.html#request-to-developers"
+    },
+    {
+      "deck": "day4",
+      "id": "personal-data-in-package",
+      "n": 28,
+      "session": 3,
+      "title": "Validation evidence about people is personal data too",
+      "text": "Before you send it Validation evidence about people is personal data too Subgroup tables use gender, age band and region of real applicants: Sadeem Al-Oraini, the data protection officer, signs off the report's annexes. Report groups and rates, not rows; the stability panel uses application identifiers, never names. The Personal Data Protection Law and its implementing regulation apply to the validator's copy as to the developers'.",
+      "href": "../slides/day4.html#personal-data-in-package"
+    },
+    {
+      "deck": "day4",
+      "id": "check-checklist",
+      "n": 29,
+      "session": 3,
+      "title": "How do you score O5 for Amana?",
+      "text": "Checkpoint How do you score O5 for Amana? metadata.json says officers see the three largest Shapley values. evidence.json says stability_checked: false. You tested stability yourself on Day 3. What is O5? Present, because the stability panel from Day 3 now exists Missing, because nothing about explanations is there Partial: the method is stated, its stability is not checked by the developers Not applicable, because the reasons were unstable",
+      "href": "../slides/day4.html#check-checklist"
+    },
+    {
+      "deck": "day4",
+      "id": "lab-4-3",
+      "n": 30,
+      "session": 3,
+      "title": "The package against a checklist",
+      "text": "Lab 4.3 · 25 min The package against a checklist Score Amana against a 12-item course checklist drawn from REFORMS and model cards, mark each item present, partial or missing with the file that shows it, and turn the gaps into a request to the developers. D4_3_score_model_package.ipynb Read the checklist 4 min Score each item with its evidence 9 min Count by part: soundness, outcomes, monitoring 4 min Write the request for missing evidence 5 min Which gap blocks a decision 3 min ✱ Stretch: Score one of the two capstone packages with the same checklist",
+      "href": "../slides/day4.html#lab-4-3"
+    },
+    {
+      "deck": "day4",
+      "id": "s4",
+      "n": 31,
+      "session": 4,
+      "title": "The fit-for-use decision",
+      "text": "Session 4 The fit-for-use decision Rate findings by severity and link each to evidence Draft a decision with conditions of use and human review Choose the capstone package and plan its validation 04",
+      "href": "../slides/day4.html#s4"
+    },
+    {
+      "deck": "day4",
+      "id": "three-decisions",
+      "n": 32,
+      "session": 4,
+      "title": "The committee needs one of three answers, and the conditions that go with it",
+      "text": "The fit-for-use decision The committee needs one of three answers, and the conditions that go with it Fit Use as documented. Rare for a first submission. Fit with conditions Use only while named conditions hold, each with an owner. Not fit Do not use. Say what would change the answer.",
+      "href": "../slides/day4.html#three-decisions"
+    },
+    {
+      "deck": "day4",
+      "id": "week-findings",
+      "n": 33,
+      "session": 4,
+      "title": "Eleven findings from the week; six are high",
+      "text": "Lab 4.4 · step 1 Eleven findings from the week; six are high High Finding F2 Probabilities about four times too high; Platt on calib rows repairs them F3, F4 Northern region and ages 18 to 24 under-predicted after repair F8 Reasons shown to officers unstable over refits F10 App channel bank inflow in the wrong unit from March 2025 F11 No monitoring, owner, conditions of use or human review",
+      "href": "../slides/day4.html#week-findings"
+    },
+    {
+      "deck": "day4",
+      "id": "conditions-with-owners",
+      "n": 34,
+      "session": 4,
+      "title": "Every condition says what must hold, who owns it and which findings it answers",
+      "text": "Lab 4.4 · step 2 Every condition says what must hold, who owns it and which findings it answers Condition Owner Answers C1 Use probabilities only after the Platt map Credit analytics F2 C2 No app scoring until the feed is fixed; rescore; range check Data engineering F10 C3 Northern and 18 to 24 go to an officer Branch officers F3, F4 C4 One grouped income reason; only stable reasons Credit analytics F8, F9 C5 Monthly monitoring; two breaches return it to validation Model risk F11, F5, F7",
+      "href": "../slides/day4.html#conditions-with-owners"
+    },
+    {
+      "deck": "day4",
+      "id": "human-review-real",
+      "n": 35,
+      "session": 4,
+      "title": "Name which applicants an officer must see, and give the officer the evidence",
+      "text": "Human review Name which applicants an officer must see, and give the officer the evidence A slogan \"Borderline cases are reviewed by a human.\" A rule Every application from the Northern region, aged 18 to 24, or with all three grades in its 90% set. Automation Bias (guide p. 19): officers who see only a score defer to it. They need the grade set, stable reasons, authority to decide differently, and their overrides monitored.",
+      "href": "../slides/day4.html#human-review-real"
+    },
+    {
+      "deck": "day4",
+      "id": "when-not-fit",
+      "n": 36,
+      "session": 4,
+      "title": "\"Fit with conditions\" is only as good as its owners and its monitoring",
+      "text": "Judgement \"Fit with conditions\" is only as good as its owners and its monitoring The model ranks well (AUC 0.755) and its probabilities are repaired: the harms found have conditions that remove them while causes are fixed. If no one will own C2 or C5, the honest decision is not fit. A condition without an owner is a wish; a review rule without a list of applicants is a slogan.",
+      "href": "../slides/day4.html#when-not-fit"
+    },
+    {
+      "deck": "day4",
+      "id": "capstone-packages",
+      "n": 37,
+      "session": 4,
+      "title": "Two packages wait for the capstone; both claim more than they deliver",
+      "text": "Lab 4.4 · steps 4 and 5 Two packages wait for the capstone; both claim more than they deliver Claimed AUC Holdout AUC Mean raw prediction Default rate Amana-R · top-up loans for repeat borrowers 0.902 0.711 0.412 0.089 Amana-F · seasonal farm loans 0.892 0.700 0.425 0.128 Each has applications, a later batch, three models, a card, metadata and evidence. Choose one, or a package agreed with your peer, and plan its first three checks.",
+      "href": "../slides/day4.html#capstone-packages"
+    },
+    {
+      "deck": "day4",
+      "id": "check-decision",
+      "n": 38,
+      "session": 4,
+      "title": "Which condition is written well enough to enforce?",
+      "text": "Checkpoint Which condition is written well enough to enforce? Four drafts for the approval committee. Which one could an auditor check next year? Borderline applications receive careful human review by experienced officers in every branch Model risk checks calibration by region and age monthly; two breaches mean revalidation The model will be monitored for fairness The developers retrain the model every year",
+      "href": "../slides/day4.html#check-decision"
+    },
+    {
+      "deck": "day4",
+      "id": "lab-4-4",
+      "n": 39,
+      "session": 4,
+      "title": "The decision and the capstone choice",
+      "text": "Lab 4.4 · 25 min The decision and the capstone choice Collect the week's findings, rate them, draft Amana's decision with conditions of use, human review and monitoring, test that every high finding has a condition, and choose the package for the capstone. D4_4_draft_decision_conditions.ipynb Collect and rate the findings 6 min Draft the decision and its conditions 8 min Check every high finding has a condition 4 min Compare the capstone packages 4 min Choose one and plan it 3 min ✱ Stretch: Write the two sentences you would say to the approval committee if it asked to approve without conditions",
+      "href": "../slides/day4.html#lab-4-4"
+    },
+    {
+      "deck": "day4",
+      "id": "wrap-up",
+      "n": 40,
+      "session": 4,
+      "title": "What a validation report gives the committee",
+      "text": "Day 4 · three things to keep What a validation report gives the committee Supported gaps By group, with intervals, tagged with the guide and rated by a rule stated before looking. Causes, not symptoms Slice, then inputs, then reasons: a broken feed is not a degraded model. Owned conditions A decision the committee can enforce, with monitoring and real human review.",
+      "href": "../slides/day4.html#wrap-up"
+    },
+    {
+      "deck": "day4",
+      "id": "next",
+      "n": 41,
+      "session": 4,
+      "title": "Capstone: validate a package and defend the decision",
+      "text": "Next Capstone: validate a package and defend the decision Bring the package you chose, your plan's first three checks, and the week's notebooks. Unfinished labs can be finished at home from their reference state.",
+      "href": "../slides/day4.html#next"
+    },
+    {
+      "deck": "capstone",
+      "id": "title",
+      "n": 1,
+      "session": 0,
+      "title": "Capstone: an independent validation",
+      "text": "SDAIA Academy · Uncertainty, Interpretability and Model Validation Capstone: an independent validation Capstone: Eight-minute panel defence of a validation report, then four minutes of questions in which the panel picks one finding to rerun Data Science Track4 teaching days + capstone day8 min talk and demo · 4 min Q&ADS-305",
+      "href": "../slides/capstone.html#title"
+    },
+    {
+      "deck": "capstone",
+      "id": "agenda",
+      "n": 2,
+      "session": 0,
+      "title": "How the day runs",
+      "text": "Capstone How the day runs The brief and the rubric what the committee expects, then a clean-clone check Validation work the morning: finish the report on your package Defences eight minutes each, four minutes of questions Exit check and closing the AI-off exit check, what the room found, what comes next",
+      "href": "../slides/capstone.html#agenda"
+    },
+    {
+      "deck": "capstone",
+      "id": "the-brief",
+      "n": 3,
+      "session": 0,
+      "title": "Validate one package independently and defend a fit-for-use decision",
+      "text": "The brief Validate one package independently and defend a fit-for-use decision Package. Amana-R (top-up loans) or Amana-F (farm loans) from labs/capstone/, or a peer's model with its card, data and a later batch. The week, repeated. Recompute the claims, calibration, intervals and sets, explanation stability, the subgroup table, the later batch, the checklist. The decision. Fit, fit with conditions or not fit, with owned conditions and named human review. Submission A link to a public GitHub repository holding the validation notebooks, the run logs, and a README that reports calibration, coverage, explanation stability, subgroup findings and the decision.",
+      "href": "../slides/capstone.html#the-brief"
+    },
+    {
+      "deck": "capstone",
+      "id": "report-sections",
+      "n": 4,
+      "session": 0,
+      "title": "Seven sections, each with the number that supports it",
+      "text": "The README Seven sections, each with the number that supports it Section Evidence From 1 · Claims Each claim of the card: supported, unsupported or untestable Lab 1.1 2 · Calibration Brier and log loss before and after, reliability diagram Labs 1.2 to 1.4 3 · Coverage Target against achieved, by group and under shift, widths and set sizes Day 2 4 · Explanations Grouped importance, ALE, stability panel, one misleading result Day 3 5 · Subgroups The flagged, tagged and rated table Lab 4.1 6 · Later batch The memo: cause, evidence, action Lab 4.2 7 · Checklist and decision Twelve items scored; decision with owned conditions Labs 4.3, 4.4",
+      "href": "../slides/capstone.html#report-sections"
+    },
+    {
+      "deck": "capstone",
+      "id": "rubric",
+      "n": 5,
+      "session": 0,
+      "title": "Five criteria, 100 points",
+      "text": "How the validation is scored Five criteria, 100 points Calibration and coverage 25% Explanations 20% Subgroup and shift findings 25% Decision 20% Reproducibility 10% Full marks. Every finding has a number, an interval where one applies, and the file that produced it.",
+      "href": "../slides/capstone.html#rubric"
+    },
+    {
+      "deck": "capstone",
+      "id": "format",
+      "n": 6,
+      "session": 0,
+      "title": "Eight minutes before the committee, then four minutes of questions",
+      "text": "The defence Eight minutes before the committee, then four minutes of questions 2 min · the package What it claims, and which claims failed on your numbers. 4 min · the findings The high findings, each with its evidence; the later batch's cause. 2 min · the decision The decision, the conditions and their owners. The panel plays the committee. In the questions it picks one finding and you rerun the cell that produced it.",
+      "href": "../slides/capstone.html#format"
+    },
+    {
+      "deck": "capstone",
+      "id": "running-order",
+      "n": 7,
+      "session": 0,
+      "title": "Who defends when",
+      "text": "Running order Who defends when # Participant Package and repository 1 2 3 4 5 6 7 8",
+      "href": "../slides/capstone.html#running-order"
+    },
+    {
+      "deck": "capstone",
+      "id": "final-prep",
+      "n": 8,
+      "session": 0,
+      "title": "Ten minutes: clone it clean, run one notebook",
+      "text": "Before the first defence Ten minutes: clone it clean, run one notebook Clone your public repository into a new folder and run one notebook from its README. If that fails, the panel's will too.",
+      "href": "../slides/capstone.html#final-prep"
+    },
+    {
+      "deck": "capstone",
+      "id": "now-presenting",
+      "n": 9,
+      "session": 0,
+      "title": "Defence",
+      "text": "Now defending Defence Questions",
+      "href": "../slides/capstone.html#now-presenting"
+    },
+    {
+      "deck": "capstone",
+      "id": "review",
+      "n": 10,
+      "session": 0,
+      "title": "What the validations showed",
+      "text": "After the defences What the validations showed Found by most Which planted problem did nearly everyone find, and with what evidence? Missed by most Which one was quieter, and which check would have caught it? Best condition Whose condition would you send to a real committee unchanged?",
+      "href": "../slides/capstone.html#review"
+    },
+    {
+      "deck": "capstone",
+      "id": "what-next",
+      "n": 11,
+      "session": 0,
+      "title": "Keep going",
+      "text": "After the course Keep going Follow-up task. A one-page checklist review of a model from your workplace, or a published one, against the twelve items of Lab 4.3. Keep the repository. It is the evidence the DS Associate badge looks at. Next Academy course: DS-309, fairness mitigation and documentation, takes this week's findings to their remedies.",
+      "href": "../slides/capstone.html#what-next"
+    },
+    {
+      "deck": "capstone",
+      "id": "thanks",
+      "n": 12,
+      "session": 0,
+      "title": "Thank you",
+      "text": "SDAIA Academy Thank you Uncertainty, Interpretability and Model Validation",
+      "href": "../slides/capstone.html#thanks"
+    }
+  ]
+}
