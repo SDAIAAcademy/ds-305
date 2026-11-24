@@ -907,7 +907,7 @@
     {
       "id": "d4-replay-paths",
       "type": "single",
-      "prompt": "After a code-list update in the scoring service, data engineering replays 150 applications through the job that built the training table and through the scoring service. Every numeric input agrees within tolerance. Business type differs on 20 of 150 rows: each is crafts in the training path and retail in the serving path. The PSI of the served business type is 0.91. What do you conclude?",
+      "prompt": "After a release of the scoring service, data engineering replays 150 applications through the job that built the training table and through the scoring service. Every numeric input agrees within tolerance. Business type differs on 20 of 150 rows: all 20 crafts applications in the sample are crafts in the training path and retail in the serving path. The PSI of the served business type is 0.91. What do you conclude?",
       "options": [
         "Crafts businesses are becoming retail ones, so the population has drifted",
         "Retrain on the serving values so the model learns what it now receives",
