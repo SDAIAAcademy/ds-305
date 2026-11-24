@@ -20,7 +20,7 @@
 # - [ ] 3 · Coverage and explanations in that slice (5')
 # - [ ] 4 · Rule out the decoy (4')
 # - [ ] 5 · Write the memo (5')
-# - [ ] ✱ Stretch · Write the input check that would have stopped the batch on the first day
+# - [ ] ✱ Stretch · Write the input check that would have stopped the batch on the first day, then replay 60 app applications through both feature paths
 
 # %%
 import os, sys, subprocess
@@ -211,6 +211,65 @@ print("first scored rows of March, app channel: alerts on", input_check(first_da
 print("February, app channel: alerts on", input_check(later[(later.month == "2025-02") & (later.channel == "app")]))
 
 # %% [markdown]
+# **Stretch, part 2 · replay.** PSI compares different applicants, so it cannot tell a changed population
+# from a changed pipeline. A replay compares the same applicants twice. `data/replay_app.csv` holds 60 app
+# applications of the 2025 batch (20 from February, 40 from March), each on two rows: `path == "training"`
+# is the value the job that built the training table computes from the source records, `"serving"` is the
+# value the scoring service received on the day.
+#
+# ✏️ **Exercise** · For one month, return one row per numeric feature: `beyond_tolerance`, the number of
+# applications whose two values differ by more than the tolerance (0.5% for amounts in riyals, exact for
+# counts), and `median_ratio`, the median of serving ÷ training on those applications (1.0 when none).
+
+# %%
+replay = pd.read_csv(U.DATA / "replay_app.csv")
+TOL = {f: (0.005 if f in ("declared_income", "bank_inflow", "loan_amount") else 0.0) for f in NUMERIC}
+
+
+def replay_diff(rp: pd.DataFrame, month: str) -> pd.DataFrame:
+    # BEGIN SOLUTION
+    r = rp[rp.month == month]
+    t = r[r.path == "training"].set_index("app_id")[NUMERIC].astype(float)
+    s = r[r.path == "serving"].set_index("app_id").loc[t.index, NUMERIC].astype(float)
+    rows = {}
+    for f in NUMERIC:
+        d = (s[f] - t[f]).abs() > TOL[f] * t[f].abs()
+        rows[f] = {"beyond_tolerance": int(d.sum()),
+                   "median_ratio": float((s[f][d] / t[f][d]).median()) if d.any() else 1.0}
+    return pd.DataFrame(rows).T
+    # END SOLUTION
+
+# %%
+def _replay_diff(rp, month):
+    r = rp[rp.month == month]
+    t = r[r.path == "training"].set_index("app_id")[NUMERIC].astype(float)
+    s = r[r.path == "serving"].set_index("app_id").loc[t.index, NUMERIC].astype(float)
+    d = (s - t).abs().gt(pd.Series(TOL) * t.abs())
+    return pd.DataFrame({"beyond_tolerance": d.sum().astype(int),
+                         "median_ratio": [float((s[f][d[f]] / t[f][d[f]]).median()) if d[f].any() else 1.0 for f in NUMERIC]})
+
+
+try:
+    feb, mar = replay_diff(replay, "2025-02"), replay_diff(replay, "2025-03")
+except NotImplementedError:
+    feb, mar = _replay_diff(replay, "2025-02"), _replay_diff(replay, "2025-03")
+print(pd.concat({"February": feb, "March": mar}, axis=1).round(4).to_string())
+tr = replay[replay.path == "training"].set_index("app_id")
+sv = replay[replay.path == "serving"].set_index("app_id").loc[tr.index]
+print("declared income: rows that differ at all", int((tr.declared_income != sv.declared_income).sum()),
+      "of", len(tr), "| largest difference", f"{(tr.declared_income - sv.declared_income).abs().max():.0f} SAR")
+U.check(feb.beyond_tolerance.sum() == 0, "in February the two paths agree on every application")
+U.check(mar.index[mar.beyond_tolerance > 0].tolist() == ["bank_inflow"] and mar.loc["bank_inflow", "beyond_tolerance"] == 40
+        and abs(mar.loc["bank_inflow", "median_ratio"] - 0.001) < 1e-4,
+        "in March only bank inflow differs, on every application, by a factor of a thousand")
+
+# %% [markdown]
+# **Read it.** The same applications get bank inflow a thousand times smaller in the serving path from
+# March and the same value in February: the fault is in the serving feed, not in the applicants. Declared
+# income differs on most rows by a few riyals, because the two paths store different precision; the
+# tolerance absorbs it. The fix goes into the serving path, because the training path's definition is the
+# one the model learned.
+#
 # ## Checkpoint
 #
 # <details><summary>1 · Why look at slices before features?</summary>
@@ -221,6 +280,9 @@ print("February, app channel: alerts on", input_check(later[(later.month == "202
 #
 # <details><summary>3 · Which bias type from the guide names this cause?</summary>
 # Measurement bias: values systematically recorded too low.</details>
+#
+# <details><summary>4 · A replay shows one input differing between the two paths. Which path do you change?</summary>
+# The serving path: the model learned the training path's definition, so the served value must match it.</details>
 #
 # ## Carry forward
 #

@@ -189,7 +189,7 @@
     <tr class="hl"><td>2025, app from March</td><td class="num">98.4%</td><td class="num">94.8%</td></tr>
     <tr><td>2025, branch</td><td class="num">15.9%</td><td class="num">88.1%</td></tr>
   </table>
-  <div class="callout tip small mt-s"><b>Use it.</b> Reasons are available on the day of scoring; outcomes take twelve months. A sudden change in the reasons officers see is an early alarm.</div>
+  <div class="callout tip small mt-s"><b>Use it.</b> Reasons exist on the day of scoring, outcomes twelve months later: a sudden change in reasons is an early alarm.</div>
   <aside class="notes"><p>The loss intervals barely move: the loss model relies on bank inflow less, so this measure alone would have missed the fault. Different monitors see different failures.</p></aside>
 </section>
 
@@ -200,11 +200,10 @@
     <ul class="bullets small">
       <li>Median declared income +9.3% (app) and +8.7% (branch).</li>
       <li>Branch channel 2025 AUC 0.747, as before.</li>
-      <li>A cause must explain why the failure is in one channel and starts in one month.</li>
     </ul>
     <div class="card c-amber flat"><h4>Model drift or a broken input?</h4><p class="small mb0">The guide's Model Drift (p. 66) and Concept Drift (p. 28) describe a changing world. This is Measurement Bias (p. 63): values recorded too low.</p></div>
   </div>
-  <aside class="notes"><p>Every real investigation has a decoy: something else that changed at about the same time. The test is whether it explains the pattern. Retraining here would teach the model the broken unit and hide the fault.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
+  <aside class="notes"><p>Every real investigation has a decoy: something else that changed at about the same time. The test is whether it explains the pattern: a cause must explain why the failure is in one channel and starts in one month. Retraining here would teach the model the broken unit and hide the fault.</p><p>Sources: SDAIA AI Bias Reference Guide.</p></aside>
 </section>
 
 <section class="slide" data-label="Memo" id="cause-memo" data-lo="LO4">
@@ -217,6 +216,50 @@
     <tr><td><b>Not</b></td><td>Do not retrain on the 2025 batch.</td></tr>
   </table>
   <aside class="notes"><p>The stretch writes the range check: bounds at the reference period's 0.1th and 99.9th percentiles; it alerts on the first 40 March app applications and stays quiet in February. That check is part of condition C2 this afternoon.</p></aside>
+</section>
+
+<section class="slide" data-label="Replay" id="replay-same-records" data-lo="LO4">
+  <div class="kicker">Training and serving features</div>
+  <h2>PSI compares different applicants; a replay compares the same applicant twice</h2>
+  <div class="cols cols-2">
+    <div class="stack">
+      <div class="card c-teal flat"><h4>Training path</h4><p class="small mb0">The job that built the training table, run again on the source records.</p></div>
+      <div class="card c-coral flat"><h4>Serving path</h4><p class="small mb0">The values the scoring service received and logged on the day.</p></div>
+    </div>
+    <ul class="bullets small">
+      <li><b>Drift:</b> different applicants, different values; the two paths agree.</li>
+      <li><b>Skew:</b> the same applicant gets different values from the two paths.</li>
+      <li><b>Replay:</b> take scored applications, rebuild them through the training path, compare column by column with a tolerance fixed before looking.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>A distribution test cannot tell a changed population from a changed pipeline, because the rows differ between the two periods. A replay holds the records fixed, so any difference beyond the tolerance is in the code or the feed. Ask: what tolerance for money that one path rounds to tens? The course uses 0.5% for amounts in riyals and exact agreement for counts.</p></aside>
+</section>
+
+<section class="slide" data-label="Replay table" id="replay-diff-table" data-lo="LO4">
+  <div class="kicker">Parallel example · a new branch tablet form</div>
+  <h2>Before go-live, 200 replayed applications: the loan amount is 2% higher on every row</h2>
+  <table class="t small">
+    <tr><th>Input</th><th class="num">Differ</th><th class="num">Over tolerance</th><th class="num">Serving ÷ training</th></tr>
+    <tr class="hl"><td>Loan amount</td><td class="num">200</td><td class="num">200</td><td class="num">1.020</td></tr>
+    <tr><td>Declared income</td><td class="num">183</td><td class="num">0</td><td class="num">1.000</td></tr>
+    <tr><td>Six others</td><td class="num">0</td><td class="num">0</td><td class="num">1.000</td></tr>
+  </table>
+  <div class="callout warn small mt-s"><b>Monitoring would miss it.</b> PSI of the served loan amount is 0.046, against 0.036 for the training values of the same rows. Yet 25 of 200 predictions rise by more than a point.</div>
+  <aside class="notes"><p>The form adds the 2% administration fee to the amount; the model learned amounts without it. Every row, one constant ratio: a definition that differs in one path. Declared income differs by at most 5 SAR because the form rounds to tens; inside the tolerance, so not a finding. The six other numeric inputs agree exactly; the ratio column is serving ÷ training on the rows over tolerance. Mean prediction moves from 8.08% to 8.24%. Numbers from labs/_tools/replay_examples.py on 200 holdout branch applications; the form is a drill, not one of Amana's findings.</p></aside>
+</section>
+
+<section class="slide" data-label="Read replay" id="read-a-replay" data-lo="LO4">
+  <div class="kicker">Reading a replay</div>
+  <h2>The pattern of differences says which path to fix</h2>
+  <table class="t small">
+    <tr><th>Pattern</th><th>Likely cause</th><th>Action</th></tr>
+    <tr><td>Every row, one constant ratio</td><td>A unit or a definition in one path</td><td>Fix that path, rescore</td></tr>
+    <tr><td>Some rows, one category or source</td><td>A code list, a join, a lookup</td><td>Fix the mapping, rescore those rows</td></tr>
+    <tr><td>Within tolerance only</td><td>Different precision</td><td>Nothing</td></tr>
+    <tr><td>No row differs, the distribution moved</td><td>The population changed</td><td>Review the model, not the feed</td></tr>
+  </table>
+  <div class="callout tip small mt-s"><b>Fix the serving path.</b> The training definition is the one the model learned.</div>
+  <aside class="notes"><p>The Lab 4.2 stretch runs a replay on the 2025 batch: read it with this table. Retraining on served values that disagree with the training path teaches the model the defect.</p></aside>
 </section>
 
 <section class="slide" id="check-degradation" data-lo="LO4">
@@ -236,7 +279,7 @@
 </section>
 
 <section class="slide lab" id="lab-4-2" data-auto="lab" data-lab="4.2">
-  <aside class="notes"><p>Expected: app channel from March predicted about 46% against 9 to 11% observed; PSI of bank inflow 8.28; bank inflow the top reason for 98.4% of the slice against 21.6%; branch 2025 AUC 0.747. Common problem: computing PSI on the whole batch rather than the failing slice, which dilutes it (still large). Quick mode gives the same numbers. The lab takes about two minutes to run because of the Shapley values.</p></aside>
+  <aside class="notes"><p>Expected: app channel from March predicted about 46% against 9 to 11% observed; PSI of bank inflow 8.28; bank inflow the top reason for 98.4% of the slice against 21.6%; branch 2025 AUC 0.747. Common problem: computing PSI on the whole batch rather than the failing slice, which dilutes it (still large). Quick mode gives the same numbers. The lab takes about two minutes to run because of the Shapley values. Stretch replay: in February nothing differs beyond tolerance; in March bank inflow differs on 40 of 40 rows at a ratio of 0.001, declared income only within the rounding: the serving feed is the path to fix.</p></aside>
 </section>
 
 <!-- ======================= SESSION 3 ======================= -->
@@ -439,7 +482,7 @@
   <h2>What a validation report gives the committee</h2>
   <div class="cols cols-3 gap-s">
     <div class="card c-teal"><h4>Supported gaps</h4><p class="small mb0">By group, with intervals, tagged with the guide and rated by a rule stated before looking.</p></div>
-    <div class="card c-coral"><h4>Causes, not symptoms</h4><p class="small mb0">Slice, then inputs, then reasons: a broken feed is not a degraded model.</p></div>
+    <div class="card c-coral"><h4>Causes, not symptoms</h4><p class="small mb0">Slice, inputs, reasons, then a replay: a broken feed is not a degraded model.</p></div>
     <div class="card c-purple"><h4>Owned conditions</h4><p class="small mb0">A decision the committee can enforce, with monitoring and real human review.</p></div>
   </div>
   <aside class="notes"><p>Each participant now has the four days' sections of a validation report on Amana. The capstone repeats the week, alone or in pairs, on Amana-R or Amana-F.</p></aside>

@@ -3,7 +3,7 @@
   "engine": "1",
   "id": "ds-305",
   "code": "DS-305",
-  "version": "2027.1.0",
+  "version": "2027.2.0",
   "lang": "en",
   "title": {
     "en": "Uncertainty, Interpretability and Model Validation",
@@ -662,6 +662,7 @@
           "outcomes": [
             "Find the slice and the month where performance fell",
             "Check feature distributions, coverage and explanations in that slice",
+            "Replay the same applications through the training and serving paths to tell a broken path from a changed population",
             "Write a memo that names one cause and one action"
           ],
           "lo": [
@@ -695,7 +696,7 @@
                 "minutes": 5
               }
             ],
-            "stretch": "Write the input check that would have stopped the batch on the first day"
+            "stretch": "Write the input check that would have stopped the batch on the first day, then replay 60 app applications through both feature paths"
           },
           "summary": "A decline is diagnosed from slices, coverage and explanations together, and the cause decides the action"
         },
