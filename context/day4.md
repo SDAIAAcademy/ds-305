@@ -1,7 +1,7 @@
 ---
 course: "Uncertainty, Interpretability and Model Validation"
 code: "DS-305"
-version: "2027.1.0"
+version: "2027.2.0"
 deck: "day4"
 day: 4
 language: "en"
@@ -159,6 +159,7 @@ Build one audit table of calibration, loss-interval coverage and error by region
 
 - Find the slice and the month where performance fell
 - Check feature distributions, coverage and explanations in that slice
+- Replay the same applications through the training and serving paths to tell a broken path from a changed population
 - Write a memo that names one cause and one action
 
 #### [day4#model-got-worse] Talib reports that Amana "got worse" in 2025
@@ -205,7 +206,7 @@ Build one audit table of calibration, loss-interval coverage and error by region
 | 2025, app from March | 98.4% | 94.8% |
 | 2025, branch | 15.9% | 88.1% |
 
-> **Use it.** Reasons are available on the day of scoring; outcomes take twelve months. A sudden change in the reasons officers see is an early alarm.
+> **Use it.** Reasons exist on the day of scoring, outcomes twelve months later: a sudden change in reasons is an early alarm.
 
 #### [day4#rule-out-decoy] Incomes also rose, in both channels; the branch channel is unharmed
 
@@ -213,7 +214,6 @@ Build one audit table of calibration, loss-interval coverage and error by region
 
 - Median declared income +9.3% (app) and +8.7% (branch).
 - Branch channel 2025 AUC 0.747, as before.
-- A cause must explain why the failure is in one channel and starts in one month.
 
 - **Model drift or a broken input?** The guide's Model Drift (p. 66) and Concept Drift (p. 28) describe a changing world. This is Measurement Bias (p. 63): values recorded too low.
 
@@ -226,6 +226,42 @@ Build one audit table of calibration, loss-interval coverage and error by region
 | **Evidence** | App from March: 46% predicted against 10% observed; PSI of bank inflow 8.3; bank inflow the top reason for 98% of the slice. |
 | **Action** | Fix the feed to riyals, rescore March to June, add an input range check before scoring. |
 | **Not** | Do not retrain on the 2025 batch. |
+
+#### [day4#replay-same-records] PSI compares different applicants; a replay compares the same applicant twice
+
+*Training and serving features*
+
+- **Training path.** The job that built the training table, run again on the source records.
+- **Serving path.** The values the scoring service received and logged on the day.
+
+- **Drift:** different applicants, different values; the two paths agree.
+- **Skew:** the same applicant gets different values from the two paths.
+- **Replay:** take scored applications, rebuild them through the training path, compare column by column with a tolerance fixed before looking.
+
+#### [day4#replay-diff-table] Before go-live, 200 replayed applications: the loan amount is 2% higher on every row
+
+*Parallel example · a new branch tablet form*
+
+| Input | Differ | Over tolerance | Serving ÷ training |
+| --- | --- | --- | --- |
+| Loan amount | 200 | 200 | 1.020 |
+| Declared income | 183 | 0 | 1.000 |
+| Six others | 0 | 0 | 1.000 |
+
+> **Monitoring would miss it.** PSI of the served loan amount is 0.046, against 0.036 for the training values of the same rows. Yet 25 of 200 predictions rise by more than a point.
+
+#### [day4#read-a-replay] The pattern of differences says which path to fix
+
+*Reading a replay*
+
+| Pattern | Likely cause | Action |
+| --- | --- | --- |
+| Every row, one constant ratio | A unit or a definition in one path | Fix that path, rescore |
+| Some rows, one category or source | A code list, a join, a lookup | Fix the mapping, rescore those rows |
+| Within tolerance only | Different precision | Nothing |
+| No row differs, the distribution moved | The population changed | Review the model, not the feed |
+
+> **Fix the serving path.** The training definition is the one the model learned.
 
 #### [day4#check-degradation] What would have caught the fault in its first week?
 
@@ -251,7 +287,7 @@ Score the 2025 batch, find that the decline sits in the app channel from March, 
 - [ ] Coverage and explanations in that slice (5 min)
 - [ ] Rule out the decoy (4 min)
 - [ ] Write the memo (5 min)
-- [ ] ✱ Stretch: Write the input check that would have stopped the batch on the first day
+- [ ] ✱ Stretch: Write the input check that would have stopped the batch on the first day, then replay 60 app applications through both feature paths
 
 ### Session 3: Checklists and model cards
 
@@ -450,7 +486,7 @@ Collect the week's findings, rate them, draft Amana's decision with conditions o
 *Day 4 · three things to keep*
 
 - **Supported gaps.** By group, with intervals, tagged with the guide and rated by a rule stated before looking.
-- **Causes, not symptoms.** Slice, then inputs, then reasons: a broken feed is not a degraded model.
+- **Causes, not symptoms.** Slice, inputs, reasons, then a replay: a broken feed is not a degraded model.
 - **Owned conditions.** A decision the committee can enforce, with monitoring and real human review.
 
 #### [day4#next] Capstone: validate a package and defend the decision

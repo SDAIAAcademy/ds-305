@@ -1,7 +1,7 @@
 ---
 course: "Uncertainty, Interpretability and Model Validation"
 code: "DS-305"
-version: "2027.1.0"
+version: "2027.2.0"
 language: "en"
 view: "trainee"
 source: "https://sdaiaacademy.github.io/ds-305/index.html"
@@ -114,6 +114,7 @@ Slides: https://sdaiaacademy.github.io/ds-305/slides/day4.md
 - **Session 2: Diagnosing degradation**
   - Find the slice and the month where performance fell
   - Check feature distributions, coverage and explanations in that slice
+  - Replay the same applications through the training and serving paths to tell a broken path from a changed population
   - Write a memo that names one cause and one action
   - [Lab 4.2: The cause of the decline (25 min)](https://sdaiaacademy.github.io/ds-305/labs/D4_2_find_seeded_cause.ipynb)
 - **Session 3: Checklists and model cards**
@@ -217,4 +218,4 @@ An independent validation of another participant's or a course model package, in
 
 SDAIA Academy · Data Science Track · Uncertainty, Interpretability and Model Validation
 
-Course version 2027.1.0 · engine 1.0.0 · built 2026-11-15 · commit cc8abd5
+Course version 2027.2.0 · engine 1.0.0 · built 2026-11-24 · commit 0baeea3

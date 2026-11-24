@@ -107,7 +107,10 @@ channel from March 2025: predicted 46% against 9 to 11% observed, AUC 0.53 to 0.
 inflow is the top reason for 98.4% of the failing slice against 21.6% of holdout app applicants. Loss
 coverage 92.4% (holdout app), 94.8% (failing slice). Decoy: declared incomes rose 9% in both channels.
 Stretch: the input check alerts on bank inflow (and loan amount) in the first 40 March app rows, nothing
-in February. Cause: unit change in the app channel's bank inflow feed. Bias type: Measurement Bias.
+in February. Stretch replay (`data/replay_app.csv`, 60 app applications through both paths): nothing
+differs beyond tolerance in February; in March bank inflow differs on 40 of 40 at a median serving to
+training ratio of 0.001, declared income on most rows by at most 5 SAR (within tolerance): fix the serving
+feed. Cause: unit change in the app channel's bank inflow feed. Bias type: Measurement Bias.
 
 **Lab 4.3.** Key: S1 partial, S2 present, S3 present, S4 partial, S5 partial, O1 partial, O2 missing, O3
 missing, O4 missing, O5 partial, M1 missing, M2 missing. By part: soundness 2 present, 3 partial;

@@ -2,9 +2,9 @@
   "v": 1,
   "engine": "1.0.0",
   "build": {
-    "at": "2026-11-15T18:29:43Z",
-    "version": "2027.1.0",
-    "commit": "cc8abd5"
+    "at": "2026-11-24T17:44:38Z",
+    "version": "2027.2.0",
+    "commit": "0baeea3"
   },
   "lang": "en",
   "dir": "ltr",
@@ -15,7 +15,7 @@
   "course": {
     "id": "ds-305",
     "code": "DS-305",
-    "version": "2027.1.0",
+    "version": "2027.2.0",
     "title": "Uncertainty, Interpretability and Model Validation",
     "tagline": "Produce the evidence an independent validator needs: calibrated probabilities, intervals with guarantees, honest explanations and a fit-for-use decision",
     "description": "Participants produce the evidence an independent validator needs about a trained model: whether its probabilities can be trusted, how wide its errors are, what drives its predictions, where it stops working and whom it fails. For Mizan Community Lending, a fictional microfinance lender, they repair calibration, wrap models in conformal intervals and prediction sets, test coverage by subgroup and under shift, show where explanations mislead, tabulate subgroup error and write a validation report against a published checklist. Fairness mitigation and documentation are DS-309.",
@@ -739,6 +739,7 @@
             "outcomes": [
               "Find the slice and the month where performance fell",
               "Check feature distributions, coverage and explanations in that slice",
+              "Replay the same applications through the training and serving paths to tell a broken path from a changed population",
               "Write a memo that names one cause and one action"
             ],
             "lo": [
@@ -773,7 +774,7 @@
                   "minutes": 5
                 }
               ],
-              "stretch": "Write the input check that would have stopped the batch on the first day"
+              "stretch": "Write the input check that would have stopped the batch on the first day, then replay 60 app applications through both feature paths"
             }
           },
           {

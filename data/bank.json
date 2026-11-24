@@ -6,7 +6,7 @@
     "code": "DS-305",
     "title": "Uncertainty, Interpretability and Model Validation",
     "lang": "en",
-    "version": "2027.1.0"
+    "version": "2027.2.0"
   },
   "questions": [
     {
@@ -1505,6 +1505,36 @@
       "day": 4,
       "session": 2,
       "level": "evaluate",
+      "pool": "practice",
+      "weight": 1,
+      "timer": 30
+    },
+    {
+      "id": "d4-replay-paths",
+      "type": "single",
+      "prompt": "After a release of the scoring service, data engineering replays 150 applications through the job that built the training table and through the scoring service. Every numeric input agrees within tolerance. Business type differs on 20 of 150 rows: all 20 crafts applications in the sample are crafts in the training path and retail in the serving path. The PSI of the served business type is 0.91. What do you conclude?",
+      "options": [
+        "Crafts businesses are becoming retail ones, so the population has drifted",
+        "Retrain on the serving values so the model learns what it now receives",
+        "The serving code list maps crafts to retail: fix it and rescore",
+        "Twenty of 150 rows is sampling noise; note it and move on"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "A replay holds the applications fixed, so a difference between the paths is in the pipeline. Every crafts row becomes retail in one path only: a code-list mismatch, fixed in the serving path because the model learned the training definition.",
+      "misconceptions": [
+        "The same applications cannot drift; the PSI moved because one path relabels them",
+        "Teaches the model the defect instead of removing it",
+        "",
+        "A deterministic relabelling of every crafts row is not chance"
+      ],
+      "lo": [
+        "LO4"
+      ],
+      "day": 4,
+      "session": 2,
+      "level": "analyze",
       "pool": "practice",
       "weight": 1,
       "timer": 30

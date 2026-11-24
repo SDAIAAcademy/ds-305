@@ -2,7 +2,7 @@
 
 Every lab works on **Amana**, the credit model package that Mizan Community Lending (a fictional
 microfinance lender) has sent to its model risk team for validation. All data are synthetic, written by
-`prepare_data.py` with seed 305, and every lab runs on a laptop CPU or in Colab. No lab calls a language
+`prepare_data.py` with seed 305 (the replay file by `_tools/replay_examples.py` from the later batch), and every lab runs on a laptop CPU or in Colab. No lab calls a language
 model, downloads a model or needs a key.
 
 ## Quick start
@@ -24,7 +24,7 @@ numbers and the capstone packages' planted problems are in `solutions/answer_key
 
 | Folder | Contents |
 |---|---|
-| `data/` | applications (train, calib, holdout), the 2025 later batch, the checklist, the bias guide's types, the week's findings |
+| `data/` | applications (train, calib, holdout), the 2025 later batch, a replay of 60 of its app applications through both feature paths, the checklist, the bias guide's types, the week's findings |
 | `package/` | Amana: three LightGBM models (default, grade, loss), model card, metadata, evidence |
 | `capstone/` | two more packages for the capstone: `renewal` (Amana-R) and `farm` (Amana-F) |
 | `mizan.py` | the course functions the labs import as `U` |
